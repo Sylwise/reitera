@@ -1,8 +1,6 @@
 package com.reitera_api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -15,17 +13,11 @@ public class User {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column (nullable = false)
-    @NotBlank
     private String name;
-    @Column (unique = true, nullable = false)
-    @NotBlank
-    @Email
     private String email;
     @Column (name = "password_hash")
     private String passwordHash;
-    @Column (name = "created_at", nullable = false, updatable = false)
-    @CreationTimestamp
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     public User() {}
@@ -93,7 +85,6 @@ public class User {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }
