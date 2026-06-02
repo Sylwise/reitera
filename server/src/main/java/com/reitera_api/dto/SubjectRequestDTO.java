@@ -10,13 +10,8 @@ public class SubjectRequestDTO {
     private String color;
     @Min(1)
     @Max(15)
-    private int total_topics;
-
-    public SubjectRequestDTO(String name, String color, int total_topics) {
-        this.name = name;
-        this.color = color;
-        this.total_topics = total_topics;
-    }
+    private int totalTopics;
+    public SubjectRequestDTO (){}
 
     public void setName(String name) {
         this.name = name;
@@ -26,8 +21,8 @@ public class SubjectRequestDTO {
         this.color = color;
     }
 
-    public void setTotal_topics(int total_topics) {
-        this.total_topics = total_topics;
+    public void setTotalTopics(int totalTopics) {
+        this.totalTopics = totalTopics;
     }
 
     public String getName() {
@@ -38,7 +33,7 @@ public class SubjectRequestDTO {
         return color;
     }
 
-    public int getTotal_topics() {
-        return total_topics;
+    public int getTotalTopics() {
+        return totalTopics;
     }
 }

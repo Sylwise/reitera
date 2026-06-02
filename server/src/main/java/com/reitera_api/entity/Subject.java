@@ -16,7 +16,16 @@ public class Subject {
     private User user;
     private String name;
     private String color;
-    private int total_topics;
+    private int totalTopics;
+
+    public Subject(User user, String name, String color, int totalTopics) {
+        this.user = user;
+        this.name = name;
+        this.color = color;
+        this.totalTopics = totalTopics;
+    }
+
+    public Subject(){}
 
     public Long getId() {
         return id;
@@ -34,8 +43,8 @@ public class Subject {
         return color;
     }
 
-    public int getTotal_topics() {
-        return total_topics;
+    public int getTotalTopics() {
+        return totalTopics;
     }
 
     public void setUser(User user) {
@@ -50,8 +59,8 @@ public class Subject {
         this.color = color;
     }
 
-    public void setTotal_topics(int total_topics) {
-        this.total_topics = total_topics;
+    public void setTotalTopics(int totalTopics) {
+        this.totalTopics = totalTopics;
     }
 
     @Override
@@ -73,7 +82,7 @@ public class Subject {
                 ", user=" + (user != null ? user.getId() : null) +
                 ", name='" + name + '\'' +
                 ", color='" + color + '\'' +
-                ", total_topics=" + total_topics +
+                ", totalTopics=" + totalTopics +
                 '}';
     }
 }
