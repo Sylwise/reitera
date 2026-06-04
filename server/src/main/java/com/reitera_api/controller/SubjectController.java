@@ -22,8 +22,7 @@ public class SubjectController {
     public ResponseEntity<SubjectResponseDTO> addSubject(@Valid @RequestBody SubjectRequestDTO dto) {
         Subject subject = new Subject(null, dto.getName(), dto.getColor(), dto.getTotalTopics());
         Subject saved = service.addSubject(subject);
-        SubjectResponseDTO response = new SubjectResponseDTO(saved.getId(), saved.getName(),
-                saved.getColor(), saved.getTotalTopics());
+        SubjectResponseDTO response = SubjectResponseDTO.fromEntity(saved);
         return ResponseEntity.status(201).body(response);
      }
 }

@@ -1,5 +1,15 @@
 package com.reitera_api.dto;
 
-public record SubjectResponseDTO(Long id, String name, String color, int totalTopics) {
+import com.reitera_api.entity.Subject;
 
+public record SubjectResponseDTO(Long id, String name, String color, int total_topics) {
+
+    public static SubjectResponseDTO fromEntity(Subject subject) {
+        return new SubjectResponseDTO(
+                subject.getId(),
+                subject.getName(),
+                subject.getColor(),
+                subject.getTotalTopics()
+        );
+    }
 }
