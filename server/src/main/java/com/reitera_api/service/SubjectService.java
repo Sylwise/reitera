@@ -24,6 +24,10 @@ public class SubjectService {
         return repository.findAll();
     }
 
+    public Subject getById (Long id) {
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Subject not found."));
+    }
+
     public Subject updateSubject(Long id, Subject subject) {
         Subject existing = repository.findById(id).orElseThrow(() -> new RuntimeException("Subject not found"));
         existing.setName(subject.getName());
