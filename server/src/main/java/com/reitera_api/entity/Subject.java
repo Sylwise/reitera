@@ -1,5 +1,6 @@
 package com.reitera_api.entity;
 
+import com.reitera_api.dto.SubjectRequestDTO;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -16,16 +17,18 @@ public class Subject {
     private User user;
     private String name;
     private String color;
+    @Column (name = "total_topics")
     private int totalTopics;
 
-    public Subject(User user, String name, String color, int totalTopics) {
-        this.user = user;
-        this.name = name;
-        this.color = color;
-        this.totalTopics = totalTopics;
-    }
-
     public Subject(){}
+
+    public static Subject create (SubjectRequestDTO dto) {
+        Subject subject = new Subject();
+        subject.setName(dto.getName());
+        subject.setColor(dto.getColor());
+        subject.setTotalTopics(dto.getTotalTopics());
+        return subject;
+    }
 
     public Long getId() {
         return id;

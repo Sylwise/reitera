@@ -22,11 +22,7 @@ public class SubjectController {
 
     @PostMapping()
     public ResponseEntity<SubjectResponseDTO> addSubject(@Valid @RequestBody SubjectRequestDTO dto) {
-        Subject subject = new Subject();
-        subject.setName(dto.getName());
-        subject.setColor(dto.getColor());
-        subject.setTotalTopics(dto.getTotalTopics());
-        Subject saved = service.addSubject(subject);
+        Subject saved = service.addSubject(Subject.create(dto));
         SubjectResponseDTO response = SubjectResponseDTO.fromEntity(saved);
         return ResponseEntity.status(201).body(response);
     }
@@ -50,11 +46,7 @@ public class SubjectController {
 
     @PutMapping("/{id}")
     public ResponseEntity<SubjectResponseDTO> updateSubject(@PathVariable Long id, @Valid @RequestBody SubjectRequestDTO dto) {
-        Subject subject = new Subject();
-        subject.setName(dto.getName());
-        subject.setColor(dto.getColor());
-        subject.setTotalTopics(dto.getTotalTopics());
-        Subject updated = service.updateSubject(id, subject);
+        Subject updated = service.updateSubject(id, Subject.create(dto));
         SubjectResponseDTO response = SubjectResponseDTO.fromEntity(updated);
         return ResponseEntity.ok(response);
     }

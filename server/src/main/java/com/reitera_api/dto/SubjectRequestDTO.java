@@ -4,13 +4,15 @@ import jakarta.validation.constraints.*;
 
 public class SubjectRequestDTO {
 
+    @NotBlank
     @Size (min = 3, max = 40)
     private String name;
-    @NotNull
+    @NotBlank
     private String color;
+    @NotNull
     @Min(1)
     @Max(15)
-    private int totalTopics;
+    private Integer totalTopics;
     public SubjectRequestDTO (){}
 
     public void setName(String name) {
