@@ -30,6 +30,8 @@ public class Topic {
         topic.setName(dto.getName());
         topic.setReviewsNeeded(dto.getReviewsNeeded());
         topic.setSubject(subject);
+        topic.setReviewCount(0);
+        topic.setNextReviewDate(LocalDate.now());
         return topic;
    }
 
