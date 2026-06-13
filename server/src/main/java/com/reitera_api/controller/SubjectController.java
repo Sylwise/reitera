@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/subjects")
+@RequestMapping("/api/subjects")
 public class SubjectController {
 
     private final SubjectService service;

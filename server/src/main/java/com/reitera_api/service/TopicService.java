@@ -25,18 +25,18 @@ public class TopicService {
         return topicRepository.save(Topic.create(topic, subject));
     }
 
-    public List<Topic> getTopics () {
-        return topicRepository.findAll();
-    }
+   public List<Topic> findBySubjectId(Long subjectId) {
+        return topicRepository.findBySubjectId(subjectId);
+   }
 
     public Topic getById (Long id) {
         return topicRepository.findById(id).orElseThrow(() -> new RuntimeException("Topic not found."));
     }
 
-    public Topic updateTopic (Long id, Topic topic) {
+    public Topic updateTopic (Long id, TopicRequestDTO dto) {
         Topic existing = topicRepository.findById(id).orElseThrow(() -> new RuntimeException("No topic found."));
-        existing.setName(topic.getName());
-        existing.setReviewsNeeded(topic.getReviewsNeeded());
+        existing.setName(dto.getName());
+        existing.setReviewsNeeded(dto.getReviewsNeeded());
         return topicRepository.save(existing);
     }
 
