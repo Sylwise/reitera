@@ -1,7 +1,4 @@
-package com.reiter@PostMapping
-    public ResponseEntity<ExamResponseDTO> addExam (@Valid @RequestBody ExamRequestDTO dto) {
-        return ResponseEntity.status(201).body(ExamResponseDTO.fromEntity(service.addExam(dto.getSubjectId(), dto)));
-    }a_api.controller;
+package com.reitera_api.controller;
 
 import com.reitera_api.dto.ExamRequestDTO;
 import com.reitera_api.dto.ExamResponseDTO;
