@@ -33,10 +33,10 @@ public class ExamService {
         return examRepository.findById(id).orElseThrow(() -> new RuntimeException("No exam found."));
     }
 
-    public Exam updateById (Long id, Exam exam) {
+    public Exam updateById (Long id, ExamRequestDTO dto) {
         Exam found = examRepository.findById(id).orElseThrow(() -> new RuntimeException("No exam found."));
-        found.setName(exam.getName());
-        found.setExamDate(exam.getExamDate());
+        found.setName(dto.getName());
+        found.setExamDate(dto.getExamDate());
         return examRepository.save(found);
     }
 
