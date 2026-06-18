@@ -3,6 +3,7 @@ package com.reitera_api.service;
 import com.reitera_api.dto.TopicRequestDTO;
 import com.reitera_api.entity.Subject;
 import com.reitera_api.entity.Topic;
+import com.reitera_api.exception.ResourceNotFoundException;
 import com.reitera_api.repository.SubjectRepository;
 import com.reitera_api.repository.TopicRepository;
 import org.springframework.stereotype.Service;
@@ -15,33 +16,34 @@ public class TopicService {
     private final TopicRepository topicRepository;
     private final SubjectRepository subjectRepository;
 
-    public TopicService (TopicRepository topicRepository, SubjectRepository subjectRepository) {
+    public TopicService(TopicRepository topicRepository, SubjectRepository subjectRepository) {
         this.topicRepository = topicRepository;
         this.subjectRepository = subjectRepository;
     }
 
     public Topic addTopic(Long id, TopicRequestDTO topic) {
-        Subject subject = subjectRepository.findById(id).orElseThrow(() -> new RuntimeException("Subject not found"));
+        Subject subject = subjectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
         return topicRepository.save(Topic.create(topic, subject));
     }
 
-   public List<Topic> findBySubjectId(Long subjectId) {
+    public List<Topic> findBySubjectId(Long subjectId) {
         return topicRepository.findBySubjectId(subjectId);
-   }
-
-    public Topic getById (Long id) {
-        return topicRepository.findById(id).orElseThrow(() -> new RuntimeException("Topic not found."));
     }
 
-    public Topic updateTopic (Long id, TopicRequestDTO dto) {
-        Topic existing = topicRepository.findById(id).orElseThrow(() -> new RuntimeException("No topic found."));
+    public Topic getById(Long id) {
+        return topicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Topic not found."));
+    }
+
+    public Topic updateTopic(Long id, TopicRequestDTO dto) {
+        Topic existing = topicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No topic found."));
         existing.setName(dto.getName());
         existing.setReviewsNeeded(dto.getReviewsNeeded());
         return topicRepository.save(existing);
     }
 
-    public void deleteTopic (Long id) {
-        topicRepository.deleteById(id);
+    public void deleteTopic(Long id) {
+        Topic existing = topicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No topic found."));
+        topicRepository.delete(existing);
     }
 
 }
