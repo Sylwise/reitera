@@ -1,6 +1,7 @@
 package com.reitera_api.exception;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -35,6 +36,16 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(400).body(errorMap);
 
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<String> handleBadCredentials(BadCredentialsException exception) {
+        return ResponseEntity.status(401).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleDuplicateEmail (EmailAlreadyExistsException exception) {
+        return ResponseEntity.status(409).body(exception.getMessage());
     }
 
 }

@@ -20,6 +20,7 @@ public class User implements UserDetails {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(unique = true)
     private String email;
     @Column (name = "password_hash")
     private String passwordHash;
@@ -32,6 +33,10 @@ public class User implements UserDetails {
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
+    }
+
+    public static User create(String name, String email, String passwordHash) {
+        return new User(name, email, passwordHash);
     }
 
     public Long getId() {
