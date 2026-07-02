@@ -3,6 +3,7 @@ package com.reitera_api.service;
 import com.reitera_api.dto.ExamRequestDTO;
 import com.reitera_api.entity.Exam;
 import com.reitera_api.entity.Subject;
+import com.reitera_api.exception.ResourceNotFoundException;
 import com.reitera_api.repository.ExamRepository;
 import com.reitera_api.repository.SubjectRepository;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class ExamService {
     }
 
     public Exam addExam(Long subjectId, ExamRequestDTO dto) {
-        Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> new RuntimeException("No subject found."));
+        Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> new ResourceNotFoundException("No subject found."));
         return examRepository.save(Exam.create(dto, subject));
     }
 
@@ -30,18 +31,19 @@ public class ExamService {
     }
 
     public Exam getById (Long id) {
-        return examRepository.findById(id).orElseThrow(() -> new RuntimeException("No exam found."));
+        return examRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No exam found."));
     }
 
     public Exam updateById (Long id, ExamRequestDTO dto) {
-        Exam found = examRepository.findById(id).orElseThrow(() -> new RuntimeException("No exam found."));
+        Exam found = examRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No exam found."));
         found.setName(dto.getName());
         found.setExamDate(dto.getExamDate());
         return examRepository.save(found);
     }
 
     public void deleteExam (Long id) {
-        examRepository.deleteById(id);
+        Exam existing = examRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No exam found."));
+        examRepository.delete(existing);
     }
 
 }

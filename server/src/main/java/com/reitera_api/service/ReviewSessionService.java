@@ -4,6 +4,8 @@ import com.reitera_api.dto.ReviewSessionRequestDTO;
 import com.reitera_api.entity.Difficulty;
 import com.reitera_api.entity.ReviewSession;
 import com.reitera_api.entity.Topic;
+import com.reitera_api.exception.ResourceNotFoundException;
+import com.reitera_api.exception.TopicAlreadyMasteredException;
 import com.reitera_api.repository.ReviewSessionRepository;
 import com.reitera_api.repository.TopicRepository;
 import org.springframework.stereotype.Service;
@@ -24,9 +26,9 @@ public class ReviewSessionService {
 
     @Transactional
     public void addReviewSession(Long topicId, ReviewSessionRequestDTO dto) {
-        Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new RuntimeException("No topic found."));
+        Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new ResourceNotFoundException("No topic found."));
         if(topic.getReviewCount() >= topic.getReviewsNeeded()) {
-            throw new RuntimeException("Topic is already mastered.");
+            throw new TopicAlreadyMasteredException("Topic is already mastered.");
         }
         topic.setReviewCount(topic.getReviewCount() + 1);
         if (topic.getReviewCount() < topic.getReviewsNeeded()) {

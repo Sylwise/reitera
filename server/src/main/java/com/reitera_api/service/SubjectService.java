@@ -1,6 +1,7 @@
 package com.reitera_api.service;
 
 import com.reitera_api.entity.Subject;
+import com.reitera_api.exception.ResourceNotFoundException;
 import com.reitera_api.repository.SubjectRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,11 +26,11 @@ public class SubjectService {
     }
 
     public Subject getById (Long id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Subject not found."));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
     }
 
     public Subject updateSubject(Long id, Subject subject) {
-        Subject existing = repository.findById(id).orElseThrow(() -> new RuntimeException("Subject not found"));
+        Subject existing = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
         existing.setName(subject.getName());
         existing.setTotalTopics(subject.getTotalTopics());
         existing.setColor(subject.getColor());
@@ -37,7 +38,8 @@ public class SubjectService {
     }
 
     public void deleteSubject(Long id) {
-        repository.deleteById(id);
+        Subject existing = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
+        repository.delete(existing);
     }
 
 }

@@ -3,11 +3,18 @@ package com.reitera_api.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table (name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -86,5 +93,20 @@ public class User {
                 ", name='" + name + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
+    }
+
+    @Override
+    public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public @Nullable String getPassword() {
+        return passwordHash;
+    }
+
+    @Override
+    public @NonNull String getUsername() {
+        return email;
     }
 }
