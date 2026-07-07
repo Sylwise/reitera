@@ -1,6 +1,8 @@
 package com.reitera_api.service;
 
+import com.reitera_api.dto.SubjectRequestDTO;
 import com.reitera_api.entity.Subject;
+import com.reitera_api.entity.User;
 import com.reitera_api.exception.ResourceNotFoundException;
 import com.reitera_api.repository.SubjectRepository;
 import org.springframework.stereotype.Service;
@@ -18,27 +20,27 @@ public class SubjectService {
     }
 
     public Subject addSubject(Subject subject) {
-      return  repository.save(subject);
+        return repository.save(subject);
     }
 
-    public List<Subject> getSubjects () {
-        return repository.findAll();
+    public List<Subject> getSubjects(User user) {
+        return repository.findByUser(user);
     }
 
-    public Subject getById (Long id) {
-        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
+    public Subject getById(Long id, User user) {
+        return repository.findByIdAndUser(id, user).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
     }
 
-    public Subject updateSubject(Long id, Subject subject) {
-        Subject existing = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
+    public Subject updateSubject(Long id, SubjectRequestDTO subject, User user) {
+        Subject existing = repository.findByIdAndUser(id, user).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
         existing.setName(subject.getName());
         existing.setTotalTopics(subject.getTotalTopics());
         existing.setColor(subject.getColor());
         return repository.save(existing);
     }
 
-    public void deleteSubject(Long id) {
-        Subject existing = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
+    public void deleteSubject(Long id, User user) {
+        Subject existing = repository.findByIdAndUser(id, user).orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
         repository.delete(existing);
     }
 
