@@ -19,6 +19,10 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
 
+    public Long getExpiration() {
+        return expiration;
+    }
+
     public String generateToken(Long userId) {
         return Jwts.builder()
                 .subject(String.valueOf(userId))

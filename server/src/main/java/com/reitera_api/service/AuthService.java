@@ -1,5 +1,6 @@
 package com.reitera_api.service;
 
+import com.reitera_api.dto.AuthResponseDTO;
 import com.reitera_api.dto.LoginRequestDTO;
 import com.reitera_api.dto.RegisterRequestDTO;
 import com.reitera_api.entity.User;
@@ -23,23 +24,22 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
-    public String register(RegisterRequestDTO dto) {
+    public AuthResponseDTO register(RegisterRequestDTO dto) {
 
         if(userRepository.findUserByEmail(dto.getEmail()).isEmpty()) {
             User user = User.create(dto.getName(), dto.getEmail(), passwordEncoder.encode(dto.getPassword()));
             userRepository.save(user);
-            return jwtUtil.generateToken(user.getId());
+            return new AuthResponseDTO(jwtUtil.generateToken(user.getId()), "Bearer", jwtUtil.getExpiration() / 1000);
         } else {
             throw new EmailAlreadyExistsException("Email already in use.");
         }
 
-
     }
 
-    public String login(LoginRequestDTO dto) {
+    public AuthResponseDTO login(LoginRequestDTO dto) {
         User user = userRepository.findUserByEmail(dto.getEmail()).orElseThrow(() -> new BadCredentialsException("Invalid credentials."));
         if (passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
-            return jwtUtil.generateToken(user.getId());
+            return new AuthResponseDTO(jwtUtil.generateToken(user.getId()), "Bearer", jwtUtil.getExpiration() / 1000);
         } else {
             throw new BadCredentialsException("Invalid credentials.");
         }

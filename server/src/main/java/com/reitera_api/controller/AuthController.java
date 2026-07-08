@@ -1,5 +1,6 @@
 package com.reitera_api.controller;
 
+import com.reitera_api.dto.AuthResponseDTO;
 import com.reitera_api.dto.LoginRequestDTO;
 import com.reitera_api.dto.RegisterRequestDTO;
 import com.reitera_api.service.AuthService;
@@ -21,14 +22,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDTO dto) {
+    public ResponseEntity<AuthResponseDTO> register(@RequestBody @Valid RegisterRequestDTO dto) {
         return ResponseEntity.status(201).body(authService.register(dto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid LoginRequestDTO dto) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO dto) {
         return ResponseEntity.ok(authService.login(dto));
     }
 
 }
-
