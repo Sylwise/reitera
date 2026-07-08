@@ -21,10 +21,11 @@ export function useTopics(showToast) {
     setModalTopic(null);
   }
 
-  function handleConfigTopic({ slotId, name, reviewsNeeded }) {
-    setTopics(prev => prev.map(t =>
-      t.id === slotId ? { ...t, name, reviewsNeeded, nextReviewDate: dateInDays(0) } : t
-    ));
+  function handleConfigTopic({ subjectId, name, reviewsNeeded }) {
+    const topic = {
+      id: Date.now(), subjectId, name, reviewCount: 0, reviewsNeeded, nextReviewDate: dateInDays(0),
+    };
+    setTopics(prev => [...prev, topic]);
     showToast(`✓ "${name}" añadido`);
   }
 
@@ -34,9 +35,7 @@ export function useTopics(showToast) {
   }
 
   function handleDeleteTopic(topicId) {
-    setTopics(prev => prev.map(t =>
-      t.id === topicId ? { ...t, name: null, reviewCount: 0, nextReviewDate: null } : t
-    ));
+    setTopics(prev => prev.filter(t => t.id !== topicId));
     showToast(`✓ Tema borrado`);
   }
 

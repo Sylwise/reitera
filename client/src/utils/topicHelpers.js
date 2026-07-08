@@ -20,7 +20,6 @@ export function dateInDays(n) {
 }
 
 export function getTopicStatus(topic) {
-  if (!topic.name) return 'empty';
   if (topic.nextReviewDate === null || topic.reviewCount >= topic.reviewsNeeded) return 'mastered';
   const diff = daysUntil(topic.nextReviewDate);
   if (diff < 0)  return 'overdue';

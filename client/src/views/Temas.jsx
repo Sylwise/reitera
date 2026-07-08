@@ -67,7 +67,6 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
 
   function matchesFilter(t) {
     const s = getTopicStatus(t);
-    if (s === 'empty')         return false;
     if (filter === 'all')      return true;
     if (filter === 'mastered') return s === 'mastered';
     if (filter === 'today')    return s === 'today';
@@ -85,7 +84,7 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
 
   const groups = subjects.map(subj => {
     const { id, name, color, totalTopics } = subj;
-    const subjTopics = topics.filter(t => t.subjectId === id && getTopicStatus(t) !== 'empty');
+    const subjTopics = topics.filter(t => t.subjectId === id);
     const filtered   = subjTopics.filter(t => matchesFilter(t) && matchesSearch(t));
     const mastered   = subjTopics.filter(t => getTopicStatus(t) === 'mastered').length;
     const pct        = totalTopics > 0 ? Math.round(mastered / totalTopics * 100) : 0;

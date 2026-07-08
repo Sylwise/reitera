@@ -57,7 +57,7 @@ export default function EditTopicModal({ isOpen, onClose, onEdit, onDelete, onRe
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⚠️</div>
           <h3 style={{ margin: '0 0 .5rem', color: 'var(--text)' }}>¿Estás seguro?</h3>
           <p style={{ color: 'var(--muted)', fontSize: '.85rem', marginBottom: '1.5rem', lineHeight: 1.4 }}>
-            Esto borrará los datos del tema y lo devolverá a su estado de "hueco vacío".
+            Esto borrará permanentemente el tema "{topic?.name}" y su historial de repasos. Esta acción no se puede deshacer.
           </p>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <button className="btn-configure" style={{ flex: 1, background: 'var(--surface)', color: 'var(--text)' }} onClick={() => setShowConfirm(false)}>

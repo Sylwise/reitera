@@ -116,7 +116,6 @@ export default function App() {
         configOpen={configOpen}
         onCloseConfig={() => setConfigOpen(false)}
         onConfirmConfig={handleConfigTopic}
-        topics={topics}
         configInitAsig={configInitAsig}
         editSubject={editSubject}
         onCloseEditSubject={() => setEditSubject(null)}

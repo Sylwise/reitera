@@ -15,7 +15,7 @@ export default function AppModals({
   // AddExamModal
   addExamOpen, onCloseAddExam, onAddExam, subjects, addExamDate,
   // ConfigTopicModal
-  configOpen, onCloseConfig, onConfirmConfig, topics, configInitAsig,
+  configOpen, onCloseConfig, onConfirmConfig, configInitAsig,
   // EditSubjectModal
   editSubject, onCloseEditSubject, onEditSubject, onDeleteSubject,
   // EditTopicModal
@@ -50,7 +50,6 @@ export default function AppModals({
         onClose={onCloseConfig}
         onConfirm={onConfirmConfig}
         subjects={subjects}
-        topics={topics}
         initialAsig={configInitAsig}
       />
       <EditSubjectModal

@@ -3,7 +3,7 @@ import StatusTag from './StatusTag';
 import { getTopicStatus, formatDaysLabel, getAsigColor } from '../../utils/topicHelpers';
 import { useLongPress } from '../../hooks/useLongPress';
 
-export default function TopicCard({ topic, subjects = [], onMark, onConfigure, onEditTopic, hideAsig = false, slotNum }) {
+export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, hideAsig = false }) {
   const status    = getTopicStatus(topic);
   const longPress = useLongPress();
 
@@ -11,30 +11,6 @@ export default function TopicCard({ topic, subjects = [], onMark, onConfigure, o
     if (!onEditTopic) return;
     e.preventDefault();
     onEditTopic(topic);
-  }
-
-  if (status === 'empty') {
-    return (
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
-        className="topic-card empty"
-      >
-        <div className="topic-empty-text">
-          Tema {slotNum} — vacío
-        </div>
-        {onConfigure && (
-          <button
-            className="btn-configure"
-            onClick={e => { e.stopPropagation(); onConfigure(topic); }}
-          >
-            Configurar
-          </button>
-        )}
-      </motion.div>
-    );
   }
 
   const fillPct   = Math.round(topic.reviewCount / topic.reviewsNeeded * 100);
