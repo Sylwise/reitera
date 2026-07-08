@@ -45,4 +45,8 @@ public class AuthService {
         }
     }
 
+    public void delete(User user) {
+        userRepository.delete(user);
+    }
+
 }

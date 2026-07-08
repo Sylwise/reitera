@@ -3,13 +3,12 @@ package com.reitera_api.controller;
 import com.reitera_api.dto.AuthResponseDTO;
 import com.reitera_api.dto.LoginRequestDTO;
 import com.reitera_api.dto.RegisterRequestDTO;
+import com.reitera_api.entity.User;
 import com.reitera_api.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,6 +28,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO dto) {
         return ResponseEntity.ok(authService.login(dto));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal User user) {
+        authService.delete(user);
+        return ResponseEntity.noContent().build();
     }
 
 }
