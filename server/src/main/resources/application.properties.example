@@ -13,3 +13,7 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 
 # Server Port
 server.port=8081
+
+# JWT
+jwt.secret=your_base64_encoded_secret_key
+jwt.expiration=86400000
