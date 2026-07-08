@@ -3,8 +3,9 @@ import DoneModal        from './DoneModal';
 import AddSubjectModal  from './AddSubjectModal';
 import AddExamModal     from './AddExamModal';
 import ConfigTopicModal from './ConfigTopicModal';
-import EditSubjectModal from './EditSubjectModal';
-import EditTopicModal   from './EditTopicModal';
+import EditSubjectModal   from './EditSubjectModal';
+import EditTopicModal     from './EditTopicModal';
+import DeleteAccountModal from './DeleteAccountModal';
 
 export default function AppModals({
   // DoneModal
@@ -19,6 +20,8 @@ export default function AppModals({
   editSubject, onCloseEditSubject, onEditSubject, onDeleteSubject,
   // EditTopicModal
   editTopic, onCloseEditTopic, onEditTopic, onDeleteTopic, onResetTopic,
+  // DeleteAccountModal
+  deleteAccountOpen, onCloseDeleteAccount, onConfirmDeleteAccount,
   // Toast
   toast, onDismissToast,
 }) {
@@ -64,6 +67,11 @@ export default function AppModals({
         onDelete={onDeleteTopic}
         onReset={onResetTopic}
         topic={editTopic}
+      />
+      <DeleteAccountModal
+        isOpen={deleteAccountOpen}
+        onClose={onCloseDeleteAccount}
+        onConfirm={onConfirmDeleteAccount}
       />
 
       <AnimatePresence>

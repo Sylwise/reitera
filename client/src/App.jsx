@@ -23,6 +23,7 @@ export default function App() {
   const [configInitAsig, setConfigInitAsig] = useState(null);
   const [editSubject, setEditSubject]       = useState(null);
   const [editTopic, setEditTopic]           = useState(null);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   const { toast, showToast, dismissToast } = useToast();
   const {
@@ -48,6 +49,11 @@ export default function App() {
     setConfigOpen(true);
   }
 
+  function handleDeleteAccount() {
+    // TODO: conectar con el endpoint DELETE de la cuenta cuando el front se integre con el backend
+    setLoggedIn(false);
+  }
+
   if (!loggedIn) return <Login onLogin={() => setLoggedIn(true)} />;
 
   return (
@@ -61,6 +67,7 @@ export default function App() {
           topics={topics}
           onAddSubject={() => setAddSubjectOpen(true)}
           onLogout={() => setLoggedIn(false)}
+          onDeleteAccount={() => setDeleteAccountOpen(true)}
         />
 
         <div className="main-area">
@@ -71,6 +78,7 @@ export default function App() {
             onAddTopic={() => openConfigModal(null)}
             onAddSubject={() => setAddSubjectOpen(true)}
             onLogout={() => setLoggedIn(false)}
+            onDeleteAccount={() => setDeleteAccountOpen(true)}
           />
 
           <div id="app">
@@ -119,6 +127,9 @@ export default function App() {
         onEditTopic={handleEditTopic}
         onDeleteTopic={handleDeleteTopic}
         onResetTopic={handleResetTopic}
+        deleteAccountOpen={deleteAccountOpen}
+        onCloseDeleteAccount={() => setDeleteAccountOpen(false)}
+        onConfirmDeleteAccount={handleDeleteAccount}
         toast={toast}
         onDismissToast={dismissToast}
       />
