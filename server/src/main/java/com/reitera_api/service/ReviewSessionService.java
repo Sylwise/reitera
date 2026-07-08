@@ -4,6 +4,7 @@ import com.reitera_api.dto.ReviewSessionRequestDTO;
 import com.reitera_api.entity.Difficulty;
 import com.reitera_api.entity.ReviewSession;
 import com.reitera_api.entity.Topic;
+import com.reitera_api.entity.User;
 import com.reitera_api.exception.ResourceNotFoundException;
 import com.reitera_api.exception.TopicAlreadyMasteredException;
 import com.reitera_api.repository.ReviewSessionRepository;
@@ -25,8 +26,8 @@ public class ReviewSessionService {
     }
 
     @Transactional
-    public void addReviewSession(Long topicId, ReviewSessionRequestDTO dto) {
-        Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new ResourceNotFoundException("No topic found."));
+    public void addReviewSession(Long topicId, ReviewSessionRequestDTO dto, User user) {
+        Topic topic = topicRepository.findByIdAndSubjectUserId(topicId, user.getId()).orElseThrow(() -> new ResourceNotFoundException("No topic found."));
         if(topic.getReviewCount() >= topic.getReviewsNeeded()) {
             throw new TopicAlreadyMasteredException("Topic is already mastered.");
         }
