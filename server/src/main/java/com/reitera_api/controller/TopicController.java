@@ -3,9 +3,11 @@ package com.reitera_api.controller;
 import com.reitera_api.dto.TopicRequestDTO;
 import com.reitera_api.dto.TopicResponseDTO;
 import com.reitera_api.entity.Topic;
+import com.reitera_api.entity.User;
 import com.reitera_api.service.TopicService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -17,21 +19,22 @@ public class TopicController {
 
     private final TopicService service;
 
-    public TopicController (TopicService service) {
+    public TopicController(TopicService service) {
         this.service = service;
     }
 
-
     @PostMapping()
-    public ResponseEntity<TopicResponseDTO> addTopic(@Valid @RequestBody TopicRequestDTO dto) {
-        Topic saved = service.addTopic(dto.getSubjectId(), dto);
+    public ResponseEntity<TopicResponseDTO> addTopic(@Valid @RequestBody TopicRequestDTO dto,
+            @AuthenticationPrincipal User user) {
+        Topic saved = service.addTopic(dto.getSubjectId(), dto, user);
         TopicResponseDTO response = TopicResponseDTO.fromEntity(saved);
         return ResponseEntity.status(201).body(response);
     }
 
     @GetMapping()
-    public ResponseEntity<List<TopicResponseDTO>> findTopicBySubjectId(@RequestParam Long subjectId) {
-        List<Topic> existing = service.findBySubjectId(subjectId);
+    public ResponseEntity<List<TopicResponseDTO>> findTopicBySubjectId(@RequestParam Long subjectId,
+            @AuthenticationPrincipal User user) {
+        List<Topic> existing = service.getTopicsBySubject(subjectId, user);
         List<TopicResponseDTO> responseDTOList = new ArrayList<>();
 
         for (Topic topic : existing) {
@@ -43,18 +46,19 @@ public class TopicController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TopicResponseDTO> findTopicById (@PathVariable Long id) {
-        return ResponseEntity.ok(TopicResponseDTO.fromEntity(service.getById(id)));
+    public ResponseEntity<TopicResponseDTO> findTopicById(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(TopicResponseDTO.fromEntity(service.getById(id, user)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TopicResponseDTO> updateTopicById (@PathVariable Long id, @Valid @RequestBody TopicRequestDTO dto) {
-        return ResponseEntity.ok(TopicResponseDTO.fromEntity(service.updateTopic(id, dto)));
+    public ResponseEntity<TopicResponseDTO> updateTopicById(@PathVariable Long id,
+            @Valid @RequestBody TopicRequestDTO dto, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(TopicResponseDTO.fromEntity(service.updateTopic(id, dto, user)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTopicById(@PathVariable Long id) {
-        service.deleteTopic(id);
+    public ResponseEntity<Void> deleteTopicById(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        service.deleteTopic(id, user);
         return ResponseEntity.noContent().build();
     }
 
