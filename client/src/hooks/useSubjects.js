@@ -1,27 +1,48 @@
-import { useState } from 'react';
-import { INITIAL_SUBJECTS } from '../data/subjects';
+import { useState, useEffect } from 'react';
+import { fetchSubjects, createSubject, updateSubject, deleteSubject } from '../api/subjects';
 
 export function useSubjects(setTopics, setFocusAsig, showToast) {
-  const [subjects, setSubjects] = useState(INITIAL_SUBJECTS);
-  const isLoading = false;
-  const error     = null;
+  const [subjects, setSubjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  function handleAddSubject({ name, totalTopics, color }) {
-    const id = Date.now();
-    setSubjects(prev => [...prev, { id, name, color, totalTopics }]);
-    showToast(`✓ "${name}" añadida`);
+  useEffect(() => {
+    fetchSubjects()
+      .then(setSubjects)
+      .catch(err => setError(err.message))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  async function handleAddSubject({ name, totalTopics, color }) {
+    try {
+      const saved = await createSubject({ name, totalTopics, color });
+      setSubjects(prev => [...prev, saved]);
+      showToast(`✓ "${name}" añadida`);
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
-  function handleEditSubject({ id, newName, totalTopics, color }) {
-    setSubjects(prev => prev.map(s => s.id === id ? { ...s, name: newName, totalTopics, color } : s));
-    showToast(`✓ Ajustes guardados`);
+  async function handleEditSubject({ id, newName, totalTopics, color }) {
+    try {
+      const saved = await updateSubject(id, { name: newName, totalTopics, color });
+      setSubjects(prev => prev.map(s => s.id === id ? saved : s));
+      showToast(`✓ Ajustes guardados`);
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
-  function handleDeleteSubject(id) {
-    setSubjects(prev => prev.filter(s => s.id !== id));
-    setTopics(prev => prev.filter(t => t.subjectId !== id));
-    setFocusAsig(prev => (prev === id ? null : prev));
-    showToast(`✓ Asignatura borrada`);
+  async function handleDeleteSubject(id) {
+    try {
+      await deleteSubject(id);
+      setSubjects(prev => prev.filter(s => s.id !== id));
+      setTopics(prev => prev.filter(t => t.subjectId !== id));
+      setFocusAsig(prev => (prev === id ? null : prev));
+      showToast(`✓ Asignatura borrada`);
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
   return {
