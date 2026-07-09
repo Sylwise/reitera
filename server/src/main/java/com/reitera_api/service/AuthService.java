@@ -29,7 +29,7 @@ public class AuthService {
         if(userRepository.findUserByEmail(dto.getEmail()).isEmpty()) {
             User user = User.create(dto.getName(), dto.getEmail(), passwordEncoder.encode(dto.getPassword()));
             userRepository.save(user);
-            return new AuthResponseDTO(jwtUtil.generateToken(user.getId()), "Bearer", jwtUtil.getExpiration() / 1000);
+            return new AuthResponseDTO(jwtUtil.generateToken(user.getId()), "Bearer", jwtUtil.getExpiration() / 1000, user.getName(), user.getEmail());
         } else {
             throw new EmailAlreadyExistsException("Email already in use.");
         }
@@ -39,7 +39,7 @@ public class AuthService {
     public AuthResponseDTO login(LoginRequestDTO dto) {
         User user = userRepository.findUserByEmail(dto.getEmail()).orElseThrow(() -> new BadCredentialsException("Invalid credentials."));
         if (passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
-            return new AuthResponseDTO(jwtUtil.generateToken(user.getId()), "Bearer", jwtUtil.getExpiration() / 1000);
+            return new AuthResponseDTO(jwtUtil.generateToken(user.getId()), "Bearer", jwtUtil.getExpiration() / 1000, user.getName(), user.getEmail());
         } else {
             throw new BadCredentialsException("Invalid credentials.");
         }
