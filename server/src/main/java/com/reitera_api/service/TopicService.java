@@ -32,6 +32,10 @@ public class TopicService {
         return topicRepository.findBySubjectIdAndSubjectUserId(subjectId, user.getId());
     }
 
+    public List<Topic> getAllTopics(User user) {
+        return topicRepository.findBySubjectUserId(user.getId());
+    }
+
     public Topic getById(Long id, User user) {
         return topicRepository.findByIdAndSubjectUserId(id, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found."));

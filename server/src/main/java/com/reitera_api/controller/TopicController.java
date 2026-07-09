@@ -32,9 +32,9 @@ public class TopicController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<TopicResponseDTO>> findTopicBySubjectId(@RequestParam Long subjectId,
+    public ResponseEntity<List<TopicResponseDTO>> findTopics(@RequestParam(required = false) Long subjectId,
             @AuthenticationPrincipal User user) {
-        List<Topic> existing = service.getTopicsBySubject(subjectId, user);
+        List<Topic> existing = subjectId != null ? service.getTopicsBySubject(subjectId, user) : service.getAllTopics(user);
         List<TopicResponseDTO> responseDTOList = new ArrayList<>();
 
         for (Topic topic : existing) {
