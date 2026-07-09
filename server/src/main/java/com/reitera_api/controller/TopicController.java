@@ -31,6 +31,12 @@ public class TopicController {
         return ResponseEntity.status(201).body(response);
     }
 
+    @PostMapping("/{id}/reset")
+    public ResponseEntity<TopicResponseDTO> resetTopic (@PathVariable Long id, @AuthenticationPrincipal User user) {
+        Topic reset = service.resetTopic(id, user);
+        return ResponseEntity.ok(TopicResponseDTO.fromEntity(reset));
+    }
+
     @GetMapping()
     public ResponseEntity<List<TopicResponseDTO>> findTopics(@RequestParam(required = false) Long subjectId,
             @AuthenticationPrincipal User user) {

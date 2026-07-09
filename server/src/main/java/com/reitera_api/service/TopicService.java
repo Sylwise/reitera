@@ -9,6 +9,7 @@ import com.reitera_api.repository.SubjectRepository;
 import com.reitera_api.repository.TopicRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -47,6 +48,14 @@ public class TopicService {
         existing.setName(dto.getName());
         existing.setReviewsNeeded(dto.getReviewsNeeded());
         return topicRepository.save(existing);
+    }
+
+    public Topic resetTopic(Long id, User user) {
+        Topic topic = topicRepository.findByIdAndSubjectUserId(id, user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Topic not found."));
+        topic.setReviewCount(0);
+        topic.setNextReviewDate(LocalDate.now());
+        return topicRepository.save(topic);
     }
 
     public void deleteTopic(Long id, User user) {
