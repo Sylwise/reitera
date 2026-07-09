@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { getTopicStatus } from '../../utils/topicHelpers';
 import { useOutsideClick } from '../../hooks/useOutsideClick';
 import { useTheme } from '../../context/ThemeContext';
+import { getInitials } from '../../utils/userHelpers';
 
 const VIEW_LABELS = { dashboard: 'Dashboard', temas: 'Temas', stats: 'Estadísticas', calendario: 'Calendario' };
 
@@ -36,7 +37,7 @@ const ICONS = {
   ),
 };
 
-export default function Sidebar({ view, onViewChange, onSelectSubject, subjects, topics, onAddSubject, onLogout, onDeleteAccount }) {
+export default function Sidebar({ view, onViewChange, onSelectSubject, subjects, topics, userName, onAddSubject, onLogout, onDeleteAccount }) {
   const { theme, toggleTheme } = useTheme();
   const dueCount = topics.filter(t => ['today', 'overdue'].includes(getTopicStatus(t))).length;
   const [menuOpen,    setMenuOpen]    = useState(false);
@@ -138,8 +139,8 @@ export default function Sidebar({ view, onViewChange, onSelectSubject, subjects,
           </div>
         )}
         <div className="sidebar-user" onClick={() => menuOpen ? closeMenu() : openMenu()}>
-          <div className="sidebar-avatar">PD</div>
-          <span className="sidebar-username">Pencho Deskov</span>
+          <div className="sidebar-avatar">{getInitials(userName)}</div>
+          <span className="sidebar-username">{userName}</span>
         </div>
       </div>
     </aside>

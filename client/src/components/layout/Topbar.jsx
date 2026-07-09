@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { getTopicStatus } from '../../utils/topicHelpers';
 import { useOutsideClick } from '../../hooks/useOutsideClick';
 import { useTheme } from '../../context/ThemeContext';
+import { getInitials, getFirstName } from '../../utils/userHelpers';
 
-export default function Topbar({ topics, subjects, streak, onAddTopic, onAddSubject, onLogout, onDeleteAccount }) {
+export default function Topbar({ topics, subjects, streak, userName, onAddTopic, onAddSubject, onLogout, onDeleteAccount }) {
   const { theme, toggleTheme } = useTheme();
   const hasSubjects = subjects.length > 0;
   const [menuOpen, setMenuOpen] = useState(false);
@@ -25,7 +26,7 @@ export default function Topbar({ topics, subjects, streak, onAddTopic, onAddSubj
   return (
     <div className="inner-topbar">
       <div className="inner-topbar-left">
-        <h2>{greet}, Pencho 👋</h2>
+        <h2>{greet}, {getFirstName(userName)} 👋</h2>
         <p>// {dateCap} · {dueLabel}</p>
       </div>
       <div className="inner-topbar-right">
@@ -38,17 +39,17 @@ export default function Topbar({ topics, subjects, streak, onAddTopic, onAddSubj
 
         <div className="mobile-menu-wrap" ref={menuRef}>
           <motion.button whileTap={{ scale: 0.95 }} className="mobile-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
-            <div className="sidebar-avatar" style={{ width: 36, height: 36, fontSize: '.85rem' }}>PD</div>
+            <div className="sidebar-avatar" style={{ width: 36, height: 36, fontSize: '.85rem' }}>{getInitials(userName)}</div>
           </motion.button>
-          
+
           {menuOpen && (
             <div className="mobile-dropdown-menu">
 
               {/* ── Bloque 1: Perfil ── */}
               <div className="mobile-menu-user">
-                <div className="sidebar-avatar" style={{ width: 36, height: 36, fontSize: '.85rem' }}>PD</div>
+                <div className="sidebar-avatar" style={{ width: 36, height: 36, fontSize: '.85rem' }}>{getInitials(userName)}</div>
                 <div>
-                  <div style={{ fontSize: '.83rem', fontWeight: 600, color: 'var(--text)' }}>Pencho Deskov</div>
+                  <div style={{ fontSize: '.83rem', fontWeight: 600, color: 'var(--text)' }}>{userName}</div>
                   <div style={{ fontSize: '.65rem', color: 'var(--accent)', marginTop: '2px' }}>🔥 {streak} días de racha</div>
                 </div>
               </div>

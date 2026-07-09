@@ -13,11 +13,13 @@ import { useTopics }   from './hooks/useTopics';
 import { useSubjects } from './hooks/useSubjects';
 import { useExams }    from './hooks/useExams';
 import { MOCK_STATS }  from './data/topics';
-import { getToken } from './api/client';
+import { buildRealStats } from './utils/statsHelpers';
+import { getToken, getUser } from './api/client';
 import { deleteAccount, logout } from './api/auth';
 
 export default function App() {
   const [loggedIn, setLoggedIn]             = useState(() => !!getToken());
+  const [currentUser, setCurrentUser]       = useState(() => getUser());
   const [view, setView]                     = useState(() => localStorage.getItem('repaso_view') || 'dashboard');
   const [focusAsig, setFocusAsig]           = useState(null);
   const [addSubjectOpen, setAddSubjectOpen] = useState(false);
@@ -53,6 +55,7 @@ export default function App() {
 
   function handleLogout() {
     logout();
+    setCurrentUser(null);
     setLoggedIn(false);
   }
 
@@ -65,7 +68,9 @@ export default function App() {
     }
   }
 
-  if (!loggedIn) return <Login onLogin={() => setLoggedIn(true)} />;
+  if (!loggedIn) return <Login onLogin={() => { setCurrentUser(getUser()); setLoggedIn(true); }} />;
+
+  const stats = { ...MOCK_STATS, ...buildRealStats(topics, subjects) };
 
   return (
     <>
@@ -76,6 +81,7 @@ export default function App() {
           onSelectSubject={(asig) => { setFocusAsig(asig); setView('temas'); }}
           subjects={subjects}
           topics={topics}
+          userName={currentUser?.name}
           onAddSubject={() => setAddSubjectOpen(true)}
           onLogout={handleLogout}
           onDeleteAccount={() => setDeleteAccountOpen(true)}
@@ -85,7 +91,8 @@ export default function App() {
           <Topbar
             topics={topics}
             subjects={subjects}
-            streak={MOCK_STATS.streak}
+            streak={stats.streak}
+            userName={currentUser?.name}
             onAddTopic={() => openConfigModal(null)}
             onAddSubject={() => setAddSubjectOpen(true)}
             onLogout={handleLogout}
@@ -102,9 +109,9 @@ export default function App() {
                 transition={{ duration: 0.2 }}
                 style={{ height: '100%', width: '100%', overflow: 'auto' }}
               >
-                {view === 'dashboard'  && <Dashboard  topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={MOCK_STATS} />}
+                {view === 'dashboard'  && <Dashboard  topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={stats} />}
                 {view === 'temas'      && <Temas      topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} focusAsig={focusAsig} />}
-                {view === 'stats'      && <Stats      stats={MOCK_STATS} />}
+                {view === 'stats'      && <Stats      stats={stats} />}
                 {view === 'calendario' && <Calendario topics={topics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} />}
               </motion.div>
             </AnimatePresence>

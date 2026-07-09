@@ -1,4 +1,4 @@
-import { apiFetch, setToken, clearToken } from './client';
+import { apiFetch, setToken, clearToken, setUser, clearUser } from './client';
 
 export async function register({ name, email, password }) {
   return apiFetch('/auth/register', {
@@ -15,6 +15,7 @@ export async function login({ email, password }) {
     auth: false,
   });
   setToken(data.token);
+  setUser({ name: data.name, email: data.email });
   return data;
 }
 
@@ -24,4 +25,5 @@ export function deleteAccount() {
 
 export function logout() {
   clearToken();
+  clearUser();
 }
