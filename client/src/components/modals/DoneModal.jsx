@@ -18,25 +18,10 @@ export default function DoneModal({ topic, isOpen, onClose, onConfirm }) {
     if (!s.trim()) return null;
     const str = s.trim();
 
-    if (str.includes("%")) {
-      const match = str.match(/^(\d+)\s*%$/);
-      if (!match) return "Formato inválido (ej. 85%)";
-      const num = parseInt(match[1], 10);
-      if (num < 1 || num > 100) return "Debe estar entre 1% y 100%";
-      return null;
-    }
-
-    if (str.includes("/")) {
-      const match = str.match(/^(\d+)\s*\/\s*(\d+)$/);
-      if (!match) return "Formato inválido (ej. 8/10)";
-      const num = parseInt(match[1], 10);
-      const div = parseInt(match[2], 10);
-      if (div === 0) return "El divisor no puede ser 0";
-      if (num > div) return "La nota no puede ser mayor al total";
-      return null;
-    }
-
-    return "Usa un formato como 8/10 o 85%";
+    if (!/^\d+$/.test(str)) return "Debe ser un número entero";
+    const num = parseInt(str, 10);
+    if (num < 1 || num > 10) return "Debe estar entre 1 y 10";
+    return null;
   }
 
   const scoreError = validateScore(score);
@@ -140,8 +125,10 @@ export default function DoneModal({ topic, isOpen, onClose, onConfirm }) {
               borderColor:
                 scoreError && score ? "var(--danger)" : "var(--border)",
             }}
-            type="text"
-            placeholder="ej. 8/10 o 85%"
+            type="number"
+            min={1}
+            max={10}
+            placeholder="ej. 7 (1-10)"
             value={score}
             onChange={(e) => setScore(e.target.value)}
             autoFocus

@@ -1,13 +1,18 @@
 package com.reitera_api.dto;
 
 import com.reitera_api.entity.Difficulty;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public class ReviewSessionRequestDTO {
 
     @NotNull
     private Difficulty difficulty;
-    private String score;
+    @NotNull
+    @Min(1)
+    @Max(10)
+    private Integer score;
 
     public ReviewSessionRequestDTO() {
     }
@@ -20,11 +25,11 @@ public class ReviewSessionRequestDTO {
         this.difficulty = difficulty;
     }
 
-    public String getScore() {
+    public Integer getScore() {
         return score;
     }
 
-    public void setScore(String score) {
+    public void setScore(Integer score) {
         this.score = score;
     }
 }

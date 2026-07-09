@@ -15,7 +15,7 @@ public class ReviewSession {
     private Long id;
     @Enumerated(EnumType.STRING)
     private Difficulty difficulty;
-    private String score;
+    private Integer score;
     @Column (name = "reviewed_at")
     private LocalDateTime reviewedAt;
     @JoinColumn (name = "topic_id")
@@ -42,7 +42,7 @@ public class ReviewSession {
         return difficulty;
     }
 
-    public String getScore() {
+    public Integer getScore() {
         return score;
     }
 
@@ -58,7 +58,7 @@ public class ReviewSession {
         this.difficulty = difficulty;
     }
 
-    public void setScore(String score) {
+    public void setScore(Integer score) {
         this.score = score;
     }
 
@@ -87,7 +87,7 @@ public class ReviewSession {
         return "ReviewSession{" +
                 "id=" + id +
                 ", difficulty=" + difficulty +
-                ", score='" + score + '\'' +
+                ", score=" + score +
                 ", reviewedAt=" + reviewedAt +
                 ", topic=" + topic +
                 '}';
