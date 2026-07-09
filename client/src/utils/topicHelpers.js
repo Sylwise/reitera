@@ -3,20 +3,11 @@ function parseLocalDate(dateStr) {
   return new Date(y, m - 1, d);
 }
 
-function daysUntil(nextReviewDate) {
+export function daysUntil(nextReviewDate) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const review = parseLocalDate(nextReviewDate);
   return Math.round((review - today) / 86400000);
-}
-
-export function dateInDays(n) {
-  const d = new Date();
-  d.setDate(d.getDate() + n);
-  const y  = d.getFullYear();
-  const m  = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${dd}`;
 }
 
 export function getTopicStatus(topic) {

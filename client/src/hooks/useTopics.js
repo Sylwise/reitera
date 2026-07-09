@@ -1,49 +1,74 @@
-import { useState } from 'react';
-import { INITIAL_TOPICS } from '../data/topics';
-import { dateInDays } from '../utils/topicHelpers';
+import { useState, useEffect } from 'react';
+import { fetchTopics, fetchTopic, createTopic, updateTopic, deleteTopic, resetTopic } from '../api/topics';
+import { addReviewSession } from '../api/reviewSessions';
 
 export function useTopics(showToast) {
-  const [topics, setTopics]         = useState(INITIAL_TOPICS);
+  const [topics, setTopics]         = useState([]);
   const [modalTopic, setModalTopic] = useState(null);
-  const isLoading = false;
-  const error     = null;
+  const [isLoading, setIsLoading]   = useState(true);
+  const [error, setError]           = useState(null);
 
-  function handleConfirm({ dificultad, score }) {
-    const intervals = { easy: 21, normal: 14, hard: 7 };
-    setTopics(prev => prev.map(t => {
-      if (t.id !== modalTopic.id) return t;
-      const newReviewCount = Math.min(t.reviewCount + 1, t.reviewsNeeded);
-      const isMastered = newReviewCount >= t.reviewsNeeded;
-      return { ...t, reviewCount: newReviewCount, nextReviewDate: isMastered ? null : dateInDays(intervals[dificultad]) };
-    }));
-    const label = dificultad === 'easy' ? 'Fácil' : dificultad === 'hard' ? 'Difícil' : 'Normal';
-    showToast(`✓ ${modalTopic.name} — ${label}${score ? ` · ${score}` : ''}`);
-    setModalTopic(null);
+  useEffect(() => {
+    fetchTopics()
+      .then(setTopics)
+      .catch(err => setError(err.message))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  async function handleConfirm({ dificultad, score }) {
+    const topic = modalTopic;
+    try {
+      await addReviewSession(topic.id, { dificultad, score });
+      const updated = await fetchTopic(topic.id);
+      setTopics(prev => prev.map(t => t.id === topic.id ? updated : t));
+      const label = dificultad === 'easy' ? 'Fácil' : dificultad === 'hard' ? 'Difícil' : 'Normal';
+      showToast(`✓ ${topic.name} — ${label}${score ? ` · ${score}` : ''}`);
+      setModalTopic(null);
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
-  function handleConfigTopic({ subjectId, name, reviewsNeeded }) {
-    const topic = {
-      id: Date.now(), subjectId, name, reviewCount: 0, reviewsNeeded, nextReviewDate: dateInDays(0),
-    };
-    setTopics(prev => [...prev, topic]);
-    showToast(`✓ "${name}" añadido`);
+  async function handleConfigTopic({ subjectId, name, reviewsNeeded }) {
+    try {
+      const saved = await createTopic({ name, reviewsNeeded, subjectId });
+      setTopics(prev => [...prev, saved]);
+      showToast(`✓ "${name}" añadido`);
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
-  function handleEditTopic({ topicId, name, reviewsNeeded }) {
-    setTopics(prev => prev.map(t => t.id === topicId ? { ...t, name, reviewsNeeded } : t));
-    showToast(`✓ Tema guardado`);
+  async function handleEditTopic({ topicId, name, reviewsNeeded }) {
+    const existing = topics.find(t => t.id === topicId);
+    if (!existing) return;
+    try {
+      const saved = await updateTopic(topicId, { name, reviewsNeeded, subjectId: existing.subjectId });
+      setTopics(prev => prev.map(t => t.id === topicId ? saved : t));
+      showToast(`✓ Tema guardado`);
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
-  function handleDeleteTopic(topicId) {
-    setTopics(prev => prev.filter(t => t.id !== topicId));
-    showToast(`✓ Tema borrado`);
+  async function handleDeleteTopic(topicId) {
+    try {
+      await deleteTopic(topicId);
+      setTopics(prev => prev.filter(t => t.id !== topicId));
+      showToast(`✓ Tema borrado`);
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
-  function handleResetTopic(topicId) {
-    setTopics(prev => prev.map(t =>
-      t.id === topicId ? { ...t, reviewCount: 0, nextReviewDate: dateInDays(0) } : t
-    ));
-    showToast(`✓ Repasos reiniciados`);
+  async function handleResetTopic(topicId) {
+    try {
+      const saved = await resetTopic(topicId);
+      setTopics(prev => prev.map(t => t.id === topicId ? saved : t));
+      showToast(`✓ Repasos reiniciados`);
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
   return {
