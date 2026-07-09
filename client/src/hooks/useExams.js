@@ -1,22 +1,38 @@
-import { useState } from 'react';
-import { MOCK_EXAMS } from '../data/topics';
+import { useState, useEffect } from 'react';
+import { fetchExams, createExam, deleteExam } from '../api/exams';
 
 export function useExams(showToast) {
-  const [exams, setExams]           = useState(MOCK_EXAMS);
+  const [exams, setExams]             = useState([]);
   const [addExamOpen, setAddExamOpen] = useState(false);
   const [addExamDate, setAddExamDate] = useState(new Date());
-  const isLoading = false;
-  const error     = null;
+  const [isLoading, setIsLoading]     = useState(true);
+  const [error, setError]             = useState(null);
 
-  function handleAddExam({ name, subjectId, date }) {
-    const id = 'exam_' + Date.now();
-    setExams(prev => [...prev, { id, name, subjectId, date }]);
-    showToast(`📅 Evento "${name}" añadido`);
+  useEffect(() => {
+    fetchExams()
+      .then(setExams)
+      .catch(err => setError(err.message))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  async function handleAddExam({ name, subjectId, date }) {
+    try {
+      const saved = await createExam({ name, subjectId, date });
+      setExams(prev => [...prev, saved]);
+      showToast(`📅 Evento "${name}" añadido`);
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
-  function handleDeleteExam(id) {
-    setExams(prev => prev.filter(e => e.id !== id));
-    showToast('✓ Evento borrado');
+  async function handleDeleteExam(id) {
+    try {
+      await deleteExam(id);
+      setExams(prev => prev.filter(e => e.id !== id));
+      showToast('✓ Evento borrado');
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
   function openAddExam(date) {
