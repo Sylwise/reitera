@@ -31,9 +31,9 @@ public class ExamController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExamResponseDTO>> findExamsBySubjectId(@RequestParam Long subjectId,
+    public ResponseEntity<List<ExamResponseDTO>> findExams(@RequestParam(required = false) Long subjectId,
             @AuthenticationPrincipal User user) {
-        List<Exam> existing = service.getExams(subjectId, user);
+        List<Exam> existing = subjectId != null ? service.getExams(subjectId, user) : service.getAllExams(user);
         List<ExamResponseDTO> responseDTOList = new ArrayList<>();
 
         for (Exam exam : existing) {

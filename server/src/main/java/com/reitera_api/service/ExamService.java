@@ -32,6 +32,10 @@ public class ExamService {
         return examRepository.findBySubjectIdAndSubjectUserId(subjectId, user.getId());
     }
 
+    public List<Exam> getAllExams(User user) {
+        return examRepository.findBySubjectUserId(user.getId());
+    }
+
     public Exam getById(Long id, User user) {
         return examRepository.findByIdAndSubjectUserId(id, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("No exam found."));
