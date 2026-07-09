@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public class ExamRequestDTO {
 
     @NotBlank
-    @Size (min = 3, max = 15)
+    @Size (min = 3, max = 50)
     private String name;
     @NotNull
     private LocalDate examDate;
