@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { login, register } from "../api/auth";
 import "./Login.css";
 
 const MONTHS = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN"];
@@ -20,6 +21,29 @@ function generateHeatmap() {
 
 export default function Login({ onLogin }) {
   const cells = useMemo(() => generateHeatmap(), []);
+  const [mode, setMode] = useState("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      if (mode === "register") {
+        await register({ name, email, password });
+      }
+      await login({ email, password });
+      onLogin();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <motion.div 
@@ -43,11 +67,15 @@ export default function Login({ onLogin }) {
           transition={{ duration: 0.5, delay: 0.1, type: 'spring', damping: 25 }}
         >
           <h1 className="lg-heading">
-            Bienvenido
-            <br />
-            de nuevo
+            {mode === "login" ? (
+              <>Bienvenido<br />de nuevo</>
+            ) : (
+              <>Crea tu<br />cuenta</>
+            )}
           </h1>
-          <p className="lg-subheading">// continúa donde lo dejaste</p>
+          <p className="lg-subheading">
+            {mode === "login" ? "// continúa donde lo dejaste" : "// empieza a llevar el control"}
+          </p>
 
           <button className="lg-oauth-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -84,35 +112,79 @@ export default function Login({ onLogin }) {
             <div className="lg-divider-line" />
           </div>
 
-          <div className="lg-field">
-            <label>EMAIL</label>
-            <input
-              type="email"
-              placeholder="tu@universidad.edu"
-              autoComplete="email"
-            />
-          </div>
+          <form onSubmit={handleSubmit}>
+            {mode === "register" && (
+              <div className="lg-field">
+                <label>NOMBRE</label>
+                <input
+                  type="text"
+                  placeholder="Tu nombre"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
 
-          <div className="lg-field">
-            <div className="lg-field-row">
-              <label>CONTRASEÑA</label>
-              <a href="#" className="lg-forgot">
-                He olvidado mi contraseña
-              </a>
+            <div className="lg-field">
+              <label>EMAIL</label>
+              <input
+                type="email"
+                placeholder="tu@universidad.edu"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
-            <input
-              type="password"
-              placeholder="••••••••••"
-              autoComplete="current-password"
-            />
-          </div>
 
-          <button className="lg-btn-primary" onClick={onLogin}>
-            Entrar con Email
-          </button>
+            <div className="lg-field">
+              <div className="lg-field-row">
+                <label>CONTRASEÑA</label>
+                {mode === "login" && (
+                  <a href="#" className="lg-forgot">
+                    He olvidado mi contraseña
+                  </a>
+                )}
+              </div>
+              <input
+                type="password"
+                placeholder="••••••••••"
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && <p className="lg-error">{error}</p>}
+
+            <button className="lg-btn-primary" type="submit" disabled={loading}>
+              {loading
+                ? "Un momento…"
+                : mode === "login"
+                ? "Entrar con Email"
+                : "Crear cuenta"}
+            </button>
+          </form>
 
           <p className="lg-signup">
-            ¿No tienes cuenta? <a href="#">Regístrate gratis</a>
+            {mode === "login" ? (
+              <>
+                ¿No tienes cuenta?{" "}
+                <a href="#" onClick={(e) => { e.preventDefault(); setError(null); setMode("register"); }}>
+                  Regístrate gratis
+                </a>
+              </>
+            ) : (
+              <>
+                ¿Ya tienes cuenta?{" "}
+                <a href="#" onClick={(e) => { e.preventDefault(); setError(null); setMode("login"); }}>
+                  Inicia sesión
+                </a>
+              </>
+            )}
           </p>
         </motion.div>
       </div>

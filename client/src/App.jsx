@@ -13,9 +13,11 @@ import { useTopics }   from './hooks/useTopics';
 import { useSubjects } from './hooks/useSubjects';
 import { useExams }    from './hooks/useExams';
 import { MOCK_STATS }  from './data/topics';
+import { getToken } from './api/client';
+import { deleteAccount, logout } from './api/auth';
 
 export default function App() {
-  const [loggedIn, setLoggedIn]             = useState(false);
+  const [loggedIn, setLoggedIn]             = useState(() => !!getToken());
   const [view, setView]                     = useState(() => localStorage.getItem('repaso_view') || 'dashboard');
   const [focusAsig, setFocusAsig]           = useState(null);
   const [addSubjectOpen, setAddSubjectOpen] = useState(false);
@@ -49,9 +51,18 @@ export default function App() {
     setConfigOpen(true);
   }
 
-  function handleDeleteAccount() {
-    // TODO: conectar con el endpoint DELETE de la cuenta cuando el front se integre con el backend
+  function handleLogout() {
+    logout();
     setLoggedIn(false);
+  }
+
+  async function handleDeleteAccount() {
+    try {
+      await deleteAccount();
+      handleLogout();
+    } catch (err) {
+      showToast(`✗ ${err.message}`);
+    }
   }
 
   if (!loggedIn) return <Login onLogin={() => setLoggedIn(true)} />;
@@ -66,7 +77,7 @@ export default function App() {
           subjects={subjects}
           topics={topics}
           onAddSubject={() => setAddSubjectOpen(true)}
-          onLogout={() => setLoggedIn(false)}
+          onLogout={handleLogout}
           onDeleteAccount={() => setDeleteAccountOpen(true)}
         />
 
@@ -77,7 +88,7 @@ export default function App() {
             streak={MOCK_STATS.streak}
             onAddTopic={() => openConfigModal(null)}
             onAddSubject={() => setAddSubjectOpen(true)}
-            onLogout={() => setLoggedIn(false)}
+            onLogout={handleLogout}
             onDeleteAccount={() => setDeleteAccountOpen(true)}
           />
 
