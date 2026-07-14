@@ -3,7 +3,7 @@ package com.reitera_api.entity;
 import com.reitera_api.dto.ReviewSessionRequestDTO;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
@@ -17,7 +17,7 @@ public class ReviewSession {
     private Difficulty difficulty;
     private Integer score;
     @Column (name = "reviewed_at")
-    private LocalDateTime reviewedAt;
+    private LocalDate reviewedAt;
     @JoinColumn (name = "topic_id")
     @ManyToOne
     private Topic topic;
@@ -26,7 +26,7 @@ public class ReviewSession {
         ReviewSession reviewSession = new ReviewSession();
         reviewSession.setDifficulty(dto.getDifficulty());
         reviewSession.setScore(dto.getScore());
-        reviewSession.setReviewedAt(LocalDateTime.now());
+        reviewSession.setReviewedAt(LocalDate.now());
         reviewSession.setTopic(topic);
         return reviewSession;
     }
@@ -46,7 +46,7 @@ public class ReviewSession {
         return score;
     }
 
-    public LocalDateTime getReviewedAt() {
+    public LocalDate getReviewedAt() {
         return reviewedAt;
     }
 
@@ -62,7 +62,7 @@ public class ReviewSession {
         this.score = score;
     }
 
-    public void setReviewedAt(LocalDateTime reviewedAt) {
+    public void setReviewedAt(LocalDate reviewedAt) {
         this.reviewedAt = reviewedAt;
     }
 

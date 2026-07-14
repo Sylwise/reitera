@@ -2,11 +2,11 @@ package com.reitera_api.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,6 +26,11 @@ public class User implements UserDetails {
     private String passwordHash;
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
+    @Column (name = "last_review_date")
+    private LocalDate lastReviewDate;
+    @Column(name = "review_streak")
+    private Integer reviewStreak;
+
 
     public User() {}
 
@@ -33,10 +38,27 @@ public class User implements UserDetails {
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
+        this.reviewStreak = 0;
     }
 
     public static User create(String name, String email, String passwordHash) {
         return new User(name, email, passwordHash);
+    }
+
+    public LocalDate getLastReviewDate() {
+        return lastReviewDate;
+    }
+
+    public void setLastReviewDate(LocalDate lastReviewDate) {
+        this.lastReviewDate = lastReviewDate;
+    }
+
+    public Integer getReviewStreak() {
+        return reviewStreak;
+    }
+
+    public void setReviewStreak(Integer reviewStreak) {
+        this.reviewStreak = reviewStreak;
     }
 
     public Long getId() {
