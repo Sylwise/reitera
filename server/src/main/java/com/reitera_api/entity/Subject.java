@@ -2,6 +2,8 @@ package com.reitera_api.entity;
 
 import com.reitera_api.dto.SubjectRequestDTO;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Objects;
 
@@ -14,6 +16,7 @@ public class Subject {
     private Long id;
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
     private String name;
     private String color;

@@ -2,6 +2,8 @@ package com.reitera_api.entity;
 
 import com.reitera_api.dto.ExamRequestDTO;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -17,6 +19,7 @@ public class Exam {
     private LocalDate examDate;
     @JoinColumn (name = "subject_id")
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Subject subject;
 
     public Exam() {

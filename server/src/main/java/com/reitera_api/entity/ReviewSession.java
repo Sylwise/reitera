@@ -2,6 +2,8 @@ package com.reitera_api.entity;
 
 import com.reitera_api.dto.ReviewSessionRequestDTO;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -20,6 +22,7 @@ public class ReviewSession {
     private LocalDate reviewedAt;
     @JoinColumn (name = "topic_id")
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Topic topic;
 
     public static ReviewSession create (ReviewSessionRequestDTO dto, Topic topic) {
