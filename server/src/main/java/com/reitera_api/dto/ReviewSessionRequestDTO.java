@@ -9,7 +9,6 @@ public class ReviewSessionRequestDTO {
 
     @NotNull
     private Difficulty difficulty;
-    @NotNull
     @Min(1)
     @Max(10)
     private Integer score;
