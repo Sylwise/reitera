@@ -30,7 +30,9 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
         <p>// {dateCap} · {dueLabel}</p>
       </div>
       <div className="inner-topbar-right">
-        <div className="streak-badge hide-on-mobile">🔥 <span>{streak} días</span></div>
+        {streak > 1 && (
+          <div className="streak-badge hide-on-mobile">🔥 <span>{streak} días</span></div>
+        )}
         {hasSubjects && (
           <motion.button whileTap={{ scale: 0.95 }} className="btn-add-topic hide-on-mobile" onClick={onAddTopic}>
             <span style={{ fontSize: '1rem', lineHeight: 1 }}>+</span> Añadir tema
@@ -50,7 +52,9 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
                 <div className="sidebar-avatar" style={{ width: 36, height: 36, fontSize: '.85rem' }}>{getInitials(userName)}</div>
                 <div>
                   <div style={{ fontSize: '.83rem', fontWeight: 600, color: 'var(--text)' }}>{userName}</div>
-                  <div style={{ fontSize: '.65rem', color: 'var(--accent)', marginTop: '2px' }}>🔥 {streak} días de racha</div>
+                  {streak > 1 && (
+                    <div style={{ fontSize: '.65rem', color: 'var(--accent)', marginTop: '2px' }}>🔥 {streak} días de racha</div>
+                  )}
                 </div>
               </div>
 

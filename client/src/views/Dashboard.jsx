@@ -35,9 +35,9 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
             <div className="hero-title">
               <span>{due.length}</span> tema{due.length !== 1 ? 's' : ''} pendiente{due.length !== 1 ? 's' : ''}
             </div>
-            <div className="hero-sub">
-              {due.length === 0 ? '¡Todo al día! Disfruta el día.' : 'Tienes la racha — no la rompas ahora.'}
-            </div>
+            {due.length > 0 && (
+              <div className="hero-sub">Tienes la racha — no la rompas ahora.</div>
+            )}
           </div>
           <div className="hero-meta">
             <div className="hero-pct">{pct}%</div>
@@ -96,15 +96,23 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
                     Sin alertas activas 🎉
                   </div>
                 )}
-                {items.map((item) => (
-                  <div key={item.name} className="risk-row">
-                    <div className="risk-name">{item.name}</div>
-                    <div style={{ display: 'flex', gap: '.35rem', flexShrink: 0 }}>
-                      {item.hardTag && <span className="risk-tag hard">{item.hardTag}</span>}
-                      {item.scoreTag && <span className="risk-tag score">{item.scoreTag}</span>}
+                {items.map((item) => {
+                  const subjectId = subjects.find(s => s.name === item.subjectName)?.id;
+                  return (
+                    <div key={item.topicId} className="risk-row">
+                      <div className="risk-row-top">
+                        <span className="risk-dot" style={{ background: getAsigColor(subjectId, subjects) }} />
+                        <div className="risk-name" title={`${item.subjectName} · ${item.topicName}`}>{item.topicName}</div>
+                      </div>
+                      {(item.hardTag || item.scoreTag) && (
+                        <div className="risk-tags">
+                          {item.hardTag && <span className="risk-tag hard">{item.hardTag}</span>}
+                          {item.scoreTag && <span className="risk-tag score">{item.scoreTag}</span>}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </Panel>
             );
           })()}

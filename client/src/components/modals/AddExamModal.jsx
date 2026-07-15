@@ -151,7 +151,7 @@ export default function AddExamModal({ isOpen, onClose, onAdd, subjects, initial
             type="button"
             className={`filter-btn${subjectId === s.id ? ' active' : ''}`}
             style={subjectId === s.id
-              ? { background: `${s.color}20`, borderColor: s.color, color: s.color }
+              ? { background: `color-mix(in srgb, ${s.color} 12%, transparent)`, borderColor: s.color, color: s.color }
               : {}}
             onClick={() => setSubjectId(s.id)}
           >

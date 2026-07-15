@@ -71,7 +71,7 @@ export default function ConfigTopicModal({
             style={
               selectedSubjectId === s.id
                 ? {
-                    background: `${s.color}20`,
+                    background: `color-mix(in srgb, ${s.color} 12%, transparent)`,
                     borderColor: s.color,
                     color: s.color,
                   }

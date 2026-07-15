@@ -67,11 +67,15 @@ export function mapStatsResponse(raw) {
     diffDistribution,
     activity: raw.activity ?? EMPTY_STATS.activity,
     weakSpots: (raw.weakSpots || []).map(w => ({
-      name: `${w.subjectName} · ${w.topicName}`,
+      topicId: w.topicId,
+      topicName: w.topicName,
+      subjectName: w.subjectName,
       tag: `Difícil ×${w.hardCount}`,
     })),
     atRisk: (raw.atRisk || []).map(a => ({
-      name: `${a.subjectName} · ${a.topicName}`,
+      topicId: a.topicId,
+      topicName: a.topicName,
+      subjectName: a.subjectName,
       tag: `Score ${Math.round(a.avgScore * 10)}%`,
     })),
   };
@@ -80,13 +84,13 @@ export function mapStatsResponse(raw) {
 export function buildFocusItems(weakSpots = [], atRisk = []) {
   const map = new Map();
   weakSpots.forEach(w => {
-    map.set(w.name, { name: w.name, hardTag: w.tag, scoreTag: null });
+    map.set(w.topicId, { topicId: w.topicId, topicName: w.topicName, subjectName: w.subjectName, hardTag: w.tag, scoreTag: null });
   });
-  atRisk.forEach(w => {
-    if (map.has(w.name)) {
-      map.get(w.name).scoreTag = w.tag;
+  atRisk.forEach(a => {
+    if (map.has(a.topicId)) {
+      map.get(a.topicId).scoreTag = a.tag;
     } else {
-      map.set(w.name, { name: w.name, hardTag: null, scoreTag: w.tag });
+      map.set(a.topicId, { topicId: a.topicId, topicName: a.topicName, subjectName: a.subjectName, hardTag: null, scoreTag: a.tag });
     }
   });
   return [...map.values()].sort((a, b) => {
