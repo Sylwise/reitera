@@ -12,7 +12,7 @@ import { useToast }    from './hooks/useToast';
 import { useTopics }   from './hooks/useTopics';
 import { useSubjects } from './hooks/useSubjects';
 import { useExams }    from './hooks/useExams';
-import { MOCK_STATS }  from './data/topics';
+import { useStats }    from './hooks/useStats';
 import { buildRealStats } from './utils/statsHelpers';
 import { getToken, getUser } from './api/client';
 import { deleteAccount, logout } from './api/auth';
@@ -45,6 +45,7 @@ export default function App() {
     addExamDate,
     handleAddExam, handleDeleteExam, openAddExam,
   } = useExams(showToast);
+  const { stats: backendStats } = useStats();
 
   useEffect(() => { localStorage.setItem('repaso_view', view); }, [view]);
 
@@ -70,7 +71,7 @@ export default function App() {
 
   if (!loggedIn) return <Login onLogin={() => { setCurrentUser(getUser()); setLoggedIn(true); }} />;
 
-  const stats = { ...MOCK_STATS, ...buildRealStats(topics, subjects) };
+  const stats = { ...backendStats, ...buildRealStats(topics, subjects) };
 
   return (
     <>

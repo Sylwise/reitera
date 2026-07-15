@@ -42,6 +42,41 @@ export function buildRealStats(topics, subjects) {
   };
 }
 
+const DIFF_KEYS = { EASY: 'easy', NORMAL: 'normal', HARD: 'hard' };
+
+export const EMPTY_STATS = {
+  streak: 0,
+  totalRepasos: 0,
+  diffDistribution: { easy: 0, normal: 0, hard: 0 },
+  activity: new Array(35).fill(0),
+  weakSpots: [],
+  atRisk: [],
+};
+
+export function mapStatsResponse(raw) {
+  if (!raw) return EMPTY_STATS;
+
+  const diffDistribution = { easy: 0, normal: 0, hard: 0 };
+  (raw.diffDistribution || []).forEach(({ difficulty, count }) => {
+    diffDistribution[DIFF_KEYS[difficulty]] = count;
+  });
+
+  return {
+    streak: raw.streak ?? 0,
+    totalRepasos: raw.totalReviews ?? 0,
+    diffDistribution,
+    activity: raw.activity ?? EMPTY_STATS.activity,
+    weakSpots: (raw.weakSpots || []).map(w => ({
+      name: `${w.subjectName} · ${w.topicName}`,
+      tag: `Difícil ×${w.hardCount}`,
+    })),
+    atRisk: (raw.atRisk || []).map(a => ({
+      name: `${a.subjectName} · ${a.topicName}`,
+      tag: `Score ${Math.round(a.avgScore * 10)}%`,
+    })),
+  };
+}
+
 export function buildFocusItems(weakSpots = [], atRisk = []) {
   const map = new Map();
   weakSpots.forEach(w => {
