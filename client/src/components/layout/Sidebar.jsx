@@ -2,8 +2,19 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { getTopicStatus } from '../../utils/topicHelpers';
 import { useOutsideClick } from '../../hooks/useOutsideClick';
+import { useLongPress } from '../../hooks/useLongPress';
 import { useTheme } from '../../context/ThemeContext';
 import { getInitials } from '../../utils/userHelpers';
+
+function IconDots() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 4 16" fill="currentColor">
+      <circle cx="2" cy="2" r="1.5" />
+      <circle cx="2" cy="8" r="1.5" />
+      <circle cx="2" cy="14" r="1.5" />
+    </svg>
+  );
+}
 
 const VIEW_LABELS = { dashboard: 'Dashboard', temas: 'Temas', stats: 'Estadísticas', calendario: 'Calendario' };
 
@@ -37,12 +48,13 @@ const ICONS = {
   ),
 };
 
-export default function Sidebar({ view, onViewChange, onSelectSubject, subjects, topics, userName, onAddSubject, onLogout, onDeleteAccount }) {
+export default function Sidebar({ view, onViewChange, onSelectSubject, onEditSubject, subjects, topics, userName, onAddSubject, onLogout, onDeleteAccount }) {
   const { theme, toggleTheme } = useTheme();
   const dueCount = topics.filter(t => ['today', 'overdue'].includes(getTopicStatus(t))).length;
   const [menuOpen,    setMenuOpen]    = useState(false);
   const [menuClosing, setMenuClosing] = useState(false);
   const menuRef = useRef(null);
+  const subjectLongPress = useLongPress();
 
   function openMenu()  { setMenuOpen(true); setMenuClosing(false); }
   function closeMenu() {
@@ -79,16 +91,36 @@ export default function Sidebar({ view, onViewChange, onSelectSubject, subjects,
       {subjects.map(s => {
         const pending = topics.filter(t => t.subjectId === s.id && ['today', 'overdue'].includes(getTopicStatus(t))).length;
         return (
-          <motion.button
+          <motion.div
             key={s.id}
+            role="button"
+            tabIndex={0}
             whileTap={{ scale: 0.96 }}
             className="sidebar-item subject-item"
-            onClick={() => onSelectSubject(s.id)}
+            onClick={() => { if (subjectLongPress.didTrigger()) return; onSelectSubject(s.id); }}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectSubject(s.id); }}
+            onContextMenu={(e) => { if (!onEditSubject) return; e.preventDefault(); onEditSubject(s.id); }}
+            onTouchStart={() => subjectLongPress.onStart(onEditSubject ? () => onEditSubject(s.id) : null)}
+            onTouchEnd={subjectLongPress.onEnd}
+            onTouchMove={subjectLongPress.onEnd}
           >
             <span className="sidebar-asig-dot" style={{ background: s.color }} />
             {s.name}
-            {pending > 0 && <span className="s-badge">{pending}</span>}
-          </motion.button>
+            <span className="subject-item-meta">
+              {pending > 0 && <span className="s-badge">{pending}</span>}
+              {onEditSubject && (
+                <button
+                  className="asig-menu-btn"
+                  onClick={(e) => { e.stopPropagation(); onEditSubject(s.id); }}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => e.stopPropagation()}
+                  title="Editar asignatura"
+                >
+                  <IconDots />
+                </button>
+              )}
+            </span>
+          </motion.div>
         );
       })}
       <motion.button

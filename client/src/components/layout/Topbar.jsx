@@ -5,7 +5,7 @@ import { useOutsideClick } from '../../hooks/useOutsideClick';
 import { useTheme } from '../../context/ThemeContext';
 import { getInitials, getFirstName } from '../../utils/userHelpers';
 
-export default function Topbar({ topics, subjects, streak, userName, onAddTopic, onAddSubject, onLogout, onDeleteAccount }) {
+export default function Topbar({ topics, subjects, streak, userName, onAddTopic, onOpenAsignaturas, onLogout, onDeleteAccount }) {
   const { theme, toggleTheme } = useTheme();
   const hasSubjects = subjects.length > 0;
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,7 +26,7 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
   return (
     <div className="inner-topbar">
       <div className="inner-topbar-left">
-        <h2>{greet}, {getFirstName(userName)} 👋</h2>
+        <h2>{greet}, {getFirstName(userName)}</h2>
         <p>// {dateCap} · {dueLabel}</p>
       </div>
       <div className="inner-topbar-right">
@@ -68,11 +68,11 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
                     Añadir tema
                   </motion.button>
                 )}
-                <motion.button whileTap={{ scale: 0.95 }} className="dd-item" onClick={() => { onAddSubject(); setMenuOpen(false); }}>
+                <motion.button whileTap={{ scale: 0.95 }} className="dd-item" onClick={() => { onOpenAsignaturas(); setMenuOpen(false); }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                   </svg>
-                  Nueva asignatura
+                  Asignaturas
                 </motion.button>
               </div>
 

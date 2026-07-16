@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Login      from './views/Login';
 import Sidebar    from './components/layout/Sidebar';
 import Topbar     from './components/layout/Topbar';
-import Dashboard  from './views/Dashboard';
-import Temas      from './views/Temas';
-import Stats      from './views/Stats';
-import Calendario from './views/Calendario';
+import Dashboard    from './views/Dashboard';
+import Temas        from './views/Temas';
+import Asignaturas  from './views/Asignaturas';
+import Stats        from './views/Stats';
+import Calendario   from './views/Calendario';
 import AppModals  from './components/modals/AppModals';
 import { useToast }    from './hooks/useToast';
 import { useTopics }   from './hooks/useTopics';
@@ -79,7 +80,8 @@ export default function App() {
         <Sidebar
           view={view}
           onViewChange={(v) => { setView(v); setFocusAsig(null); }}
-          onSelectSubject={(asig) => { setFocusAsig(asig); setView('temas'); }}
+          onSelectSubject={(asig) => { setFocusAsig(prev => prev === asig ? null : asig); setView('temas'); }}
+          onEditSubject={setEditSubject}
           subjects={subjects}
           topics={topics}
           userName={currentUser?.name}
@@ -95,7 +97,7 @@ export default function App() {
             streak={stats.streak}
             userName={currentUser?.name}
             onAddTopic={() => openConfigModal(null)}
-            onAddSubject={() => setAddSubjectOpen(true)}
+            onOpenAsignaturas={() => setView('asignaturas')}
             onLogout={handleLogout}
             onDeleteAccount={() => setDeleteAccountOpen(true)}
           />
@@ -111,8 +113,9 @@ export default function App() {
                 style={{ height: '100%', width: '100%', overflow: 'auto' }}
               >
                 {view === 'dashboard'  && <Dashboard  topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={stats} />}
-                {view === 'temas'      && <Temas      topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} focusAsig={focusAsig} />}
-                {view === 'stats'      && <Stats      stats={stats} />}
+                {view === 'temas'       && <Temas       topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} focusAsig={focusAsig} />}
+                {view === 'asignaturas' && <Asignaturas subjects={subjects} topics={topics} onEditSubject={setEditSubject} onAddSubject={() => setAddSubjectOpen(true)} />}
+                {view === 'stats'       && <Stats       stats={stats} />}
                 {view === 'calendario' && <Calendario topics={topics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} />}
               </motion.div>
             </AnimatePresence>
