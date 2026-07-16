@@ -60,6 +60,7 @@
 
 .lg-oauth-btn {
   width: 100%;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,6 +81,42 @@
   background: var(--surface2);
   border-color: var(--border2);
   color: var(--text);
+}
+.lg-oauth-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.lg-oauth-btn:disabled:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: var(--border);
+  color: var(--muted);
+}
+.lg-oauth-badge {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+}
+
+.lg-dev-notice {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--muted);
+  background: rgba(var(--accent-rgb), 0.06);
+  border: 1px solid rgba(var(--accent-rgb), 0.15);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1rem;
 }
 
 .lg-divider {
@@ -125,6 +162,16 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .lg-field input::placeholder { color: var(--muted); }
+.lg-field input:-webkit-autofill,
+.lg-field input:-webkit-autofill:hover,
+.lg-field input:-webkit-autofill:focus,
+.lg-field input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  box-shadow: 0 0 0 1000px var(--surface) inset;
+  border-color: var(--border);
+  transition: background-color 999999s ease-in-out 0s;
+}
 .lg-field input:focus {
   border-color: rgba(var(--accent-rgb), 0.5);
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.08);
@@ -143,6 +190,11 @@
   transition: color 0.2s;
 }
 .lg-forgot:hover { color: var(--text); }
+.lg-forgot-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.lg-forgot-disabled:hover { color: var(--muted); }
 
 .lg-error {
   font-size: 0.82rem;
