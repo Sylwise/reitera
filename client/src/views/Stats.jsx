@@ -7,14 +7,35 @@ const WEEK_LABELS  = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 const INSIGHT_TEXT = 'Vas genial en IPE, pero Sistemas Informáticos necesita tu atención esta semana.';
 
 function buildHeatmapDates(activity) {
-  const today = new Date();
-  return activity.map((v, i) => {
+  const today    = new Date();
+  const todayDow = (today.getDay() + 6) % 7; // Monday=0 ... Sunday=6, matches WEEK_LABELS order
+
+  // Backend always sends a fixed 35-day trailing window. Keep only the current
+  // week (partial, up to today) plus the 4 full calendar weeks before it, so the
+  // grid always aligns to real Monday-Sunday weeks and always renders 5 columns.
+  const daysNeeded = 28 + todayDow + 1;
+  const sliced     = activity.slice(activity.length - daysNeeded);
+
+  const days = sliced.map((v, i) => {
     const d = new Date(today);
-    d.setDate(today.getDate() - (activity.length - 1 - i));
+    d.setDate(today.getDate() - (daysNeeded - 1 - i));
     const mon = d.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
     const tip = `${d.getDate()} ${mon} · ${v} repaso${v !== 1 ? 's' : ''}`;
     return { v, tip, d };
   });
+
+  const trailingPad = 6 - todayDow; // empty cells after today, completing the current week's column
+  const cells   = [...days, ...Array(trailingPad).fill(null)];
+  const numCols = cells.length / 7;
+
+  const mondayOfFirstCol = days[0].d; // days[0] is always the Monday of 4 weeks ago
+  const weekHeaders = Array.from({ length: numCols }, (_, c) => {
+    const d = new Date(mondayOfFirstCol);
+    d.setDate(d.getDate() + c * 7);
+    return { day: d.getDate(), mon: d.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '').toUpperCase() };
+  });
+
+  return { cells, numCols, weekHeaders };
 }
 
 export default function Stats({ stats }) {
@@ -22,12 +43,7 @@ export default function Stats({ stats }) {
 
   const { streak, totalRepasos, overdue, diffDistribution, chart30, asigProgress, activity } = stats;
   const masteredTotal = asigProgress.reduce((s, a) => s + a.done, 0);
-  const heatmapData   = buildHeatmapDates(activity);
-  const weekHeaders   = [0, 7, 14, 21, 28].map(idx => {
-    const d = heatmapData[idx]?.d;
-    if (!d) return { day: '', mon: '' };
-    return { day: d.getDate(), mon: d.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '').toUpperCase() };
-  });
+  const { cells: heatmapData, numCols, weekHeaders } = buildHeatmapDates(activity);
 
   const chart30data = chart30.map((count, i) => ({
     count, label: i === 0 ? 'Hoy' : i % 5 === 0 ? `${i}d` : '',
@@ -106,7 +122,7 @@ export default function Stats({ stats }) {
         <Panel title="Actividad — últimas 5 semanas" style={{ alignSelf: 'start' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gridTemplateRows: 'auto auto', columnGap: '.5rem', rowGap: '5px' }}>
             <div />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 5 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${numCols},1fr)`, gap: 5 }}>
               {weekHeaders.map((w, i) => (
                 <div key={i} style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: 'var(--mono)', fontSize: '.62rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{w.day}</div>
@@ -119,9 +135,11 @@ export default function Stats({ stats }) {
                 <div key={l} style={{ height: 34, display: 'flex', alignItems: 'center', fontFamily: 'var(--mono)', fontSize: '.62rem', color: 'var(--muted)' }}>{l}</div>
               ))}
             </div>
-            <div className="streak-grid">
+            <div className="streak-grid" style={{ gridTemplateColumns: `repeat(${numCols},1fr)` }}>
               {heatmapData.map((d, i) => (
-                <div key={i} className={`streak-day done-${Math.min(d.v, 4)}`} data-tip={d.tip} />
+                d
+                  ? <div key={i} className={`streak-day done-${Math.min(d.v, 4)}`} data-tip={d.tip} />
+                  : <div key={i} />
               ))}
             </div>
           </div>

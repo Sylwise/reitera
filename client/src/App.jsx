@@ -21,7 +21,12 @@ import { deleteAccount, logout } from './api/auth';
 export default function App() {
   const [loggedIn, setLoggedIn]             = useState(() => !!getToken());
   const [currentUser, setCurrentUser]       = useState(() => getUser());
-  const [view, setView]                     = useState(() => localStorage.getItem('repaso_view') || 'dashboard');
+  const [view, setView]                     = useState(() => {
+    const saved = localStorage.getItem('repaso_view') || 'dashboard';
+    const isMobileOnlyView = saved === 'asignaturas';
+    const isDesktop = window.innerWidth > 768;
+    return isMobileOnlyView && isDesktop ? 'dashboard' : saved;
+  });
   const [focusAsig, setFocusAsig]           = useState(null);
   const [addSubjectOpen, setAddSubjectOpen] = useState(false);
   const [configOpen, setConfigOpen]         = useState(false);
@@ -49,6 +54,14 @@ export default function App() {
   const { stats: backendStats } = useStats();
 
   useEffect(() => { localStorage.setItem('repaso_view', view); }, [view]);
+
+  useEffect(() => {
+    function handleResize() {
+      if (view === 'asignaturas' && window.innerWidth > 768) setView('dashboard');
+    }
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [view]);
 
   function openConfigModal(asig = null) {
     setConfigInitAsig(asig);
