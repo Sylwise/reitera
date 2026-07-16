@@ -77,10 +77,6 @@ export default function Login({ onLogin }) {
             {mode === "login" ? "// continúa donde lo dejaste" : "// empieza a llevar el control"}
           </p>
 
-          <p className="lg-dev-notice">
-            Login social y recuperación de contraseña aún no están disponibles — entra con tu email y contraseña.
-          </p>
-
           <button className="lg-oauth-btn" disabled title="Próximamente disponible">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <path
