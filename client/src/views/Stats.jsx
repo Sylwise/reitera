@@ -1,6 +1,7 @@
 import Panel from '../components/ui/Panel';
 import Spinner from '../components/ui/Spinner';
 import DonutChart from '../components/charts/DonutChart';
+import BarChart from '../components/ui/BarChart';
 
 const WEEK_LABELS  = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 const INSIGHT_TEXT = 'Vas genial en IPE, pero Sistemas Informáticos necesita tu atención esta semana.';
@@ -51,22 +52,14 @@ export default function Stats({ stats }) {
 
       <div className="stats-row fade-in" style={{ animationDelay: '.1s' }}>
         <Panel title="Carga — próximos 30 días">
-          <div className="big-chart">
-            {chart30data.map((d, i) => {
-              const isEmpty = d.count === 0;
-              const isToday = i === 0;
-              const barH    = isEmpty ? 20 : d.count * 20;
-              const cls     = isToday ? 'today-bar' : isEmpty ? 'empty-bar' : 'has-reviews';
-              return (
-                <div key={i} className="bar-wrap" style={{ gap: 2 }}>
-                  <div className={`bar ${cls}`} style={{ height: barH }}>
-                    {!isEmpty && <span className="bar-inner-count">{d.count}</span>}
-                  </div>
-                  <div className="bar-label" style={{ fontSize: '.55rem' }}>{d.label}</div>
-                </div>
-              );
-            })}
-          </div>
+          <BarChart
+            data={chart30data}
+            todayIdx={0}
+            height={120}
+            className="big-chart"
+            barWrapGap={2}
+            barLabelStyle={{ fontSize: '.55rem' }}
+          />
         </Panel>
         <Panel title="Distribución de dificultad">
           <DonutChart
