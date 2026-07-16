@@ -158,6 +158,16 @@ body::before {
 .topic-card.mastered { --card-accent: var(--ok); opacity: .6; cursor: default }
 .topic-card.mastered:hover { opacity: 1; transform: none }
 
+.due-list {
+  max-height: 382px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: .25rem;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+.due-list .topic-card { scroll-snap-align: start; scroll-snap-stop: always }
+
 .card-left { display: flex; flex-direction: column; gap: .15rem; min-width: 0 }
 .card-asig { font-family: var(--sans); font-size: .82rem; font-weight: 600; color: var(--muted); letter-spacing: .01em }
 .card-name { font-size: 1.05rem; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }

@@ -22,8 +22,6 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
   const pct = totalCourseTopics > 0 ? Math.round((mastered / totalCourseTopics) * 100) : 0;
 
   const chart7  = (stats.chart7 || []).map((count, i) => ({ count, label: (stats.chart7Labels || [])[i] || '' }));
-  const dateStr = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const dateCap = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
 
   return (
     <div className="page-wrap">
@@ -31,7 +29,6 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
 
         <div className="hero fade-in">
           <div>
-            <div className="hero-date">{dateCap}</div>
             <div className="hero-title">
               <span>{due.length}</span> tema{due.length !== 1 ? 's' : ''} pendiente{due.length !== 1 ? 's' : ''}
             </div>
@@ -55,11 +52,13 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
                 <div style={{ fontFamily: 'var(--mono)', fontSize: '.78rem', color: 'var(--muted)' }}>Racha activa — vuelve mañana.</div>
               </div>
             )}
-            <AnimatePresence mode="popLayout">
-              {due.map((t, i) => (
-                <TopicCard key={t.id} topic={t} subjects={subjects} onMark={onMark} delay={0.05 + i * 0.05} />
-              ))}
-            </AnimatePresence>
+            <div className="due-list">
+              <AnimatePresence mode="popLayout">
+                {due.map((t, i) => (
+                  <TopicCard key={t.id} topic={t} subjects={subjects} onMark={onMark} delay={0.05 + i * 0.05} />
+                ))}
+              </AnimatePresence>
+            </div>
           </div>
 
           {upcoming.length > 0 && (
