@@ -47,7 +47,6 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
             <SectionLabel count={due.length}>Para hoy</SectionLabel>
             {due.length === 0 && (
               <div style={{ textAlign: 'center', padding: '2.5rem 1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: '.6rem' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '.75rem' }}>🎉</div>
                 <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '.35rem', letterSpacing: '-.01em' }}>¡Todo al día!</div>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: '.78rem', color: 'var(--muted)' }}>Racha activa — vuelve mañana.</div>
               </div>
@@ -92,7 +91,7 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
               <Panel title="Foco de atención" delay={0.15}>
                 {items.length === 0 && (
                   <div style={{ fontFamily: 'var(--mono)', fontSize: '.78rem', color: 'var(--muted)', textAlign: 'center', padding: '1.5rem 0' }}>
-                    Sin alertas activas 🎉
+                    Sin alertas activas
                   </div>
                 )}
                 {items.map((item) => {
