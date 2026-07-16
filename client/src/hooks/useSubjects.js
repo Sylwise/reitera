@@ -6,12 +6,14 @@ export function useSubjects(setTopics, setFocusAsig, showToast) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchSubjects()
+  function refetch() {
+    return fetchSubjects()
       .then(setSubjects)
       .catch(err => setError(err.message))
       .finally(() => setIsLoading(false));
-  }, []);
+  }
+
+  useEffect(() => { refetch(); }, []);
 
   async function handleAddSubject({ name, totalTopics, color }) {
     try {
@@ -48,6 +50,6 @@ export function useSubjects(setTopics, setFocusAsig, showToast) {
   return {
     subjects, setSubjects,
     handleAddSubject, handleEditSubject, handleDeleteSubject,
-    isLoading, error,
+    isLoading, error, refetch,
   };
 }

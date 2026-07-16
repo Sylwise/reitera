@@ -8,12 +8,14 @@ export function useExams(showToast) {
   const [isLoading, setIsLoading]     = useState(true);
   const [error, setError]             = useState(null);
 
-  useEffect(() => {
-    fetchExams()
+  function refetch() {
+    return fetchExams()
       .then(setExams)
       .catch(err => setError(err.message))
       .finally(() => setIsLoading(false));
-  }, []);
+  }
+
+  useEffect(() => { refetch(); }, []);
 
   async function handleAddExam({ name, subjectId, date }) {
     try {
@@ -45,6 +47,6 @@ export function useExams(showToast) {
     addExamOpen, setAddExamOpen,
     addExamDate,
     handleAddExam, handleDeleteExam, openAddExam,
-    isLoading, error,
+    isLoading, error, refetch,
   };
 }

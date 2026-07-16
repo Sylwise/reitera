@@ -40,18 +40,21 @@ export default function App() {
     topics, setTopics,
     modalTopic, setModalTopic,
     handleConfirm, handleConfigTopic, handleEditTopic, handleDeleteTopic, handleResetTopic,
+    refetch: refetchTopics,
   } = useTopics(showToast);
   const {
     subjects,
     handleAddSubject, handleEditSubject, handleDeleteSubject,
+    refetch: refetchSubjects,
   } = useSubjects(setTopics, setFocusAsig, showToast);
   const {
     exams,
     addExamOpen, setAddExamOpen,
     addExamDate,
     handleAddExam, handleDeleteExam, openAddExam,
+    refetch: refetchExams,
   } = useExams(showToast);
-  const { stats: backendStats } = useStats();
+  const { stats: backendStats, refetch: refetchStats } = useStats();
 
   useEffect(() => { localStorage.setItem('repaso_view', view); }, [view]);
 
@@ -62,6 +65,11 @@ export default function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [view]);
+
+  async function handleConfirmDone(payload) {
+    await handleConfirm(payload);
+    refetchStats();
+  }
 
   function openConfigModal(asig = null) {
     setConfigInitAsig(asig);
@@ -83,7 +91,17 @@ export default function App() {
     }
   }
 
-  if (!loggedIn) return <Login onLogin={() => { setCurrentUser(getUser()); setLoggedIn(true); }} />;
+  function handleLoginSuccess() {
+    setCurrentUser(getUser());
+    setLoggedIn(true);
+    setView('dashboard');
+    refetchTopics();
+    refetchSubjects();
+    refetchExams();
+    refetchStats();
+  }
+
+  if (!loggedIn) return <Login onLogin={handleLoginSuccess} />;
 
   const stats = { ...backendStats, ...buildRealStats(topics, subjects) };
 
@@ -128,7 +146,7 @@ export default function App() {
                 {view === 'dashboard'  && <Dashboard  topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={stats} />}
                 {view === 'temas'       && <Temas       topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} focusAsig={focusAsig} />}
                 {view === 'asignaturas' && <Asignaturas subjects={subjects} topics={topics} onEditSubject={setEditSubject} onAddSubject={() => setAddSubjectOpen(true)} />}
-                {view === 'stats'       && <Stats       stats={stats} />}
+                {view === 'stats'       && <Stats       stats={stats} onAddSubject={() => setAddSubjectOpen(true)} onGoToTemas={() => setView('temas')} />}
                 {view === 'calendario' && <Calendario topics={topics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} />}
               </motion.div>
             </AnimatePresence>
@@ -139,7 +157,7 @@ export default function App() {
       <AppModals
         modalTopic={modalTopic}
         onCloseDoneModal={() => setModalTopic(null)}
-        onConfirmDone={handleConfirm}
+        onConfirmDone={handleConfirmDone}
         addSubjectOpen={addSubjectOpen}
         onCloseAddSubject={() => setAddSubjectOpen(false)}
         onAddSubject={handleAddSubject}

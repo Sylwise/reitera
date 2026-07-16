@@ -1,4 +1,4 @@
-import './EmptyDashboard.css';
+import './EmptyState.css';
 
 const GHOST_CARDS = [
   { fill: 65, nameW: 55 },

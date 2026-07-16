@@ -3,9 +3,9 @@ const HARD_COLOR = '#ff6b35';
 export default function DonutChart({ easy, normal, hard }) {
   const total   = easy + normal + hard;
   const circ    = 2 * Math.PI * 40;
-  const easeLen = circ * easy   / total;
-  const normLen = circ * normal / total;
-  const hardLen = circ * hard   / total;
+  const easeLen = total > 0 ? circ * easy   / total : 0;
+  const normLen = total > 0 ? circ * normal / total : 0;
+  const hardLen = total > 0 ? circ * hard   / total : 0;
   const easeOff = 63;
   const normOff = -(easeLen - 63);
   const hardOff = -(easeLen + normLen - 63);
@@ -30,9 +30,9 @@ export default function DonutChart({ easy, normal, hard }) {
       </svg>
       <div className="donut-legend">
         {[
-          { c: 'var(--ok)',     l: 'Fácil',   v: easy,   p: Math.round(easy   / total * 100) },
-          { c: 'var(--accent)', l: 'Normal',  v: normal, p: Math.round(normal / total * 100) },
-          { c: HARD_COLOR,      l: 'Difícil', v: hard,   p: Math.round(hard   / total * 100) },
+          { c: 'var(--ok)',     l: 'Fácil',   v: easy,   p: total > 0 ? Math.round(easy   / total * 100) : 0 },
+          { c: 'var(--accent)', l: 'Normal',  v: normal, p: total > 0 ? Math.round(normal / total * 100) : 0 },
+          { c: HARD_COLOR,      l: 'Difícil', v: hard,   p: total > 0 ? Math.round(hard   / total * 100) : 0 },
         ].map(r => (
           <div key={r.l} className="legend-row">
             <div className="legend-dot" style={{ background: r.c }} />

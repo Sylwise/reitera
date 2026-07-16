@@ -8,12 +8,14 @@ export function useTopics(showToast) {
   const [isLoading, setIsLoading]   = useState(true);
   const [error, setError]           = useState(null);
 
-  useEffect(() => {
-    fetchTopics()
+  function refetch() {
+    return fetchTopics()
       .then(setTopics)
       .catch(err => setError(err.message))
       .finally(() => setIsLoading(false));
-  }, []);
+  }
+
+  useEffect(() => { refetch(); }, []);
 
   async function handleConfirm({ dificultad, score }) {
     const topic = modalTopic;
@@ -75,6 +77,6 @@ export function useTopics(showToast) {
     topics, setTopics,
     modalTopic, setModalTopic,
     handleConfirm, handleConfigTopic, handleEditTopic, handleDeleteTopic, handleResetTopic,
-    isLoading, error,
+    isLoading, error, refetch,
   };
 }

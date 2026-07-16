@@ -2,9 +2,9 @@ import Panel from '../components/ui/Panel';
 import Spinner from '../components/ui/Spinner';
 import DonutChart from '../components/charts/DonutChart';
 import BarChart from '../components/ui/BarChart';
+import EmptyStats from './EmptyStats';
 
 const WEEK_LABELS  = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-const INSIGHT_TEXT = 'Vas genial en IPE, pero Sistemas Informáticos necesita tu atención esta semana.';
 
 function buildHeatmapDates(activity) {
   const today    = new Date();
@@ -38,10 +38,21 @@ function buildHeatmapDates(activity) {
   return { cells, numCols, weekHeaders };
 }
 
-export default function Stats({ stats }) {
+export default function Stats({ stats, onAddSubject, onGoToTemas }) {
   if (!stats) return <Spinner />;
 
   const { streak, totalRepasos, overdue, diffDistribution, chart30, asigProgress, activity } = stats;
+
+  if (totalRepasos === 0) {
+    return (
+      <EmptyStats
+        hasSubjects={asigProgress.length > 0}
+        onAddSubject={onAddSubject}
+        onGoToTemas={onGoToTemas}
+      />
+    );
+  }
+
   const masteredTotal = asigProgress.reduce((s, a) => s + a.done, 0);
   const { cells: heatmapData, numCols, weekHeaders } = buildHeatmapDates(activity);
 
@@ -54,7 +65,7 @@ export default function Stats({ stats }) {
       <div className="stats-grid fade-in">
         {[
           { label: 'Afianzados',      value: masteredTotal,   cls: 'accent', sub: `de ${asigProgress.reduce((s, a) => s + a.total, 0)} temas totales` },
-          { label: 'Racha actual',    value: `🔥 ${streak}`,  cls: 'accent', sub: 'días consecutivos' },
+          { label: 'Racha actual',    value: <>{streak >= 3 && <span style={{ fontSize: '1.3rem', verticalAlign: 'middle', marginRight: '.3rem' }}>🔥</span>}{streak}</>, cls: 'accent', sub: 'días consecutivos' },
           { label: 'Repasos totales', value: totalRepasos,    cls: 'ok',     sub: 'sesiones completadas' },
           { label: 'Atrasados',       value: overdue,         cls: 'danger', sub: 'temas con retraso' },
         ].map(k => (
@@ -109,12 +120,12 @@ export default function Stats({ stats }) {
           </Panel>
 
           <div className="panel fade-in" style={{ height: 'fit-content', background: `linear-gradient(135deg, rgba(var(--accent-rgb),.06) 0%, rgba(var(--accent-rgb),.02) 100%)`, border: `1px solid rgba(var(--accent-rgb),.15)` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', marginBottom: '.6rem' }}>
-              <span style={{ fontSize: '1rem' }}>✨</span>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: '.65rem', color: 'var(--accent)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Insight Semanal</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.6rem' }}>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: '.65rem', color: 'var(--muted)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Insight Semanal</span>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: '.6rem', color: 'var(--muted)', letterSpacing: '.04em', textTransform: 'uppercase', background: 'var(--surface2)', border: '1px solid var(--border2)', borderRadius: '999px', padding: '.2rem .55rem', flexShrink: 0 }}>En desarrollo</span>
             </div>
-            <p style={{ fontFamily: 'var(--sans)', fontSize: '.85rem', lineHeight: 1.6, color: 'var(--text)', margin: 0 }}>
-              {INSIGHT_TEXT}
+            <p style={{ fontFamily: 'var(--sans)', fontSize: '.85rem', lineHeight: 1.6, color: 'var(--muted)', margin: 0 }}>
+              Estamos preparando recomendaciones personalizadas basadas en tu actividad de repaso. Disponible próximamente.
             </p>
           </div>
         </div>
