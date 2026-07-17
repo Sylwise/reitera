@@ -24,7 +24,8 @@ public class StatsService {
     public StatsResponseDTO getStats(User user) {
         Long totalReviews = reviewSessionRepository.countByUserId(user.getId());
         List<DifficultyCountDTO> diffDistribution = reviewSessionRepository.countGroupedByDifficulty(user.getId());
-        Integer currentStreak = user.getReviewStreak();
+        LocalDate currentDay = LocalDate.now();
+        Integer currentStreak = currentDay.minusDays(1).equals(user.getLastReviewDate()) || currentDay.equals(user.getLastReviewDate()) ?  user.getReviewStreak() :  0;
         List<WeakSpotDTO> weakSpots = reviewSessionRepository.findWeakSpots(user.getId(), PageRequest.of(0, 5));
         List<AtRiskDTO> atRisk = reviewSessionRepository.findAtRisk(user.getId(), PageRequest.of(0, 5));
 
