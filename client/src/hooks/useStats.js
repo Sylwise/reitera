@@ -7,14 +7,19 @@ export function useStats() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  function refetch() {
+  function load() {
     return fetchStats()
       .then(raw => setStats(mapStatsResponse(raw)))
       .catch(err => setError(err.message))
       .finally(() => setIsLoading(false));
   }
 
-  useEffect(() => { refetch(); }, []);
+  function refetch() {
+    setError(null);
+    return load();
+  }
+
+  useEffect(() => { load(); }, []);
 
   return { stats, isLoading, error, refetch };
 }

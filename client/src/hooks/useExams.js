@@ -8,14 +8,19 @@ export function useExams(showToast) {
   const [isLoading, setIsLoading]     = useState(true);
   const [error, setError]             = useState(null);
 
-  function refetch() {
+  function load() {
     return fetchExams()
       .then(setExams)
       .catch(err => setError(err.message))
       .finally(() => setIsLoading(false));
   }
 
-  useEffect(() => { refetch(); }, []);
+  function refetch() {
+    setError(null);
+    return load();
+  }
+
+  useEffect(() => { load(); }, []);
 
   async function handleAddExam({ name, subjectId, date }) {
     try {

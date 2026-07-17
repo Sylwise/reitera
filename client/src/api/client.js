@@ -27,6 +27,14 @@ export function clearUser() {
   localStorage.removeItem(USER_KEY);
 }
 
+let unauthorizedHandler = null;
+
+// App registra aquí su logout para que un 401 en cualquier petición
+// devuelva al login en vez de dejar la UI con datos vacíos.
+export function setUnauthorizedHandler(fn) {
+  unauthorizedHandler = fn;
+}
+
 export class ApiError extends Error {
   constructor(message, status, details) {
     super(message);
@@ -43,10 +51,8 @@ function extractMessage(data, status) {
 
 export async function apiFetch(path, { method = 'GET', body, auth = true } = {}) {
   const headers = { 'Content-Type': 'application/json' };
-  if (auth) {
-    const token = getToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
+  const token = auth ? getToken() : null;
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
@@ -67,7 +73,11 @@ export async function apiFetch(path, { method = 'GET', body, auth = true } = {})
   }
 
   if (!res.ok) {
-    if (res.status === 401 && auth) clearToken();
+    if (res.status === 401 && token) {
+      clearToken();
+      clearUser();
+      if (unauthorizedHandler) unauthorizedHandler();
+    }
     throw new ApiError(extractMessage(data, res.status), res.status, data);
   }
 

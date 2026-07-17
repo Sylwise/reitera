@@ -6,14 +6,20 @@ export function useSubjects(setTopics, setFocusAsig, showToast) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  function refetch() {
+  function load() {
     return fetchSubjects()
       .then(setSubjects)
       .catch(err => setError(err.message))
       .finally(() => setIsLoading(false));
   }
 
-  useEffect(() => { refetch(); }, []);
+  function refetch() {
+    setError(null);
+    setIsLoading(true);
+    return load();
+  }
+
+  useEffect(() => { load(); }, []);
 
   async function handleAddSubject({ name, totalTopics, color }) {
     try {

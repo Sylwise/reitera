@@ -8,14 +8,20 @@ export function useTopics(showToast) {
   const [isLoading, setIsLoading]   = useState(true);
   const [error, setError]           = useState(null);
 
-  function refetch() {
+  function load() {
     return fetchTopics()
       .then(setTopics)
       .catch(err => setError(err.message))
       .finally(() => setIsLoading(false));
   }
 
-  useEffect(() => { refetch(); }, []);
+  function refetch() {
+    setError(null);
+    setIsLoading(true);
+    return load();
+  }
+
+  useEffect(() => { load(); }, []);
 
   async function handleConfirm({ dificultad, score }) {
     const topic = modalTopic;

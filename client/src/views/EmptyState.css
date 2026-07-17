@@ -156,6 +156,18 @@
   filter: brightness(.96);
 }
 
+/* ── Error de carga (backend caído / sin red) ───────────── */
+.load-error {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  text-align: center;
+  padding: 2rem;
+}
+
 /* ── Mobile ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .ghost-layout { display: none; }

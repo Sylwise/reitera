@@ -19,7 +19,7 @@ function generateHeatmap() {
   });
 }
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, notice }) {
   const cells = useMemo(() => generateHeatmap(), []);
   const [mode, setMode] = useState("login");
   const [name, setName] = useState("");
@@ -76,6 +76,8 @@ export default function Login({ onLogin }) {
           <p className="lg-subheading">
             {mode === "login" ? "// continúa donde lo dejaste" : "// empieza a llevar el control"}
           </p>
+
+          {notice && <p className="lg-notice">{notice}</p>}
 
           <button className="lg-oauth-btn" disabled title="Próximamente disponible">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

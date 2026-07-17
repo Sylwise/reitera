@@ -15,7 +15,8 @@ import { useSubjects } from './hooks/useSubjects';
 import { useExams }    from './hooks/useExams';
 import { useStats }    from './hooks/useStats';
 import { buildRealStats } from './utils/statsHelpers';
-import { getToken, getUser } from './api/client';
+import Spinner from './components/ui/Spinner';
+import { getToken, getUser, setUnauthorizedHandler } from './api/client';
 import { deleteAccount, logout } from './api/auth';
 
 export default function App() {
@@ -35,17 +36,20 @@ export default function App() {
   const [editSubject, setEditSubject]       = useState(null);
   const [editTopic, setEditTopic]           = useState(null);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [sessionExpired, setSessionExpired]       = useState(false);
 
   const { toast, showToast, dismissToast } = useToast();
   const {
     topics, setTopics,
     modalTopic, setModalTopic,
     handleConfirm, handleConfigTopic, handleEditTopic, handleDeleteTopic, handleResetTopic,
+    isLoading: topicsLoading, error: topicsError,
     refetch: refetchTopics,
   } = useTopics(showToast);
   const {
     subjects,
     handleAddSubject, handleEditSubject, handleDeleteSubject,
+    isLoading: subjectsLoading, error: subjectsError,
     refetch: refetchSubjects,
   } = useSubjects(setTopics, setFocusAsig, showToast);
   const {
@@ -58,6 +62,17 @@ export default function App() {
   const { stats: backendStats, refetch: refetchStats } = useStats();
 
   useEffect(() => { localStorage.setItem('repaso_view', view); }, [view]);
+
+  // Un 401 en cualquier petición (token caducado) fuerza el logout con aviso,
+  // en vez de dejar la app "logueada" enseñando el estado vacío.
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setCurrentUser(null);
+      setLoggedIn(false);
+      setSessionExpired(true);
+    });
+    return () => setUnauthorizedHandler(null);
+  }, []);
 
   useEffect(() => {
     function handleResize() {
@@ -95,6 +110,7 @@ export default function App() {
   function handleLoginSuccess() {
     setCurrentUser(getUser());
     setLoggedIn(true);
+    setSessionExpired(false);
     setView('dashboard');
     refetchTopics();
     refetchSubjects();
@@ -102,9 +118,18 @@ export default function App() {
     refetchStats();
   }
 
-  if (!loggedIn) return <Login onLogin={handleLoginSuccess} />;
+  if (!loggedIn) {
+    return (
+      <Login
+        onLogin={handleLoginSuccess}
+        notice={sessionExpired ? 'Tu sesión ha caducado. Vuelve a iniciar sesión.' : null}
+      />
+    );
+  }
 
   const stats = { ...backendStats, ...buildRealStats(topics, subjects) };
+  const dataLoading = subjectsLoading || topicsLoading;
+  const dataError   = subjectsError || topicsError;
 
   return (
     <>
@@ -135,6 +160,24 @@ export default function App() {
           />
 
           <div id="app">
+            {dataLoading && <Spinner />}
+            {!dataLoading && dataError && (
+              <div className="load-error">
+                <h1 className="empty-title">Sin conexión con el servidor</h1>
+                <p className="empty-subtitle">
+                  Tus datos están a salvo, pero ahora mismo no se han podido cargar.
+                  <br />
+                  ({dataError})
+                </p>
+                <button
+                  className="empty-cta"
+                  onClick={() => { refetchSubjects(); refetchTopics(); refetchExams(); refetchStats(); }}
+                >
+                  Reintentar
+                </button>
+              </div>
+            )}
+            {!dataLoading && !dataError && (
             <AnimatePresence mode="wait">
               <motion.div
                 key={view}
@@ -151,6 +194,7 @@ export default function App() {
                 {view === 'calendario' && <Calendario topics={topics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} />}
               </motion.div>
             </AnimatePresence>
+            )}
           </div>
         </div>
       </div>

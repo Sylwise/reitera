@@ -188,6 +188,13 @@
 }
 .lg-forgot-disabled:hover { color: var(--muted); }
 
+.lg-notice {
+  font-size: 0.82rem;
+  color: #fbbf24;
+  font-family: var(--mono);
+  margin-bottom: 1rem;
+}
+
 .lg-error {
   font-size: 0.82rem;
   color: #f87171;

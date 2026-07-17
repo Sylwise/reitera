@@ -29,6 +29,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         return authHeader.substring(7);
     }
 
+    // No usar sendError(): re-despacha a /error, que está protegido por
+    // anyRequest().authenticated(), y el cliente acaba recibiendo 403 en vez de 401.
+    private static void writeUnauthorized(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             @NonNull HttpServletResponse response,
@@ -45,7 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = extractJwtFromHeader(authHeader);
 
         if (!jwtUtil.validateToken(token)) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token.");
+            writeUnauthorized(response, "Invalid token.");
             return;
         }
 
@@ -53,7 +61,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found.");
+            writeUnauthorized(response, "User not found.");
             return;
         }
 
