@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TopicCard from '../components/ui/TopicCard';
-import { getTopicStatus } from '../utils/topicHelpers';
+import { getTopicStatus, compareByUrgency } from '../utils/topicHelpers';
 import { useLongPress } from '../hooks/useLongPress';
 
 const FILTERS = [
@@ -99,7 +99,7 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
   const groups = subjects.map(subj => {
     const { id, name, color, totalTopics } = subj;
     const subjTopics = topics.filter(t => t.subjectId === id);
-    const filtered   = subjTopics.filter(t => matchesFilter(t) && matchesSearch(t));
+    const filtered   = subjTopics.filter(t => matchesFilter(t) && matchesSearch(t)).sort(compareByUrgency);
     const mastered   = subjTopics.filter(t => getTopicStatus(t) === 'mastered').length;
     const pct        = totalTopics > 0 ? Math.round(mastered / totalTopics * 100) : 0;
     return { id, name, color, topics: filtered, mastered, total: subjTopics.length, totalTopics, pct };

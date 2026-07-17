@@ -31,3 +31,14 @@ export function formatDaysLabel(topic) {
 export function getAsigColor(subjectId, subjects) {
   return subjects.find(s => s.id === subjectId)?.color ?? '#888';
 }
+
+const STATUS_RANK = { overdue: 0, today: 1, soon: 2, future: 3, mastered: 4 };
+
+// Lo que arde, arriba: atrasados (el más atrasado primero), hoy, y el resto por fecha.
+export function compareByUrgency(a, b) {
+  const rankDiff = STATUS_RANK[getTopicStatus(a)] - STATUS_RANK[getTopicStatus(b)];
+  if (rankDiff !== 0) return rankDiff;
+  const da = a.nextReviewDate ? +parseLocalDate(a.nextReviewDate) : Infinity;
+  const db = b.nextReviewDate ? +parseLocalDate(b.nextReviewDate) : Infinity;
+  return da - db;
+}
