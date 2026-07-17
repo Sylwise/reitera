@@ -2,7 +2,7 @@
 
 SaaS de repetición espaciada para estudiantes de ciclos formativos. Permite organizar el contenido de estudio en asignaturas, temas y exámenes, y programa automáticamente las sesiones de repaso en función del rendimiento del usuario.
 
-> 🚧 En desarrollo activo — pendiente de despliegue.
+> 🌐 En producción: [reitera.dev](https://reitera.dev)
 
 ---
 
@@ -15,7 +15,7 @@ Estudiar sin un sistema lleva a repasar lo mismo sin criterio o a olvidar temas 
 ## Stack
 
 **Backend**
-- Java 21 + Spring Boot 3
+- Java 21 + Spring Boot 4
 - Spring Security + JWT (autenticación stateless)
 - Spring Data JPA + Hibernate
 - MySQL
@@ -76,6 +76,15 @@ Autenticación stateless con JWT:
 
 ---
 
+## Despliegue
+
+- Backend y frontend desplegados en Railway, con MySQL gestionado
+- Backend construido con Dockerfile multi-stage (Maven → JRE 21)
+- Dominios propios: [reitera.dev](https://reitera.dev) (frontend) y `api.reitera.dev` (API)
+- Perfil `prod` de Spring configurado por variables de entorno (datasource, JWT, CORS)
+
+---
+
 ## Estado actual
 
 - [x] CRUD completo: Subject, Topic, Exam, ReviewSession
@@ -83,7 +92,7 @@ Autenticación stateless con JWT:
 - [x] Manejo global de excepciones (`@ControllerAdvice`)
 - [x] Spring Security + JWT
 - [x] Frontend React
-- [ ] Despliegue
+- [x] Despliegue en producción
 
 ---
 

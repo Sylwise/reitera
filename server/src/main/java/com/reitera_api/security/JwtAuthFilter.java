@@ -29,8 +29,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         return authHeader.substring(7);
     }
 
-    // No usar sendError(): re-despacha a /error, que está protegido por
-    // anyRequest().authenticated(), y el cliente acaba recibiendo 403 en vez de 401.
     private static void writeUnauthorized(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
