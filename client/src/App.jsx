@@ -28,6 +28,7 @@ export default function App() {
     return isMobileOnlyView && isDesktop ? 'dashboard' : saved;
   });
   const [focusAsig, setFocusAsig]           = useState(null);
+  const [focusTopicId, setFocusTopicId]     = useState(null);
   const [addSubjectOpen, setAddSubjectOpen] = useState(false);
   const [configOpen, setConfigOpen]         = useState(false);
   const [configInitAsig, setConfigInitAsig] = useState(null);
@@ -110,8 +111,8 @@ export default function App() {
       <div className="app-shell">
         <Sidebar
           view={view}
-          onViewChange={(v) => { setView(v); setFocusAsig(null); }}
-          onSelectSubject={(asig) => { setFocusAsig(prev => prev === asig ? null : asig); setView('temas'); }}
+          onViewChange={(v) => { setView(v); setFocusAsig(null); setFocusTopicId(null); }}
+          onSelectSubject={(asig) => { setFocusAsig(prev => prev === asig ? null : asig); setFocusTopicId(null); setView('temas'); }}
           onEditSubject={setEditSubject}
           subjects={subjects}
           topics={topics}
@@ -144,10 +145,10 @@ export default function App() {
                 style={{ height: '100%', width: '100%', overflow: 'auto' }}
               >
                 {view === 'dashboard'  && <Dashboard  topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={stats} />}
-                {view === 'temas'       && <Temas       topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} focusAsig={focusAsig} />}
+                {view === 'temas'       && <Temas       topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} focusAsig={focusAsig} focusTopicId={focusTopicId} />}
                 {view === 'asignaturas' && <Asignaturas subjects={subjects} topics={topics} onEditSubject={setEditSubject} onAddSubject={() => setAddSubjectOpen(true)} />}
                 {view === 'stats'       && <Stats       stats={stats} onAddSubject={() => setAddSubjectOpen(true)} onGoToTemas={() => setView('temas')} />}
-                {view === 'calendario' && <Calendario topics={topics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} />}
+                {view === 'calendario' && <Calendario topics={topics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} />}
               </motion.div>
             </AnimatePresence>
           </div>

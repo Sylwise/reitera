@@ -3,7 +3,7 @@ import StatusTag from './StatusTag';
 import { getTopicStatus, formatDaysLabel, getAsigColor } from '../../utils/topicHelpers';
 import { useLongPress } from '../../hooks/useLongPress';
 
-export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, hideAsig = false }) {
+export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, hideAsig = false, highlighted = false }) {
   const status    = getTopicStatus(topic);
   const longPress = useLongPress();
 
@@ -33,7 +33,8 @@ export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, h
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      className={`topic-card ${status}`}
+      id={`topic-card-${topic.id}`}
+      className={`topic-card ${status}${highlighted ? ' highlight-pulse' : ''}`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       onTouchStart={() => longPress.onStart(onEditTopic ? () => onEditTopic(topic) : null)}

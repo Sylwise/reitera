@@ -10,11 +10,36 @@ function sameDay(a, b) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
-export default function Calendario({ topics, subjects, exams, onAddExam, onDeleteExam }) {
+function mondayDow(date) {
+  return (date.getDay() + 6) % 7; // Monday=0 ... Sunday=6
+}
+
+function startOfWeek(date) {
+  const d = new Date(date);
+  d.setDate(d.getDate() - mondayDow(d));
+  return d;
+}
+
+function buildWeekDays(date) {
+  const start = startOfWeek(date);
+  return Array.from({ length: 7 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
+}
+
+function weekRangeLabel(weekDaysArr) {
+  const first = weekDaysArr[0], last = weekDaysArr[6];
+  const sameMonth = first.getMonth() === last.getMonth();
+  const sameYear  = first.getFullYear() === last.getFullYear();
+  const fmt = (d, withMonth) => `${d.getDate()}${withMonth ? ' ' + MONTH_NAMES[d.getMonth()].slice(0, 3).toLowerCase() : ''}`;
+  const firstLabel = `${fmt(first, !sameMonth)}${!sameYear ? ' ' + first.getFullYear() : ''}`;
+  return `${firstLabel} – ${fmt(last, true)} ${last.getFullYear()}`;
+}
+
+export default function Calendario({ topics, subjects, exams, onAddExam, onDeleteExam, onNavigateTopic }) {
   const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
   const [year,  setYear]  = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
   const [sel,   setSel]   = useState(today);
+  const [viewMode, setViewMode] = useState('month'); // 'month' | 'week'
 
   // ── long-press / right-click para añadir examen ──────────
   const pressTimer        = useRef(null);
@@ -49,7 +74,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
 
   function buildDays() {
     const first    = new Date(year, month, 1);
-    const startDow = (first.getDay() + 6) % 7;
+    const startDow = mondayDow(first);
     const daysInMonth     = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
     const days = [];
@@ -71,11 +96,15 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
   }
 
   const days      = buildDays();
+  const weekDays  = buildWeekDays(sel);
   const selTopics = getDayTopics(sel);
   const selExams  = getDayExams(sel);
 
   function prevMonth() { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); }
   function nextMonth() { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); }
+  function prevWeek()  { const d = new Date(sel); d.setDate(d.getDate() - 7); setSel(d); setYear(d.getFullYear()); setMonth(d.getMonth()); }
+  function nextWeek()  { const d = new Date(sel); d.setDate(d.getDate() + 7); setSel(d); setYear(d.getFullYear()); setMonth(d.getMonth()); }
+  function goToday()   { setYear(today.getFullYear()); setMonth(today.getMonth()); setSel(today); }
 
   const selDateLabel = sel.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
   const selDateCap   = selDateLabel.charAt(0).toUpperCase() + selDateLabel.slice(1);
@@ -85,46 +114,105 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
       <div className="cal-wrap fade-in">
 
         <div>
-          <div className="cal-nav">
-            <button className="cal-nav-btn" onClick={prevMonth}>‹</button>
-            <div className="cal-month-label">{MONTH_NAMES[month]} {year}</div>
-            <button className="cal-nav-btn" onClick={nextMonth}>›</button>
+          <div className="filter-bar cal-view-toggle">
+            <button className={`filter-btn${viewMode === 'month' ? ' active' : ''}`} onClick={() => setViewMode('month')}>Mes</button>
+            <button className={`filter-btn${viewMode === 'week' ? ' active' : ''}`} onClick={() => setViewMode('week')}>Semana</button>
           </div>
 
-          <div className="cal-grid">
-            {CAL_DAY_LABELS.map(l => <div key={l} className="cal-day-hdr">{l}</div>)}
-            {days.map((day, i) => {
-              const dayTopics = getDayTopics(day.date);
-              const dayExams  = getDayExams(day.date);
-              const isToday   = sameDay(day.date, today);
-              const isSel     = sameDay(day.date, sel);
-              const dotColors = [...new Set(dayTopics.map(t => getAsigColor(t.subjectId, subjects)).filter(Boolean))];
-              return (
-                <div
-                  key={i}
-                  className={`cal-day${day.other ? ' other-month' : ''}${isToday ? ' is-today' : ''}${isSel ? ' selected' : ''}${dayExams.length ? ' has-exam' : ''}`}
-                  onClick={() => { if (!longPressTriggered.current) { setSel(day.date); if (day.other) { setMonth(day.date.getMonth()); setYear(day.date.getFullYear()); } } }}
-                  onContextMenu={(e) => handleDayContextMenu(e, day.date)}
-                  onTouchStart={() => handleDayTouchStart(day.date)}
-                  onTouchEnd={handleDayTouchEnd}
-                  onTouchMove={handleDayTouchEnd}
-                  style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
-                >
-                  <div className="cal-day-num">{day.date.getDate()}</div>
-                  {(dayExams.length > 0 || dotColors.length > 0) && (
-                    <div className="cal-dots">
-                      {dayExams.map(e => (
-                        <div key={`exam-${e.id}`} className="cal-dot-sm" style={{ background: 'var(--warn)' }} title={e.name} />
-                      ))}
-                      {dotColors.map(c => (
-                        <div key={`color-${c}`} className="cal-dot-sm" style={{ background: c }} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+          <div className="cal-nav">
+            <button className="cal-nav-btn" onClick={viewMode === 'month' ? prevMonth : prevWeek}>‹</button>
+            <div className="cal-month-label">{viewMode === 'month' ? `${MONTH_NAMES[month]} ${year}` : weekRangeLabel(weekDays)}</div>
+            <div style={{ display: 'flex', gap: '.4rem' }}>
+              <button className="cal-today-btn" onClick={goToday}>Hoy</button>
+              <button className="cal-nav-btn" onClick={viewMode === 'month' ? nextMonth : nextWeek}>›</button>
+            </div>
           </div>
+
+          {viewMode === 'month' ? (
+            <div className="cal-grid">
+              {CAL_DAY_LABELS.map(l => <div key={l} className="cal-day-hdr">{l}</div>)}
+              {days.map((day, i) => {
+                const dayTopics = getDayTopics(day.date);
+                const dayExams  = getDayExams(day.date);
+                const isToday   = sameDay(day.date, today);
+                const isSel     = sameDay(day.date, sel);
+                const dotColors = [...new Set(dayTopics.map(t => getAsigColor(t.subjectId, subjects)).filter(Boolean))];
+                return (
+                  <div
+                    key={i}
+                    className={`cal-day${day.other ? ' other-month' : ''}${isToday ? ' is-today' : ''}${isSel ? ' selected' : ''}${dayExams.length ? ' has-exam' : ''}`}
+                    onClick={() => { if (!longPressTriggered.current) { setSel(day.date); if (day.other) { setMonth(day.date.getMonth()); setYear(day.date.getFullYear()); } } }}
+                    onContextMenu={(e) => handleDayContextMenu(e, day.date)}
+                    onTouchStart={() => handleDayTouchStart(day.date)}
+                    onTouchEnd={handleDayTouchEnd}
+                    onTouchMove={handleDayTouchEnd}
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                  >
+                    <div className="cal-day-num">{day.date.getDate()}</div>
+                    {(dayExams.length > 0 || dotColors.length > 0) && (
+                      <div className="cal-dots">
+                        {dayExams.map(e => (
+                          <div key={`exam-${e.id}`} className="cal-dot-sm" style={{ background: 'var(--warn)' }} title={e.name} />
+                        ))}
+                        {dotColors.map(c => (
+                          <div key={`color-${c}`} className="cal-dot-sm" style={{ background: c }} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="cal-week-list">
+              {weekDays.map(d => {
+                const dTopics = getDayTopics(d);
+                const dExams  = getDayExams(d);
+                const isToday = sameDay(d, today);
+                const isSel   = sameDay(d, sel);
+                const visibleTopics = dTopics.slice(0, 4);
+                const extra = dTopics.length - visibleTopics.length;
+                return (
+                  <div
+                    key={d.toISOString()}
+                    className={`cal-week-row${isToday ? ' is-today' : ''}${isSel ? ' selected' : ''}`}
+                    onClick={() => { if (!longPressTriggered.current) { setSel(d); setMonth(d.getMonth()); setYear(d.getFullYear()); } }}
+                    onContextMenu={(e) => handleDayContextMenu(e, d)}
+                    onTouchStart={() => handleDayTouchStart(d)}
+                    onTouchEnd={handleDayTouchEnd}
+                    onTouchMove={handleDayTouchEnd}
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                  >
+                    <div className="cal-week-row-day">
+                      <span className="cal-week-row-dow">{CAL_DAY_LABELS[mondayDow(d)]}</span>
+                      <span className="cal-week-row-num">{d.getDate()}</span>
+                    </div>
+                    <div className="cal-week-row-content">
+                      {dTopics.length === 0 && dExams.length === 0 && (
+                        <span className="cal-week-row-empty">Sin repasos</span>
+                      )}
+                      {dExams.map(e => (
+                        <span key={`exam-${e.id}`} className="cal-week-chip exam" title={e.name}>📅 {e.name}</span>
+                      ))}
+                      {visibleTopics.map(t => (
+                        <span
+                          key={t.id}
+                          className="cal-week-chip"
+                          title={t.name}
+                          onClick={(e) => { e.stopPropagation(); onNavigateTopic && onNavigateTopic(t); }}
+                          style={onNavigateTopic ? { cursor: 'pointer' } : undefined}
+                        >
+                          <span className="cal-week-chip-dot" style={{ background: getAsigColor(t.subjectId, subjects) }} />
+                          {t.name}
+                        </span>
+                      ))}
+                      {extra > 0 && <span className="cal-week-chip cal-week-chip-more">+{extra}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="cal-legend">
             <div className="cal-legend-item">
@@ -190,7 +278,13 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
               <div style={{ marginTop: selExams.length ? '.75rem' : 0 }}>
                 <div className="cal-side-section">Repasos ({selTopics.length})</div>
                 {selTopics.map(t => (
-                  <div key={t.id} className="risk-row">
+                  <div
+                    key={t.id}
+                    className="risk-row"
+                    onClick={() => onNavigateTopic && onNavigateTopic(t)}
+                    style={onNavigateTopic ? { cursor: 'pointer' } : undefined}
+                    title={onNavigateTopic ? 'Ir al tema' : undefined}
+                  >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flex: 1, minWidth: 0 }}>
                       <span style={{ width: 7, height: 7, borderRadius: '50%', background: getAsigColor(t.subjectId, subjects), flexShrink: 0, display: 'inline-block' }} />
                       <div className="risk-name" style={{ fontSize: '.78rem' }}>{t.name}</div>

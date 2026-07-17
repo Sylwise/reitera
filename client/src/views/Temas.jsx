@@ -10,10 +10,14 @@ const FILTERS = [
   { key: 'mastered', label: 'Afianzados' },
 ];
 
-export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSubject, focusAsig }) {
-  const [filter, setFilter] = useState(focusAsig ? 'all' : 'pending');
+export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSubject, focusAsig, focusTopicId }) {
+  const focusTopic       = focusTopicId != null ? topics.find(t => t.id === focusTopicId) : null;
+  const effectiveFocusAsig = focusAsig ?? focusTopic?.subjectId ?? null;
+
+  const [filter, setFilter] = useState(effectiveFocusAsig ? 'all' : 'pending');
   const [search, setSearch] = useState('');
-  
+  const [highlightId, setHighlightId] = useState(focusTopicId ?? null);
+
   const subjectLongPress = useLongPress();
 
   const subjectsRef = useRef(subjects);
@@ -24,8 +28,8 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
   const [collapsed, setCollapsed] = useState(() => {
     const s = new Set();
     subjects.forEach(subj => {
-      if (focusAsig) {
-        if (subj.id !== focusAsig) s.add(subj.name);
+      if (effectiveFocusAsig) {
+        if (subj.id !== effectiveFocusAsig) s.add(subj.name);
       } else {
         const ts = topics.filter(t => t.subjectId === subj.id);
         const hasPending = ts.some(t => ['today', 'overdue'].includes(getTopicStatus(t)));
@@ -35,11 +39,21 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
     return s;
   });
 
+  // Scroll + flash-highlight al tema que nos trajo aquí desde el calendario.
+  useEffect(() => {
+    if (focusTopicId == null) return;
+    const scrollTimer = setTimeout(() => {
+      document.getElementById(`topic-card-${focusTopicId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 400);
+    const clearTimer = setTimeout(() => setHighlightId(null), 2200);
+    return () => { clearTimeout(scrollTimer); clearTimeout(clearTimer); };
+  }, []);
+
   useEffect(() => {
     const s = new Set();
     subjectsRef.current.forEach(subj => {
-      if (focusAsig) {
-        if (subj.id !== focusAsig) s.add(subj.name);
+      if (effectiveFocusAsig) {
+        if (subj.id !== effectiveFocusAsig) s.add(subj.name);
       } else {
         const ts = topicsRef.current.filter(t => t.subjectId === subj.id);
         const hasPending = ts.some(t => ['today', 'overdue'].includes(getTopicStatus(t)));
@@ -47,7 +61,7 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
       }
     });
     setCollapsed(s);
-    setFilter(focusAsig ? 'all' : 'pending');
+    setFilter(effectiveFocusAsig ? 'all' : 'pending');
   }, [focusAsig]);
 
   function toggleCollapse(asig) {
@@ -192,6 +206,7 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
                         onMark={onMark}
                         onEditTopic={onEditTopic}
                         hideAsig
+                        highlighted={t.id === highlightId}
                       />
                     ))}
                   </AnimatePresence>
