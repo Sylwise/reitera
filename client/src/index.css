@@ -129,9 +129,9 @@ body::before {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 1rem 1.25rem;
+  padding: .7rem 1.25rem;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr) 1.4fr 130px;
   align-items: center;
   gap: 1rem;
   cursor: pointer;
@@ -158,32 +158,76 @@ body::before {
 .topic-card.mastered { --card-accent: var(--ok); opacity: .6; cursor: default }
 .topic-card.mastered:hover { opacity: 1; transform: none }
 
+/* Tarjetas accionables "vivas": glow interior que respira e invita a tocarlas */
+@keyframes cardAlive {
+  0%, 100% { box-shadow: inset 0 0 0 0 rgba(var(--accent-rgb), 0); }
+  50%      { box-shadow: inset 0 0 22px -8px rgba(var(--accent-rgb), .45); }
+}
+.topic-card.today, .topic-card.overdue { animation: cardAlive 2.6s ease-in-out infinite; }
+/* Desfase en las pares para que la lista respire orgánica, no en bloque */
+.topic-card.today:nth-child(even), .topic-card.overdue:nth-child(even) { animation-delay: -1.3s; }
+.topic-card.today:active, .topic-card.overdue:active { transform: scale(.985); }
+@media (prefers-reduced-motion: reduce) {
+  .topic-card.today, .topic-card.overdue { animation: none; }
+}
+
 @keyframes highlightPulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), .45); }
   50%      { box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0); }
 }
 .topic-card.highlight-pulse { border-color: var(--accent); animation: highlightPulse 1s ease-out 2; }
 
+.due-wrap { position: relative }
+.due-more {
+  position: absolute;
+  left: 50%;
+  bottom: .4rem;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  animation: dueMoreBounce 1.6s ease-in-out infinite;
+}
+.due-more:hover { color: var(--text); border-color: var(--accent); animation-play-state: paused }
+@keyframes dueMoreBounce {
+  0%, 100% { transform: translate(-50%, 0) }
+  50%      { transform: translate(-50%, 4px) }
+}
 .due-list {
-  max-height: 382px;
+  /* 5 tarjetas justas (65px + 9.6px margen); la flecha .due-more indica que hay más */
+  max-height: 22.7rem;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   padding-right: .25rem;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
   scroll-behavior: smooth;
 }
-.due-list .topic-card { scroll-snap-align: start; scroll-snap-stop: always }
+.due-list .topic-card { scroll-snap-align: start; grid-template-columns: minmax(0, 1.5fr) 1fr 130px }
+/* En el dashboard no cabe la fila completa: fuera el contador, queda barra + fecha */
+.due-list .progress-label { display: none }
 
 .card-left { display: flex; flex-direction: column; gap: .15rem; min-width: 0 }
 .card-asig { font-family: var(--sans); font-size: .82rem; font-weight: 600; color: var(--muted); letter-spacing: .01em }
 .card-name { font-size: 1.05rem; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 
-.card-progress { display: flex; flex-direction: column; gap: .4rem }
-.progress-track { height: 5px; background: var(--muted2); border-radius: 99px; overflow: hidden }
+.card-progress { display: flex; align-items: center; gap: .75rem }
+.progress-track { flex: 1; height: 5px; background: var(--muted2); border-radius: 99px; overflow: hidden }
 .progress-fill  { height: 100%; border-radius: 99px; background: var(--accent); transition: width .6s cubic-bezier(.34,1.56,.64,1) }
-.progress-label { font-family: var(--mono); font-size: .76rem; color: var(--muted); display: flex; justify-content: space-between }
+.progress-label { font-family: var(--mono); font-size: .76rem; color: var(--muted); display: flex; justify-content: space-between; flex-shrink: 0; min-width: 11ch }
+.progress-days  { font-family: var(--mono); font-size: .76rem; color: var(--muted); flex-shrink: 0; min-width: 12ch; text-align: right }
+.progress-days.overdue { color: var(--danger) }
+.progress-days.soon    { color: var(--warn) }
+.progress-days.today   { color: var(--accent) }
 
-.card-action { display: flex; flex-direction: column; align-items: flex-end; gap: .5rem }
+.card-action { display: flex; align-items: center; justify-content: flex-end; gap: .4rem }
 
 .topic-menu-btn {
   background: none;
@@ -273,6 +317,11 @@ body::before {
 .col-left  { display: flex; flex-direction: column; gap: 1.25rem }
 .col-right { display: flex; flex-direction: column; gap: 1.25rem }
 
+/* Entre escritorio ancho y móvil la col-left quedaba aplastada por los 320px fijos del panel derecho */
+@media (max-width: 1080px) {
+  #dash-main { grid-template-columns: 1fr; }
+}
+
 .chart {
   display: flex;
   align-items: flex-end;
@@ -338,6 +387,8 @@ body::before {
 
 .risk-row { display: flex; flex-direction: column; gap: .35rem; padding: .6rem 0; border-bottom: 1px solid var(--border) }
 .risk-row:last-child { border-bottom: none }
+.risk-row.clickable { cursor: pointer }
+.risk-row.clickable:hover .risk-name { color: var(--accent) }
 .risk-row-top { display: flex; align-items: flex-start; gap: .5rem }
 .risk-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: .4rem }
 .risk-name { font-size: .85rem; font-weight: 500; flex: 1; min-width: 0; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
@@ -1167,35 +1218,40 @@ body::before {
   .modal { padding: 1.5rem; }
   .diff-btns { grid-template-columns: 1fr; } 
 
-  /* Topic Cards 3-row vertical stack */
+  /* Topic Cards compactas: asignatura+fecha arriba, nombre, y una sola fila de progreso+acción */
   .topic-card {
     display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-areas: 
-      "left left"
-      "track track"
-      "label action";
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "asig asig days"
+      "name name name"
+      "label track action";
     align-items: center;
-    gap: 0;
-    padding: 1rem;
+    gap: .45rem .6rem;
+    padding: .85rem 1rem;
   }
-  .card-left { grid-area: left; margin-bottom: 0.8rem; }
-  .card-name { white-space: normal; line-height: 1.3; }
-  
-  .card-progress { display: contents; }
-  .progress-track { grid-area: track; width: 100%; height: 4px; margin-bottom: 0.8rem; align-self: center; }
-  
-  .progress-label { grid-area: label; align-self: center; }
-  .progress-label span { color: var(--muted); }
-  
-  .card-action { grid-area: action; align-self: center; flex-direction: row; gap: 0; }
+  .card-left { display: contents; }
+  .card-asig { grid-area: asig; }
+  .card-name { grid-area: name; white-space: normal; line-height: 1.3; }
 
-  .topic-menu-btn {
-    position: absolute;
-    top: 0.6rem;
-    right: 0.6rem;
-    opacity: 0.4;
-  }
+  .card-progress { display: contents; }
+  .progress-track { grid-area: track; width: 100%; height: 4px; }
+  .progress-label { grid-area: label; min-width: 0; }
+  .progress-label span { color: var(--muted); }
+  .progress-days { grid-area: days; min-width: 0; align-self: start; }
+
+  /* La regla de escritorio .due-list .topic-card gana por especificidad: re-anular columnas aquí */
+  .due-list .topic-card { grid-template-columns: auto 1fr auto; }
+
+  /* En móvil el botón sobra: la tarjeta entera marca (el glow .today/.overdue hace de señal) */
+  .topic-card .btn-done { display: none; }
+
+  /* 2 tarjetas móviles justas (86px + 9.6px margen); la flecha .due-more indica que hay más */
+  .due-list { max-height: 11.35rem; }
+
+  .card-action { grid-area: action; gap: .4rem; }
+
+  .topic-menu-btn { opacity: 0.4; }
   .asig-menu-btn { opacity: 0.4; }
   .cal-event-del-btn { opacity: 0.4; }
 

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Panel from '../components/ui/Panel';
 import SectionLabel from '../components/ui/SectionLabel';
@@ -7,7 +8,30 @@ import EmptyDashboard from './EmptyDashboard';
 import { getTopicStatus, getAsigColor, formatDaysLabel } from '../utils/topicHelpers';
 import { buildFocusItems } from '../utils/statsHelpers';
 
-export default function Dashboard({ topics, subjects, onMark, onAddSubject, isModalOpen, stats }) {
+export default function Dashboard({ topics, subjects, onMark, onAddSubject, isModalOpen, stats, onNavigateTopic, showToast }) {
+  const dueListRef = useRef(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+
+  function updateMoreBelow() {
+    const el = dueListRef.current;
+    setMoreBelow(!!el && el.scrollTop + el.clientHeight < el.scrollHeight - 4);
+  }
+
+  useEffect(() => {
+    updateMoreBelow();
+    window.addEventListener('resize', updateMoreBelow);
+    return () => window.removeEventListener('resize', updateMoreBelow);
+  }, [topics]);
+
+  // En móvil no hay botón "Marcar": pista de una sola vez para que el tap sea descubrible.
+  useEffect(() => {
+    if (!showToast || window.innerWidth > 768) return;
+    if (localStorage.getItem('hintTapToMark')) return;
+    if (!topics.some(t => ['today', 'overdue'].includes(getTopicStatus(t)))) return;
+    localStorage.setItem('hintTapToMark', '1');
+    showToast('Toca una tarjeta para marcar el repaso');
+  }, [topics, showToast]);
+
   if (subjects.length === 0) return <EmptyDashboard onAddSubject={onAddSubject} isModalOpen={isModalOpen} />;
   const overdue  = topics.filter(t => getTopicStatus(t) === 'overdue');
   const todayDue = topics.filter(t => getTopicStatus(t) === 'today');
@@ -51,12 +75,23 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
                 <div style={{ fontFamily: 'var(--mono)', fontSize: '.78rem', color: 'var(--muted)' }}>Racha activa — vuelve mañana.</div>
               </div>
             )}
-            <div className="due-list">
-              <AnimatePresence mode="popLayout">
-                {due.map((t, i) => (
-                  <TopicCard key={t.id} topic={t} subjects={subjects} onMark={onMark} delay={0.05 + i * 0.05} />
-                ))}
-              </AnimatePresence>
+            <div className="due-wrap">
+              <div className="due-list" ref={dueListRef} onScroll={updateMoreBelow}>
+                <AnimatePresence mode="popLayout">
+                  {due.map((t, i) => (
+                    <TopicCard key={t.id} topic={t} subjects={subjects} onMark={onMark} delay={0.05 + i * 0.05} />
+                  ))}
+                </AnimatePresence>
+              </div>
+              {moreBelow && (
+                <button
+                  className="due-more"
+                  aria-label="Ver más temas"
+                  onClick={() => dueListRef.current?.scrollBy({ top: dueListRef.current.clientHeight * 0.8, behavior: 'smooth' })}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+              )}
             </div>
           </div>
 
@@ -97,7 +132,12 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
                 {items.map((item) => {
                   const subjectId = subjects.find(s => s.name === item.subjectName)?.id;
                   return (
-                    <div key={item.topicId} className="risk-row">
+                    <div
+                      key={item.topicId}
+                      className={`risk-row${onNavigateTopic ? ' clickable' : ''}`}
+                      onClick={onNavigateTopic ? () => onNavigateTopic(topics.find(t => t.id === item.topicId) ?? { id: item.topicId }) : undefined}
+                      title={onNavigateTopic ? 'Ir al tema' : undefined}
+                    >
                       <div className="risk-row-top">
                         <span className="risk-dot" style={{ background: getAsigColor(subjectId, subjects) }} />
                         <div className="risk-name" title={`${item.subjectName} · ${item.topicName}`}>{item.topicName}</div>

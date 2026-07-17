@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import ModalShell from '../ui/ModalShell';
 import { PALETTE } from '../../data/subjects';
+import { isTouchDevice } from '../../utils/device';
 
 export default function EditSubjectModal({ isOpen, onClose, onEdit, onDelete, subject }) {
   const [name,        setName]        = useState('');
@@ -76,7 +77,7 @@ export default function EditSubjectModal({ isOpen, onClose, onEdit, onDelete, su
             placeholder="ej. Programación"
             value={name}
             onChange={e => setName(e.target.value)}
-            autoFocus
+            autoFocus={!isTouchDevice}
           />
 
           <div className="modal-section-label">Temas totales del curso</div>

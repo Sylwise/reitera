@@ -14,10 +14,6 @@ export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, h
   }
 
   const fillPct   = Math.round(topic.reviewCount / topic.reviewsNeeded * 100);
-  const fillColor =
-    status === 'overdue'  ? 'var(--danger)' :
-    status === 'mastered' ? 'var(--ok)'     :
-    status === 'soon'     ? 'var(--warn)'   : 'var(--accent)';
   const canMark      = status === 'today' || status === 'overdue';
   const dotColor     = getAsigColor(topic.subjectId, subjects);
   const subjectName  = subjects.find(s => s.id === topic.subjectId)?.name ?? '';
@@ -53,42 +49,21 @@ export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, h
       </div>
 
       <div className="card-progress">
-        <div className="progress-track">
-          <div className="progress-fill" style={{ width: `${fillPct}%`, background: fillColor }} />
-        </div>
         <div className="progress-label">
           <span>Repaso {topic.reviewCount}/{topic.reviewsNeeded}</span>
-          <span className="hide-on-mobile" style={{ color: status === 'overdue' ? 'var(--danger)' : 'var(--muted)' }}>
-            {formatDaysLabel(topic)}
-          </span>
         </div>
+        <div className="progress-track">
+          <div className="progress-fill" style={{ width: `${fillPct}%` }} />
+        </div>
+        <span className={`progress-days ${status}`}>
+          {status !== 'mastered' ? formatDaysLabel(topic) : ''}
+        </span>
       </div>
 
       <div className="card-action">
         {status === 'mastered' && <StatusTag status="mastered" />}
-        {status === 'today' && (
-          <>
-            <button className="btn-done" onClick={e => { e.stopPropagation(); onMark && onMark(topic); }}>Marcar ✓</button>
-            <span className="rep-badge hide-on-mobile">HOY</span>
-          </>
-        )}
-        {status === 'overdue' && (
-          <>
-            <button className="btn-done" onClick={e => { e.stopPropagation(); onMark && onMark(topic); }}>Marcar ✓</button>
-            <span className="rep-badge danger hide-on-mobile">{formatDaysLabel(topic)}</span>
-          </>
-        )}
-        {status === 'soon' && (
-          <>
-            <span className="hide-on-mobile"><StatusTag status="soon" /></span>
-            <span className="rep-badge">{formatDaysLabel(topic)}</span>
-          </>
-        )}
-        {status === 'future' && (
-          <>
-            <span className="hide-on-mobile"><StatusTag status="future" /></span>
-            <span className="rep-badge">{formatDaysLabel(topic)}</span>
-          </>
+        {canMark && (
+          <button className="btn-done" onClick={e => { e.stopPropagation(); onMark && onMark(topic); }}>Marcar ✓</button>
         )}
         {onEditTopic && (
           <button

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ModalShell from '../ui/ModalShell';
+import { isTouchDevice } from '../../utils/device';
 
 const TOTAL_OPTS = [2, 3, 4, 5, 6];
 
@@ -77,7 +78,7 @@ export default function EditTopicModal({ isOpen, onClose, onEdit, onDelete, onRe
             placeholder="ej. Introducción a SQL"
             value={name}
             onChange={e => setName(e.target.value)}
-            autoFocus
+            autoFocus={!isTouchDevice}
           />
 
           <div className="modal-section-label">Repasos necesarios</div>
