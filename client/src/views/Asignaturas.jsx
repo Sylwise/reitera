@@ -1,5 +1,6 @@
 import { useLongPress } from '../hooks/useLongPress';
 import { getTopicStatus } from '../utils/topicHelpers';
+import { SUBJECT_LIMIT } from '../data/subjects';
 
 function IconDots() {
   return (
@@ -21,6 +22,7 @@ function IconPlus() {
 
 export default function Asignaturas({ subjects, topics, onEditSubject, onAddSubject }) {
   const longPress = useLongPress();
+  const atSubjectLimit = subjects.length >= SUBJECT_LIMIT;
 
   return (
     <div className="page-wrap" style={{ maxWidth: 640 }}>
@@ -67,9 +69,15 @@ export default function Asignaturas({ subjects, topics, onEditSubject, onAddSubj
         );
       })}
 
-      <button className="btn-add-topic btn-add-subject-full" onClick={onAddSubject}>
+      <button
+        className="btn-add-topic btn-add-subject-full"
+        onClick={onAddSubject}
+        disabled={atSubjectLimit}
+        title={atSubjectLimit ? `Máximo de ${SUBJECT_LIMIT} asignaturas alcanzado` : undefined}
+        style={atSubjectLimit ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+      >
         <IconPlus />
-        Añadir asignatura
+        {atSubjectLimit ? `Máximo de ${SUBJECT_LIMIT} asignaturas` : 'Añadir asignatura'}
       </button>
     </div>
   );

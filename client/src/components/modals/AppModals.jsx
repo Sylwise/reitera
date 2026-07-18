@@ -37,6 +37,7 @@ export default function AppModals({
         isOpen={addSubjectOpen}
         onClose={onCloseAddSubject}
         onAdd={onAddSubject}
+        subjectCount={subjects.length}
       />
       <AddExamModal
         isOpen={addExamOpen}

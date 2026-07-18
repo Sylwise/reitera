@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import ModalShell from "../ui/ModalShell";
-import { PALETTE } from "../../data/subjects";
+import { PALETTE, SUBJECT_LIMIT } from "../../data/subjects";
 
-export default function AddSubjectModal({ isOpen, onClose, onAdd }) {
+export default function AddSubjectModal({ isOpen, onClose, onAdd, subjectCount = 0 }) {
   const [name, setName] = useState("");
   const [totalTopics, setTotalTopics] = useState(6);
   const [color, setColor] = useState(PALETTE[0]);
+  const atLimit = subjectCount >= SUBJECT_LIMIT;
 
   useEffect(() => {
     if (isOpen) {
@@ -19,14 +20,14 @@ export default function AddSubjectModal({ isOpen, onClose, onAdd }) {
     if (!isOpen) return;
     function onKey(e) {
       if (e.key === "Escape") onClose();
-      if (e.key === "Enter" && name.trim()) handleAdd();
+      if (e.key === "Enter" && name.trim() && !atLimit) handleAdd();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, name, totalTopics, color]);
+  }, [isOpen, name, totalTopics, color, atLimit]);
 
   function handleAdd() {
-    if (name.trim().length < 3) return;
+    if (name.trim().length < 3 || atLimit) return;
     onAdd({ name: name.trim(), totalTopics: Math.max(1, totalTopics), color });
     onClose();
   }
@@ -45,6 +46,15 @@ export default function AddSubjectModal({ isOpen, onClose, onAdd }) {
       </div>
       <div className="modal-divider" />
 
+      {atLimit && (
+        <div
+          className="modal-section-label"
+          style={{ color: "var(--danger)", marginBottom: "1rem" }}
+        >
+          Has alcanzado el máximo de {SUBJECT_LIMIT} asignaturas.
+        </div>
+      )}
+
       <div className="modal-section-label">Nombre</div>
       <input
         className="modal-input"
@@ -54,6 +64,7 @@ export default function AddSubjectModal({ isOpen, onClose, onAdd }) {
         placeholder="ej. Programación"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        disabled={atLimit}
         autoFocus
       />
 
@@ -109,7 +120,7 @@ export default function AddSubjectModal({ isOpen, onClose, onAdd }) {
 
       <button
         className="btn-confirm"
-        disabled={name.trim().length < 3}
+        disabled={name.trim().length < 3 || atLimit}
         onClick={handleAdd}
       >
         Crear asignatura

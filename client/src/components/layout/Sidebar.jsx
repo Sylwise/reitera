@@ -5,6 +5,7 @@ import { useOutsideClick } from '../../hooks/useOutsideClick';
 import { useLongPress } from '../../hooks/useLongPress';
 import { useTheme } from '../../context/ThemeContext';
 import { getInitials } from '../../utils/userHelpers';
+import { SUBJECT_LIMIT } from '../../data/subjects';
 
 function IconDots() {
   return (
@@ -55,6 +56,7 @@ export default function Sidebar({ view, onViewChange, onSelectSubject, onEditSub
   const [menuClosing, setMenuClosing] = useState(false);
   const menuRef = useRef(null);
   const subjectLongPress = useLongPress();
+  const atSubjectLimit = subjects.length >= SUBJECT_LIMIT;
 
   function openMenu()  { setMenuOpen(true); setMenuClosing(false); }
   function closeMenu() {
@@ -124,9 +126,12 @@ export default function Sidebar({ view, onViewChange, onSelectSubject, onEditSub
         );
       })}
       <motion.button
-        whileTap={{ scale: 0.96 }}
+        whileTap={atSubjectLimit ? undefined : { scale: 0.96 }}
         className="sidebar-item subject-action"
         onClick={onAddSubject}
+        disabled={atSubjectLimit}
+        title={atSubjectLimit ? `Máximo de ${SUBJECT_LIMIT} asignaturas alcanzado` : undefined}
+        style={atSubjectLimit ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
       >
         <span>+</span> Nueva asignatura
       </motion.button>

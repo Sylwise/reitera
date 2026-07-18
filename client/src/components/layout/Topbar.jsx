@@ -16,7 +16,7 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
   const dueCount = topics.filter(t => ['today', 'overdue'].includes(getTopicStatus(t))).length;
 
   const hour     = new Date().getHours();
-  const greet    = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
+  const greet    = hour < 6 ? 'Buenas noches' : hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
   const dateStr  = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
   const dateCap  = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
   const dueLabel = dueCount > 0
