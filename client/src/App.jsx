@@ -188,7 +188,7 @@ export default function App() {
                 style={{ height: '100%', width: '100%', overflow: 'auto' }}
               >
                 {view === 'dashboard'  && <Dashboard  topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={stats} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} showToast={showToast} />}
-                {view === 'temas'       && <Temas       topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} focusAsig={focusAsig} focusTopicId={focusTopicId} />}
+                {view === 'temas'       && <Temas       topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} onAddTopic={() => openConfigModal(null)} focusAsig={focusAsig} focusTopicId={focusTopicId} />}
                 {view === 'asignaturas' && <Asignaturas subjects={subjects} topics={topics} onEditSubject={setEditSubject} onAddSubject={() => setAddSubjectOpen(true)} />}
                 {view === 'stats'       && <Stats       stats={stats} onAddSubject={() => setAddSubjectOpen(true)} onGoToTemas={() => setView('temas')} />}
                 {view === 'calendario' && <Calendario topics={topics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} />}
@@ -196,6 +196,7 @@ export default function App() {
             </AnimatePresence>
             )}
           </div>
+
         </div>
       </div>
 

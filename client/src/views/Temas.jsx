@@ -24,7 +24,7 @@ function computeCollapsed(subjects, topics, effectiveFocusAsig) {
   return s;
 }
 
-export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSubject, focusAsig, focusTopicId }) {
+export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSubject, onAddTopic, focusAsig, focusTopicId }) {
   const focusTopic       = focusTopicId != null ? topics.find(t => t.id === focusTopicId) : null;
   const effectiveFocusAsig = focusAsig ?? focusTopic?.subjectId ?? null;
 
@@ -96,11 +96,24 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
   }).filter(g => g.topics.length > 0);
 
   const total = topics.filter(t => matchesFilter(t) && matchesSearch(t)).length;
+  // Coincidencias de la búsqueda que el filtro activo está ocultando.
+  const hiddenByFilter = search && filter !== 'all'
+    ? topics.filter(t => matchesSearch(t)).length - total
+    : 0;
 
   return (
     <div className="page-wrap" style={{ maxWidth: 960 }}>
       <div className="temas-header fade-in">
-        <div className="temas-title">Todos los temas</div>
+        <div className="temas-title-row">
+          <div className="temas-title">Todos los temas</div>
+          {onAddTopic && subjects.length > 0 && (
+            <button className="temas-add-btn" onClick={onAddTopic} aria-label="Añadir tema" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          )}
+        </div>
         <div className="search-wrap">
           <span className="search-icon">⌕</span>
           <input
@@ -123,17 +136,32 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
             {f.label}
           </button>
         ))}
-        <span style={{ marginLeft: 'auto', fontFamily: 'var(--mono)', fontSize: '.65rem', color: 'var(--muted)', alignSelf: 'center' }}>
+        <span style={{ marginLeft: 'auto', fontFamily: 'var(--mono)', fontSize: '.7rem', color: 'var(--muted)', alignSelf: 'center' }}>
           {total} resultado{total !== 1 ? 's' : ''}
+          {hiddenByFilter > 0 && (
+            <button className="link-btn" onClick={() => setFilter('all')}>
+              +{hiddenByFilter} en “Todos”
+            </button>
+          )}
         </span>
       </div>
 
       {groups.length === 0 ? (
-        <div style={{ fontFamily: 'var(--mono)', fontSize: '.8rem', color: 'var(--muted)', padding: '3rem 0', textAlign: 'center' }}>
-          Sin resultados
+        <div className="fade-in" style={{ fontFamily: 'var(--mono)', fontSize: '.8rem', color: 'var(--muted)', padding: '3rem 0', textAlign: 'center' }}>
+          <div>Sin resultados{search ? <> para <span style={{ color: 'var(--text)' }}>“{search}”</span></> : ''}</div>
+          <div style={{ marginTop: '.9rem', display: 'flex', gap: '.5rem', justifyContent: 'center' }}>
+            {hiddenByFilter > 0 && (
+              <button className="filter-btn" onClick={() => setFilter('all')}>
+                Ver {hiddenByFilter} resultado{hiddenByFilter !== 1 ? 's' : ''} en “Todos”
+              </button>
+            )}
+            {search && (
+              <button className="filter-btn" onClick={() => setSearch('')}>Limpiar búsqueda</button>
+            )}
+          </div>
         </div>
       ) : groups.map((g, gi) => {
-        const isCollapsed = collapsed.has(g.name);
+        const isCollapsed = !search && collapsed.has(g.name);
         return (
           <div key={g.id} className="asig-group fade-in" style={{ animationDelay: `${gi * 0.05}s` }}>
             <div
@@ -143,7 +171,6 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
               onTouchStart={() => subjectLongPress.onStart(onEditSubject ? () => onEditSubject(g.id) : null)}
               onTouchEnd={subjectLongPress.onEnd}
               onTouchMove={subjectLongPress.onEnd}
-              style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
             >
               <svg className={`chevron${isCollapsed ? ' collapsed' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9" />

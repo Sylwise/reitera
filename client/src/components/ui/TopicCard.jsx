@@ -36,7 +36,6 @@ export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, h
       onTouchStart={() => longPress.onStart(onEditTopic ? () => onEditTopic(topic) : null)}
       onTouchEnd={longPress.onEnd}
       onTouchMove={longPress.onEnd}
-      style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
     >
       <div className="card-left">
         {!hideAsig && (
@@ -63,7 +62,7 @@ export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, h
       <div className="card-action">
         {status === 'mastered' && <StatusTag status="mastered" />}
         {canMark && (
-          <button className="btn-done" onClick={e => { e.stopPropagation(); onMark && onMark(topic); }}>Marcar ✓</button>
+          <button className="btn-done" onClick={e => { e.stopPropagation(); onMark && onMark(topic); }}>Repasado ✓</button>
         )}
         {onEditTopic && (
           <button

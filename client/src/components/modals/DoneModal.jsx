@@ -75,9 +75,10 @@ function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
       >
         <span>Dificultad</span>
         <span
+          className="key-hint"
           style={{
             color: "var(--muted)",
-            fontSize: ".6rem",
+            fontSize: ".66rem",
             letterSpacing: ".04em",
           }}
         >
@@ -119,7 +120,7 @@ function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
         onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
         onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
       >
-        <span style={{ fontSize: ".65rem" }}>{showScore ? "▾" : "▸"}</span>{" "}
+        <span style={{ fontSize: ".7rem" }}>{showScore ? "▾" : "▸"}</span>{" "}
         Añadir puntuación (opcional)
       </button>
 
@@ -165,7 +166,7 @@ function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
         }}
       >
         ✓ Confirmar repaso
-        <span style={{ opacity: 0.5, fontSize: ".7rem", marginLeft: ".5rem" }}>
+        <span className="key-hint" style={{ opacity: 0.5, fontSize: ".7rem", marginLeft: ".5rem" }}>
           Enter ↵
         </span>
       </button>

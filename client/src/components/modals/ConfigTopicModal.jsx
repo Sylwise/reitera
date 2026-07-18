@@ -145,7 +145,7 @@ function ConfigTopicForm({ keyHandlerRef, onClose, onConfirm, subjects, initialA
         onClick={handleConfirm}
       >
         Confirmar tema
-        <span style={{ opacity: 0.5, fontSize: ".7rem", marginLeft: ".5rem" }}>
+        <span className="key-hint" style={{ opacity: 0.5, fontSize: ".7rem", marginLeft: ".5rem" }}>
           Enter ↵
         </span>
       </button>

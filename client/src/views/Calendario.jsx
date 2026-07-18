@@ -1,7 +1,14 @@
 import { useState, useMemo, useRef } from 'react';
 import Panel from '../components/ui/Panel';
 import StatusTag from '../components/ui/StatusTag';
-import { getTopicStatus, getAsigColor } from '../utils/topicHelpers';
+import { getTopicStatus, getAsigColor, compareByUrgency } from '../utils/topicHelpers';
+
+function examCountdownLabel(diff) {
+  if (diff === 0) return 'hoy';
+  if (diff === 1) return 'mañana';
+  if (diff > 1)   return `en ${diff} días`;
+  return diff === -1 ? 'ayer' : `hace ${-diff} días`;
+}
 
 const CAL_DAY_LABELS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 const MONTH_NAMES    = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -40,6 +47,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
   const [month, setMonth] = useState(today.getMonth());
   const [sel,   setSel]   = useState(today);
   const [viewMode, setViewMode] = useState('month'); // 'month' | 'week'
+  const [showOverdue, setShowOverdue] = useState(false);
 
   // ── long-press / right-click para añadir examen ──────────
   const pressTimer        = useRef(null);
@@ -100,6 +108,12 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
   const selTopics = getDayTopics(sel);
   const selExams  = getDayExams(sel);
 
+  // Los atrasados se acumulan en "hoy": se muestran plegados para que
+  // lo que toca de verdad hoy no quede enterrado bajo la lista de retrasos.
+  const selSorted   = [...selTopics].sort(compareByUrgency);
+  const selOverdue  = selSorted.filter(t => getTopicStatus(t) === 'overdue');
+  const selOnTime   = selSorted.filter(t => getTopicStatus(t) !== 'overdue');
+
   function prevMonth() { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); }
   function nextMonth() { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); }
   function prevWeek()  { const d = new Date(sel); d.setDate(d.getDate() - 7); setSel(d); setYear(d.getFullYear()); setMonth(d.getMonth()); }
@@ -146,7 +160,6 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                     onTouchStart={() => handleDayTouchStart(day.date)}
                     onTouchEnd={handleDayTouchEnd}
                     onTouchMove={handleDayTouchEnd}
-                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                   >
                     <div className="cal-day-num">{day.date.getDate()}</div>
                     {(dayExams.length > 0 || dotColors.length > 0) && (
@@ -181,7 +194,6 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                     onTouchStart={() => handleDayTouchStart(d)}
                     onTouchEnd={handleDayTouchEnd}
                     onTouchMove={handleDayTouchEnd}
-                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                   >
                     <div className="cal-week-row-day">
                       <span className="cal-week-row-dow">{CAL_DAY_LABELS[mondayDow(d)]}</span>
@@ -259,9 +271,9 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                 <div key={exam.id} className="risk-row">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '.15rem', flex: 1, minWidth: 0 }}>
                     <div className="risk-name">📅 {exam.name}</div>
-                    <div style={{ fontFamily: 'var(--mono)', fontSize: '.65rem', color: 'var(--muted)' }}>{subjects.find(s => s.id === exam.subjectId)?.name ?? ''}</div>
+                    <div style={{ fontFamily: 'var(--mono)', fontSize: '.7rem', color: 'var(--muted)' }}>{subjects.find(s => s.id === exam.subjectId)?.name ?? ''}</div>
                   </div>
-                  <span className={`exam-countdown ${diff <= 7 ? 'urgent' : diff <= 14 ? 'soon' : 'ok'}`}>{diff}d</span>
+                  <span className={`exam-countdown ${diff <= 7 ? 'urgent' : diff <= 14 ? 'soon' : 'ok'}`}>{examCountdownLabel(diff)}</span>
                   {onDeleteExam && (
                     <button
                       className="cal-event-del-btn"
@@ -274,10 +286,39 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                 </div>
               );
             })}
-            {selTopics.length > 0 && (
+            {selOnTime.length > 0 && (
               <div style={{ marginTop: selExams.length ? '.75rem' : 0 }}>
-                <div className="cal-side-section">Repasos ({selTopics.length})</div>
-                {selTopics.map(t => (
+                <div className="cal-side-section">Repasos ({selOnTime.length})</div>
+                {selOnTime.map(t => (
+                  <div
+                    key={t.id}
+                    className="risk-row"
+                    onClick={() => onNavigateTopic && onNavigateTopic(t)}
+                    style={onNavigateTopic ? { cursor: 'pointer' } : undefined}
+                    title={onNavigateTopic ? 'Ir al tema' : undefined}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flex: 1, minWidth: 0 }}>
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: getAsigColor(t.subjectId, subjects), flexShrink: 0, display: 'inline-block' }} />
+                      <div className="risk-name" style={{ fontSize: '.78rem' }}>{t.name}</div>
+                    </div>
+                    <StatusTag status={getTopicStatus(t)} />
+                  </div>
+                ))}
+              </div>
+            )}
+            {selOverdue.length > 0 && (
+              <div style={{ marginTop: selOnTime.length || selExams.length ? '.75rem' : 0 }}>
+                <button
+                  className="cal-side-section cal-side-toggle"
+                  onClick={() => setShowOverdue(v => !v)}
+                  aria-expanded={showOverdue}
+                >
+                  <svg className={`chevron${showOverdue ? '' : ' collapsed'}`} width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                  Atrasados ({selOverdue.length})
+                </button>
+                {showOverdue && selOverdue.map(t => (
                   <div
                     key={t.id}
                     className="risk-row"

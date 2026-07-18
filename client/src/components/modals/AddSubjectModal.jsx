@@ -111,6 +111,9 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
         {PALETTE.map((c) => (
           <button
             key={c}
+            type="button"
+            aria-label={`Color ${c}`}
+            aria-pressed={color === c}
             className={`color-swatch${color === c ? " selected" : ""}`}
             style={{
               "--swatch-color": c,
@@ -129,7 +132,7 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
         onClick={handleAdd}
       >
         Crear asignatura
-        <span style={{ opacity: 0.5, fontSize: ".7rem", marginLeft: ".5rem" }}>
+        <span className="key-hint" style={{ opacity: 0.5, fontSize: ".7rem", marginLeft: ".5rem" }}>
           Enter ↵
         </span>
       </button>

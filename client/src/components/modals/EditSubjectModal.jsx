@@ -109,6 +109,9 @@ function EditSubjectForm({ keyHandlerRef, onClose, onEdit, onDelete, subject }) 
             {PALETTE.map(c => (
               <button
                 key={c}
+                type="button"
+                aria-label={`Color ${c}`}
+                aria-pressed={color === c}
                 className={`color-swatch${color === c ? ' selected' : ''}`}
                 style={{ '--swatch-color': c, background: c, borderColor: color === c ? '#fff' : 'transparent', boxShadow: color === c ? `0 0 0 2px ${c}` : 'none' }}
                 onClick={() => setColor(c)}

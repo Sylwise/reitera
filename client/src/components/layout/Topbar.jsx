@@ -31,7 +31,7 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
       </div>
       <div className="inner-topbar-right">
         {streak >= 1 && (
-          <div className="streak-badge hide-on-mobile">{streak >= 3 && '🔥 '}<span>{streak} días</span></div>
+          <div className="streak-badge">{streak >= 3 && '🔥 '}<span>{streak} día{streak !== 1 ? 's' : ''}</span></div>
         )}
         {hasSubjects && (
           <motion.button whileTap={{ scale: 0.95 }} className="btn-add-topic hide-on-mobile" onClick={onAddTopic}>
@@ -53,7 +53,7 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
                 <div>
                   <div style={{ fontSize: '.83rem', fontWeight: 600, color: 'var(--text)' }}>{userName}</div>
                   {streak >= 1 && (
-                    <div style={{ fontSize: '.65rem', color: 'var(--accent)', marginTop: '2px' }}>{streak >= 3 && '🔥 '}{streak} días de racha</div>
+                    <div style={{ fontSize: '.7rem', color: 'var(--accent)', marginTop: '2px' }}>{streak >= 3 && '🔥 '}{streak} día{streak !== 1 ? 's' : ''} de racha</div>
                   )}
                 </div>
               </div>

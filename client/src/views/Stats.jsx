@@ -65,9 +65,9 @@ export default function Stats({ stats, onAddSubject, onGoToTemas }) {
       <div className="stats-grid fade-in">
         {[
           { label: 'Afianzados',      value: masteredTotal,   cls: 'accent', sub: `de ${asigProgress.reduce((s, a) => s + a.total, 0)} temas totales` },
-          { label: 'Racha actual',    value: <>{streak >= 3 && <span style={{ fontSize: '1.3rem', verticalAlign: 'middle', marginRight: '.3rem' }}>🔥</span>}{streak}</>, cls: 'accent', sub: 'días consecutivos' },
-          { label: 'Repasos totales', value: totalRepasos,    cls: 'ok',     sub: 'sesiones completadas' },
-          { label: 'Atrasados',       value: overdue,         cls: 'danger', sub: 'temas con retraso' },
+          { label: 'Racha actual',    value: <>{streak >= 3 && <span style={{ fontSize: '1.3rem', verticalAlign: 'middle', marginRight: '.3rem' }}>🔥</span>}{streak}</>, cls: 'accent', sub: streak === 1 ? 'día consecutivo' : 'días consecutivos' },
+          { label: 'Repasos totales', value: totalRepasos,    cls: 'ok',     sub: totalRepasos === 1 ? 'sesión completada' : 'sesiones completadas' },
+          { label: 'Atrasados',       value: overdue,         cls: 'danger', sub: overdue === 1 ? 'tema con retraso' : 'temas con retraso' },
         ].map(k => (
           <div key={k.label} className="kpi-card">
             <div className="kpi-label">{k.label}</div>
@@ -85,7 +85,7 @@ export default function Stats({ stats, onAddSubject, onGoToTemas }) {
             height={120}
             className="big-chart"
             barWrapGap={2}
-            barLabelStyle={{ fontSize: '.55rem' }}
+            barLabelStyle={{ fontSize: '.66rem' }}
           />
         </Panel>
         <Panel title="Distribución de dificultad">
@@ -121,8 +121,8 @@ export default function Stats({ stats, onAddSubject, onGoToTemas }) {
 
           <div className="panel fade-in" style={{ height: 'fit-content', background: `linear-gradient(135deg, rgba(var(--accent-rgb),.06) 0%, rgba(var(--accent-rgb),.02) 100%)`, border: `1px solid rgba(var(--accent-rgb),.15)` }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.6rem' }}>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: '.65rem', color: 'var(--muted)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Insight Semanal</span>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: '.6rem', color: 'var(--muted)', letterSpacing: '.04em', textTransform: 'uppercase', background: 'var(--surface2)', border: '1px solid var(--border2)', borderRadius: '999px', padding: '.2rem .55rem', flexShrink: 0 }}>En desarrollo</span>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: '.7rem', color: 'var(--muted)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Insight Semanal</span>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: '.66rem', color: 'var(--muted)', letterSpacing: '.04em', textTransform: 'uppercase', background: 'var(--surface2)', border: '1px solid var(--border2)', borderRadius: '999px', padding: '.2rem .55rem', flexShrink: 0 }}>En desarrollo</span>
             </div>
             <p style={{ fontFamily: 'var(--sans)', fontSize: '.85rem', lineHeight: 1.6, color: 'var(--muted)', margin: 0 }}>
               Estamos preparando recomendaciones personalizadas basadas en tu actividad de repaso. Disponible próximamente.

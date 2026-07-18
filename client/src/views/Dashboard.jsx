@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Panel from '../components/ui/Panel';
 import SectionLabel from '../components/ui/SectionLabel';
@@ -9,20 +9,6 @@ import { getTopicStatus, getAsigColor, formatDaysLabel, compareByUrgency } from 
 import { buildFocusItems } from '../utils/statsHelpers';
 
 export default function Dashboard({ topics, subjects, onMark, onAddSubject, isModalOpen, stats, onNavigateTopic, showToast }) {
-  const dueListRef = useRef(null);
-  const [moreBelow, setMoreBelow] = useState(false);
-
-  function updateMoreBelow() {
-    const el = dueListRef.current;
-    setMoreBelow(!!el && el.scrollTop + el.clientHeight < el.scrollHeight - 4);
-  }
-
-  useEffect(() => {
-    updateMoreBelow();
-    window.addEventListener('resize', updateMoreBelow);
-    return () => window.removeEventListener('resize', updateMoreBelow);
-  }, [topics]);
-
   // En móvil no hay botón "Marcar": pista de una sola vez para que el tap sea descubrible.
   useEffect(() => {
     if (!showToast || window.innerWidth > 768) return;
@@ -68,30 +54,19 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
 
         <div className="col-left">
           <div>
-            <SectionLabel count={due.length}>Para hoy</SectionLabel>
+            <SectionLabel>Para hoy</SectionLabel>
             {due.length === 0 && (
               <div style={{ textAlign: 'center', padding: '2.5rem 1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: '.6rem' }}>
                 <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '.35rem', letterSpacing: '-.01em' }}>¡Todo al día!</div>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: '.78rem', color: 'var(--muted)' }}>Racha activa — vuelve mañana.</div>
               </div>
             )}
-            <div className="due-wrap">
-              <div className="due-list" ref={dueListRef} onScroll={updateMoreBelow}>
-                <AnimatePresence mode="popLayout">
-                  {due.map((t, i) => (
-                    <TopicCard key={t.id} topic={t} subjects={subjects} onMark={onMark} delay={0.05 + i * 0.05} />
-                  ))}
-                </AnimatePresence>
-              </div>
-              {moreBelow && (
-                <button
-                  className="due-more"
-                  aria-label="Ver más temas"
-                  onClick={() => dueListRef.current?.scrollBy({ top: dueListRef.current.clientHeight * 0.8, behavior: 'smooth' })}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-                </button>
-              )}
+            <div className="due-list">
+              <AnimatePresence mode="popLayout">
+                {due.map((t, i) => (
+                  <TopicCard key={t.id} topic={t} subjects={subjects} onMark={onMark} delay={0.05 + i * 0.05} />
+                ))}
+              </AnimatePresence>
             </div>
           </div>
 

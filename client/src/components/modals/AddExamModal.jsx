@@ -182,7 +182,7 @@ function AddExamForm({ keyHandlerRef, onClose, onAdd, subjects, initialDate }) {
         onClick={handleAdd}
       >
         Añadir evento
-        <span style={{ opacity: .5, fontSize: '.7rem', marginLeft: '.5rem' }}>Enter ↵</span>
+        <span className="key-hint" style={{ opacity: .5, fontSize: '.7rem', marginLeft: '.5rem' }}>Enter ↵</span>
       </button>
     </>
   );
