@@ -493,7 +493,7 @@ body::before {
 .chevron.collapsed { transform: rotate(-90deg) }
 
 .asig-group-dot      { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0 }
-.asig-group-name     { font-size: 1rem; font-weight: 700; letter-spacing: -.01em }
+.asig-group-name     { font-size: 1rem; font-weight: 700; letter-spacing: -.01em; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .asig-group-count    { font-family: var(--mono); font-size: .7rem; color: var(--muted); opacity: .7 }
 .asig-group-progress { margin-left: auto; display: flex; align-items: center; gap: .6rem }
 .asig-mini-bar  { width: 80px; height: 3px; background: var(--muted2); border-radius: 99px; overflow: hidden }
@@ -1213,6 +1213,11 @@ body::before {
   /* Temas Header */
   .temas-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .temas-header .search-wrap { width: 100%; }
+
+  /* Asignaturas: el contador es redundante con el x/y de la barra, fuera en móvil */
+  .asig-group-count { display: none; }
+  .asig-mini-bar { width: 50px; }
+  .asig-mini-pct  { white-space: nowrap; }
   
   /* Modals */
   .modal { padding: 1.5rem; }

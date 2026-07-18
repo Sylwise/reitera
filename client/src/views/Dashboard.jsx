@@ -5,7 +5,7 @@ import SectionLabel from '../components/ui/SectionLabel';
 import BarChart from '../components/ui/BarChart';
 import TopicCard from '../components/ui/TopicCard';
 import EmptyDashboard from './EmptyDashboard';
-import { getTopicStatus, getAsigColor, formatDaysLabel } from '../utils/topicHelpers';
+import { getTopicStatus, getAsigColor, formatDaysLabel, compareByUrgency } from '../utils/topicHelpers';
 import { buildFocusItems } from '../utils/statsHelpers';
 
 export default function Dashboard({ topics, subjects, onMark, onAddSubject, isModalOpen, stats, onNavigateTopic, showToast }) {
@@ -33,9 +33,9 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
   }, [topics, showToast]);
 
   if (subjects.length === 0) return <EmptyDashboard onAddSubject={onAddSubject} isModalOpen={isModalOpen} />;
-  const overdue  = topics.filter(t => getTopicStatus(t) === 'overdue');
-  const todayDue = topics.filter(t => getTopicStatus(t) === 'today');
-  const due      = [...overdue, ...todayDue];
+  const due = topics
+    .filter(t => ['overdue', 'today'].includes(getTopicStatus(t)))
+    .sort(compareByUrgency);
   const upcoming = topics
     .filter(t => ['soon', 'future'].includes(getTopicStatus(t)))
     .sort((a, b) => new Date(a.nextReviewDate) - new Date(b.nextReviewDate))
