@@ -40,7 +40,7 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
         <div className="hero fade-in">
           <div>
             <div className="hero-title">
-              <span>{due.length}</span> tema{due.length !== 1 ? 's' : ''} pendiente{due.length !== 1 ? 's' : ''}
+              <span className="hero-num">{due.length}</span> <span className="hero-title-label">tema{due.length !== 1 ? 's' : ''} pendiente{due.length !== 1 ? 's' : ''}</span>
             </div>
             {due.length > 0 && (
               <div className="hero-sub">Tienes la racha — no la rompas ahora.</div>

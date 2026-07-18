@@ -25,21 +25,7 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
 
   return (
     <div className="inner-topbar">
-      <div className="inner-topbar-left">
-        <h2>{greet}, {getFirstName(userName)}</h2>
-        <p>// {dateCap} · {dueLabel}</p>
-      </div>
-      <div className="inner-topbar-right">
-        {streak >= 1 && (
-          <div className="streak-badge">{streak >= 3 && '🔥 '}<span>{streak} día{streak !== 1 ? 's' : ''}</span></div>
-        )}
-        {hasSubjects && (
-          <motion.button whileTap={{ scale: 0.95 }} className="btn-add-topic hide-on-mobile" onClick={onAddTopic}>
-            <span style={{ fontSize: '1rem', lineHeight: 1 }}>+</span> Añadir tema
-          </motion.button>
-        )}
-
-        <div className="mobile-menu-wrap" ref={menuRef}>
+      <div className="mobile-menu-wrap" ref={menuRef}>
           <motion.button whileTap={{ scale: 0.95 }} className="mobile-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
             <div className="sidebar-avatar" style={{ width: 36, height: 36, fontSize: '.85rem' }}>{getInitials(userName)}</div>
           </motion.button>
@@ -118,7 +104,21 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
 
             </div>
           )}
-        </div>
+      </div>
+
+      <div className="inner-topbar-left">
+        <h2>{greet}, {getFirstName(userName)}</h2>
+        <p>// {dateCap} · {dueLabel}</p>
+      </div>
+      <div className="inner-topbar-right">
+        {streak >= 1 && (
+          <div className="streak-badge">{streak >= 3 && '🔥 '}<span>{streak} día{streak !== 1 ? 's' : ''}</span></div>
+        )}
+        {hasSubjects && (
+          <motion.button whileTap={{ scale: 0.95 }} className="btn-add-topic hide-on-mobile" onClick={onAddTopic}>
+            <span style={{ fontSize: '1rem', lineHeight: 1 }}>+</span> Añadir tema
+          </motion.button>
+        )}
       </div>
     </div>
   );
