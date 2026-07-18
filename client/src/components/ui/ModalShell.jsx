@@ -15,11 +15,21 @@ function useIsMobile() {
 export default function ModalShell({ isOpen, onClose, children }) {
   const isMobile = useIsMobile();
 
+  // Key distinta por apertura: si se reabre durante la animación de salida,
+  // AnimatePresence monta un modal nuevo en vez de resucitar el que se iba
+  // (que conservaría el estado anterior del formulario).
+  const [openId, setOpenId] = useState(0);
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
+    if (isOpen) setOpenId(id => id + 1);
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          key="modal-overlay"
+          key={`modal-overlay-${openId}`}
           className="modal-overlay open"
           style={isMobile ? { alignItems: 'flex-end' } : {}}
           initial={{ opacity: 0 }}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TopicCard from '../components/ui/TopicCard';
 import { getTopicStatus, compareByUrgency } from '../utils/topicHelpers';
@@ -10,6 +10,20 @@ const FILTERS = [
   { key: 'mastered', label: 'Afianzados' },
 ];
 
+function computeCollapsed(subjects, topics, effectiveFocusAsig) {
+  const s = new Set();
+  subjects.forEach(subj => {
+    if (effectiveFocusAsig) {
+      if (subj.id !== effectiveFocusAsig) s.add(subj.name);
+    } else {
+      const ts = topics.filter(t => t.subjectId === subj.id);
+      const hasPending = ts.some(t => ['today', 'overdue'].includes(getTopicStatus(t)));
+      if (!hasPending) s.add(subj.name);
+    }
+  });
+  return s;
+}
+
 export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSubject, focusAsig, focusTopicId }) {
   const focusTopic       = focusTopicId != null ? topics.find(t => t.id === focusTopicId) : null;
   const effectiveFocusAsig = focusAsig ?? focusTopic?.subjectId ?? null;
@@ -20,24 +34,15 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
 
   const subjectLongPress = useLongPress();
 
-  const subjectsRef = useRef(subjects);
-  const topicsRef   = useRef(topics);
-  subjectsRef.current = subjects;
-  topicsRef.current   = topics;
+  const [collapsed, setCollapsed] = useState(() => computeCollapsed(subjects, topics, effectiveFocusAsig));
 
-  const [collapsed, setCollapsed] = useState(() => {
-    const s = new Set();
-    subjects.forEach(subj => {
-      if (effectiveFocusAsig) {
-        if (subj.id !== effectiveFocusAsig) s.add(subj.name);
-      } else {
-        const ts = topics.filter(t => t.subjectId === subj.id);
-        const hasPending = ts.some(t => ['today', 'overdue'].includes(getTopicStatus(t)));
-        if (!hasPending) s.add(subj.name);
-      }
-    });
-    return s;
-  });
+  // Al cambiar el foco de asignatura, se recalcula qué grupos van plegados y el filtro.
+  const [prevFocusAsig, setPrevFocusAsig] = useState(focusAsig);
+  if (focusAsig !== prevFocusAsig) {
+    setPrevFocusAsig(focusAsig);
+    setCollapsed(computeCollapsed(subjects, topics, effectiveFocusAsig));
+    setFilter(effectiveFocusAsig ? 'all' : 'pending');
+  }
 
   // Scroll + flash-highlight al tema que nos trajo aquí desde el calendario.
   useEffect(() => {
@@ -47,22 +52,7 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
     }, 400);
     const clearTimer = setTimeout(() => setHighlightId(null), 2200);
     return () => { clearTimeout(scrollTimer); clearTimeout(clearTimer); };
-  }, []);
-
-  useEffect(() => {
-    const s = new Set();
-    subjectsRef.current.forEach(subj => {
-      if (effectiveFocusAsig) {
-        if (subj.id !== effectiveFocusAsig) s.add(subj.name);
-      } else {
-        const ts = topicsRef.current.filter(t => t.subjectId === subj.id);
-        const hasPending = ts.some(t => ['today', 'overdue'].includes(getTopicStatus(t)));
-        if (!hasPending) s.add(subj.name);
-      }
-    });
-    setCollapsed(s);
-    setFilter(effectiveFocusAsig ? 'all' : 'pending');
-  }, [focusAsig]);
+  }, [focusTopicId]);
 
   function toggleCollapse(asig) {
     if (subjectLongPress.didTrigger()) return;
@@ -149,7 +139,7 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
             <div
               className="asig-group-header"
               onClick={() => toggleCollapse(g.name)}
-              onContextMenu={(e) => handleSubjectContextMenu(e, g.name)}
+              onContextMenu={(e) => handleSubjectContextMenu(e, g.id)}
               onTouchStart={() => subjectLongPress.onStart(onEditSubject ? () => onEditSubject(g.id) : null)}
               onTouchEnd={subjectLongPress.onEnd}
               onTouchMove={subjectLongPress.onEnd}

@@ -4,32 +4,42 @@ import { PALETTE } from '../../data/subjects';
 import { isTouchDevice } from '../../utils/device';
 
 export default function EditSubjectModal({ isOpen, onClose, onEdit, onDelete, subject }) {
-  const [name,        setName]        = useState('');
-  const [totalTopics, setTotalTopics] = useState(6);
-  const [color,       setColor]       = useState(PALETTE[0]);
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  useEffect(() => {
-    if (isOpen && subject) {
-      setName(subject.name);
-      setTotalTopics(subject.totalTopics);
-      setColor(subject.color);
-      setShowConfirm(false);
-    }
-  }, [isOpen, subject]);
-
   const keyHandlerRef = useRef(null);
-  keyHandlerRef.current = (e) => {
-    if (e.key === 'Escape') onClose();
-    if (e.key === 'Enter' && name.trim() && !showConfirm) handleEdit();
-  };
-
   useEffect(() => {
     if (!isOpen) return;
-    function handler(e) { keyHandlerRef.current(e); }
+    const handler = (e) => keyHandlerRef.current?.(e);
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen]);
+
+  return (
+    <ModalShell isOpen={isOpen} onClose={onClose}>
+      {subject && (
+        <EditSubjectForm
+          key={subject.id}
+          keyHandlerRef={keyHandlerRef}
+          onClose={onClose}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          subject={subject}
+        />
+      )}
+    </ModalShell>
+  );
+}
+
+function EditSubjectForm({ keyHandlerRef, onClose, onEdit, onDelete, subject }) {
+  const [name,        setName]        = useState(subject.name);
+  const [totalTopics, setTotalTopics] = useState(subject.totalTopics);
+  const [color,       setColor]       = useState(subject.color);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+    keyHandlerRef.current = (e) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'Enter' && name.trim() && !showConfirm) handleEdit();
+    };
+  });
 
   function handleEdit() {
     if (!name.trim() || !subject) return;
@@ -44,7 +54,7 @@ export default function EditSubjectModal({ isOpen, onClose, onEdit, onDelete, su
   }
 
   return (
-    <ModalShell isOpen={isOpen} onClose={onClose}>
+    <>
       <button className="btn-cancel" onClick={onClose}>✕</button>
 
       <div className="modal-asig" style={{ color: 'var(--muted)' }}>AJUSTES</div>
@@ -124,6 +134,6 @@ export default function EditSubjectModal({ isOpen, onClose, onEdit, onDelete, su
           </button>
         </div>
       )}
-    </ModalShell>
+    </>
   );
 }

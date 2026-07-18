@@ -4,26 +4,32 @@ import ModalShell from '../ui/ModalShell';
 const CONFIRM_WORD = 'ELIMINAR';
 
 export default function DeleteAccountModal({ isOpen, onClose, onConfirm }) {
-  const [confirmText, setConfirmText] = useState('');
-
-  useEffect(() => {
-    if (isOpen) setConfirmText('');
-  }, [isOpen]);
-
-  const canConfirm = confirmText.trim().toUpperCase() === CONFIRM_WORD;
-
   const keyHandlerRef = useRef(null);
-  keyHandlerRef.current = (e) => {
-    if (e.key === 'Escape') onClose();
-    if (e.key === 'Enter' && canConfirm) handleConfirm();
-  };
-
   useEffect(() => {
     if (!isOpen) return;
-    function handler(e) { keyHandlerRef.current(e); }
+    const handler = (e) => keyHandlerRef.current?.(e);
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen]);
+
+  return (
+    <ModalShell isOpen={isOpen} onClose={onClose}>
+      <DeleteAccountForm keyHandlerRef={keyHandlerRef} onClose={onClose} onConfirm={onConfirm} />
+    </ModalShell>
+  );
+}
+
+function DeleteAccountForm({ keyHandlerRef, onClose, onConfirm }) {
+  const [confirmText, setConfirmText] = useState('');
+
+  const canConfirm = confirmText.trim().toUpperCase() === CONFIRM_WORD;
+
+  useEffect(() => {
+    keyHandlerRef.current = (e) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'Enter' && canConfirm) handleConfirm();
+    };
+  });
 
   function handleConfirm() {
     if (!canConfirm) return;
@@ -32,7 +38,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }) {
   }
 
   return (
-    <ModalShell isOpen={isOpen} onClose={onClose}>
+    <>
       <button className="btn-cancel" onClick={onClose}>✕</button>
 
       <div className="modal-asig" style={{ color: 'var(--danger)' }}>PELIGRO</div>
@@ -73,6 +79,6 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }) {
           </button>
         </div>
       </div>
-    </ModalShell>
+    </>
   );
 }

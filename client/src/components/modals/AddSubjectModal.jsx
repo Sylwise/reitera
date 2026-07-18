@@ -1,30 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ModalShell from "../ui/ModalShell";
 import { PALETTE, SUBJECT_LIMIT } from "../../data/subjects";
 
 export default function AddSubjectModal({ isOpen, onClose, onAdd, subjectCount = 0 }) {
+  const keyHandlerRef = useRef(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e) => keyHandlerRef.current?.(e);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isOpen]);
+
+  return (
+    <ModalShell isOpen={isOpen} onClose={onClose}>
+      <AddSubjectForm keyHandlerRef={keyHandlerRef} onClose={onClose} onAdd={onAdd} subjectCount={subjectCount} />
+    </ModalShell>
+  );
+}
+
+function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
   const [name, setName] = useState("");
   const [totalTopics, setTotalTopics] = useState(6);
   const [color, setColor] = useState(PALETTE[0]);
   const atLimit = subjectCount >= SUBJECT_LIMIT;
 
   useEffect(() => {
-    if (isOpen) {
-      setName("");
-      setTotalTopics(6);
-      setColor(PALETTE[0]);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    function onKey(e) {
+    keyHandlerRef.current = (e) => {
       if (e.key === "Escape") onClose();
       if (e.key === "Enter" && name.trim() && !atLimit) handleAdd();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, name, totalTopics, color, atLimit]);
+    };
+  });
 
   function handleAdd() {
     if (name.trim().length < 3 || atLimit) return;
@@ -33,7 +38,7 @@ export default function AddSubjectModal({ isOpen, onClose, onAdd, subjectCount =
   }
 
   return (
-    <ModalShell isOpen={isOpen} onClose={onClose}>
+    <>
       <button className="btn-cancel" onClick={onClose}>
         ✕
       </button>
@@ -128,6 +133,6 @@ export default function AddSubjectModal({ isOpen, onClose, onAdd, subjectCount =
           Enter ↵
         </span>
       </button>
-    </ModalShell>
+    </>
   );
 }

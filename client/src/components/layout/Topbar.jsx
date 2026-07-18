@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { getTopicStatus } from '../../utils/topicHelpers';
 import { useOutsideClick } from '../../hooks/useOutsideClick';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/theme';
 import { getInitials, getFirstName } from '../../utils/userHelpers';
 
 export default function Topbar({ topics, subjects, streak, userName, onAddTopic, onOpenAsignaturas, onLogout, onDeleteAccount }) {

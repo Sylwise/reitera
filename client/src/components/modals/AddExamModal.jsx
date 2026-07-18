@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ModalShell from '../ui/ModalShell';
 
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -94,28 +94,40 @@ function DatePicker({ value, onChange }) {
 }
 
 export default function AddExamModal({ isOpen, onClose, onAdd, subjects, initialDate }) {
-  const [name,      setName]      = useState('');
-  const [subjectId, setSubjectId] = useState(null);
-  const [date,      setDate]      = useState(new Date());
-  useEffect(() => {
-    if (isOpen) {
-      setName('');
-      setSubjectId(subjects[0]?.id ?? null);
-      setDate(startOfDay(initialDate instanceof Date ? initialDate : new Date()));
-    }
-  }, [isOpen]);
-
+  const keyHandlerRef = useRef(null);
   useEffect(() => {
     if (!isOpen) return;
-    function onKey(e) {
-      if (e.key === 'Escape') onClose();
-      if (e.key === 'Enter' && canSubmit) handleAdd();
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, name, subjectId, date]);
+    const handler = (e) => keyHandlerRef.current?.(e);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen]);
+
+  return (
+    <ModalShell isOpen={isOpen} onClose={onClose}>
+      <AddExamForm
+        keyHandlerRef={keyHandlerRef}
+        onClose={onClose}
+        onAdd={onAdd}
+        subjects={subjects}
+        initialDate={initialDate}
+      />
+    </ModalShell>
+  );
+}
+
+function AddExamForm({ keyHandlerRef, onClose, onAdd, subjects, initialDate }) {
+  const [name,      setName]      = useState('');
+  const [subjectId, setSubjectId] = useState(subjects[0]?.id ?? null);
+  const [date,      setDate]      = useState(() => startOfDay(initialDate instanceof Date ? initialDate : new Date()));
 
   const canSubmit = name.trim() && subjectId != null;
+
+  useEffect(() => {
+    keyHandlerRef.current = (e) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'Enter' && canSubmit) handleAdd();
+    };
+  });
 
   function handleAdd() {
     if (!canSubmit) return;
@@ -125,7 +137,7 @@ export default function AddExamModal({ isOpen, onClose, onAdd, subjects, initial
   }
 
   return (
-    <ModalShell isOpen={isOpen} onClose={onClose}>
+    <>
       <button className="btn-cancel" onClick={onClose}>✕</button>
 
       <div className="modal-asig" style={{ color: 'var(--muted)' }}>NUEVO EVENTO</div>
@@ -172,6 +184,6 @@ export default function AddExamModal({ isOpen, onClose, onAdd, subjects, initial
         Añadir evento
         <span style={{ opacity: .5, fontSize: '.7rem', marginLeft: '.5rem' }}>Enter ↵</span>
       </button>
-    </ModalShell>
+    </>
   );
 }

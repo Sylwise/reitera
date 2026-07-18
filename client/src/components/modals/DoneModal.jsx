@@ -2,17 +2,31 @@ import { useState, useEffect, useRef } from "react";
 import ModalShell from "../ui/ModalShell";
 
 export default function DoneModal({ topic, isOpen, onClose, onConfirm }) {
+  const keyHandlerRef = useRef(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e) => keyHandlerRef.current?.(e);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isOpen]);
+
+  return (
+    <ModalShell isOpen={isOpen} onClose={onClose}>
+      <DoneForm
+        key={topic?.id}
+        keyHandlerRef={keyHandlerRef}
+        topic={topic}
+        onClose={onClose}
+        onConfirm={onConfirm}
+      />
+    </ModalShell>
+  );
+}
+
+function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
   const [diff, setDiff] = useState("normal");
   const [score, setScore] = useState("");
   const [showScore, setShowScore] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setDiff("normal");
-      setScore("");
-      setShowScore(false);
-    }
-  }, [isOpen, topic?.id]);
 
   function validateScore(s) {
     if (!s.trim()) return null;
@@ -27,30 +41,22 @@ export default function DoneModal({ topic, isOpen, onClose, onConfirm }) {
   const scoreError = validateScore(score);
   const canConfirm = !scoreError;
 
-  const keyHandlerRef = useRef(null);
-  keyHandlerRef.current = (e) => {
-    if (e.target.tagName === "INPUT") return;
-    if (e.key === "Enter" && canConfirm) {
-      onConfirm({ dificultad: diff, score: score.trim() });
-      onClose();
-    }
-    if (e.key === "1") setDiff("easy");
-    if (e.key === "2") setDiff("normal");
-    if (e.key === "3") setDiff("hard");
-    if (e.key === "Escape") onClose();
-  };
-
   useEffect(() => {
-    if (!isOpen) return;
-    function handler(e) {
-      keyHandlerRef.current(e);
-    }
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [isOpen]);
+    keyHandlerRef.current = (e) => {
+      if (e.target.tagName === "INPUT") return;
+      if (e.key === "Enter" && canConfirm) {
+        onConfirm({ dificultad: diff, score: score.trim() });
+        onClose();
+      }
+      if (e.key === "1") setDiff("easy");
+      if (e.key === "2") setDiff("normal");
+      if (e.key === "3") setDiff("hard");
+      if (e.key === "Escape") onClose();
+    };
+  });
 
   return (
-    <ModalShell isOpen={isOpen} onClose={onClose}>
+    <>
       <button className="btn-cancel" onClick={onClose}>
         ✕
       </button>
@@ -163,6 +169,6 @@ export default function DoneModal({ topic, isOpen, onClose, onConfirm }) {
           Enter ↵
         </span>
       </button>
-    </ModalShell>
+    </>
   );
 }

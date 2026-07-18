@@ -1,31 +1,46 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ModalShell from '../ui/ModalShell';
 import { isTouchDevice } from '../../utils/device';
 
 const TOTAL_OPTS = [2, 3, 4, 5, 6];
 
 export default function EditTopicModal({ isOpen, onClose, onEdit, onDelete, onReset, topic }) {
-  const [name,          setName]          = useState('');
-  const [reviewsNeeded, setReviewsNeeded] = useState(4);
+  const keyHandlerRef = useRef(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e) => keyHandlerRef.current?.(e);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen]);
+
+  return (
+    <ModalShell isOpen={isOpen} onClose={onClose}>
+      {topic && (
+        <EditTopicForm
+          key={topic.id}
+          keyHandlerRef={keyHandlerRef}
+          onClose={onClose}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onReset={onReset}
+          topic={topic}
+        />
+      )}
+    </ModalShell>
+  );
+}
+
+function EditTopicForm({ keyHandlerRef, onClose, onEdit, onDelete, onReset, topic }) {
+  const [name,          setName]          = useState(topic.name || '');
+  const [reviewsNeeded, setReviewsNeeded] = useState(topic.reviewsNeeded || 4);
   const [showConfirm,   setShowConfirm]   = useState(false);
 
   useEffect(() => {
-    if (isOpen && topic) {
-      setName(topic.name || '');
-      setReviewsNeeded(topic.reviewsNeeded || 4);
-      setShowConfirm(false);
-    }
-  }, [isOpen, topic]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    function onKey(e) {
+    keyHandlerRef.current = (e) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'Enter' && name.trim() && !showConfirm) handleEdit();
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, name, reviewsNeeded, showConfirm]);
+    };
+  });
 
   function handleEdit() {
     if (!name.trim() || !topic) return;
@@ -46,7 +61,7 @@ export default function EditTopicModal({ isOpen, onClose, onEdit, onDelete, onRe
   }
 
   return (
-    <ModalShell isOpen={isOpen} onClose={onClose}>
+    <>
       <button className="btn-cancel" onClick={onClose}>✕</button>
 
       <div className="modal-asig" style={{ color: 'var(--muted)' }}>AJUSTES</div>
@@ -123,6 +138,6 @@ export default function EditTopicModal({ isOpen, onClose, onEdit, onDelete, onRe
           </button>
         </div>
       )}
-    </ModalShell>
+    </>
   );
 }

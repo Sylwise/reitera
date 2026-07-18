@@ -10,16 +10,34 @@ export default function ConfigTopicModal({
   subjects,
   initialAsig,
 }) {
-  const [selectedSubjectId, setSelectedSubjectId] = useState(null);
-  const [name, setName] = useState("");
-  const [reviewsNeeded, setReviewsNeeded] = useState(4);
-
+  const keyHandlerRef = useRef(null);
   useEffect(() => {
     if (!isOpen) return;
-    setSelectedSubjectId(initialAsig ?? subjects[0]?.id ?? null);
-    setName("");
-    setReviewsNeeded(4);
-  }, [isOpen, initialAsig]);
+    const handler = (e) => keyHandlerRef.current?.(e);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isOpen]);
+
+  return (
+    <ModalShell isOpen={isOpen} onClose={onClose}>
+      <ConfigTopicForm
+        key={initialAsig ?? "none"}
+        keyHandlerRef={keyHandlerRef}
+        onClose={onClose}
+        onConfirm={onConfirm}
+        subjects={subjects}
+        initialAsig={initialAsig}
+      />
+    </ModalShell>
+  );
+}
+
+function ConfigTopicForm({ keyHandlerRef, onClose, onConfirm, subjects, initialAsig }) {
+  const [selectedSubjectId, setSelectedSubjectId] = useState(
+    initialAsig ?? subjects[0]?.id ?? null
+  );
+  const [name, setName] = useState("");
+  const [reviewsNeeded, setReviewsNeeded] = useState(4);
 
   function handleConfirm() {
     if (!name.trim() || !selectedSubjectId) return;
@@ -27,25 +45,17 @@ export default function ConfigTopicModal({
     onClose();
   }
 
-  const keyHandlerRef = useRef(null);
-  keyHandlerRef.current = (e) => {
-    if (e.key === "Escape") onClose();
-    if (e.key === "Enter" && name.trim() && selectedSubjectId) handleConfirm();
-  };
-
   useEffect(() => {
-    if (!isOpen) return;
-    function handler(e) {
-      keyHandlerRef.current(e);
-    }
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [isOpen]);
+    keyHandlerRef.current = (e) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "Enter" && name.trim() && selectedSubjectId) handleConfirm();
+    };
+  });
 
   const canConfirm = name.trim().length >= 3 && selectedSubjectId;
 
   return (
-    <ModalShell isOpen={isOpen} onClose={onClose}>
+    <>
       <button className="btn-cancel" onClick={onClose}>
         ✕
       </button>
@@ -139,6 +149,6 @@ export default function ConfigTopicModal({
           Enter ↵
         </span>
       </button>
-    </ModalShell>
+    </>
   );
 }

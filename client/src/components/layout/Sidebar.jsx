@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { getTopicStatus } from '../../utils/topicHelpers';
 import { useOutsideClick } from '../../hooks/useOutsideClick';
 import { useLongPress } from '../../hooks/useLongPress';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/theme';
 import { getInitials } from '../../utils/userHelpers';
 import { SUBJECT_LIMIT } from '../../data/subjects';
 
