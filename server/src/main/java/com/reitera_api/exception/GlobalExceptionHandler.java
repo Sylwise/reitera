@@ -48,4 +48,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(409).body(exception.getMessage());
     }
 
+    @ExceptionHandler(LimitReachedException.class)
+    public ResponseEntity<String> handleTopicLimitReached(LimitReachedException exception) {
+        return ResponseEntity.status(409).body(exception.getMessage());
+    }
+
 }

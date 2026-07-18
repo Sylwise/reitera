@@ -5,6 +5,7 @@ import com.reitera_api.entity.Subject;
 import com.reitera_api.entity.Topic;
 import com.reitera_api.entity.User;
 import com.reitera_api.exception.ResourceNotFoundException;
+import com.reitera_api.exception.LimitReachedException;
 import com.reitera_api.repository.SubjectRepository;
 import com.reitera_api.repository.TopicRepository;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,10 @@ public class TopicService {
     public Topic addTopic(Long subjectId, TopicRequestDTO topic, User user) {
         Subject subject = subjectRepository.findByIdAndUser(subjectId, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
+        List<Topic> topicList = topicRepository.findBySubjectIdAndSubjectUserId(subjectId, user.getId());
+        if(topicList.size() >= subject.getTotalTopics()) {
+            throw new LimitReachedException("Topic limit already reached.");
+        }
         return topicRepository.save(Topic.create(topic, subject));
     }
 

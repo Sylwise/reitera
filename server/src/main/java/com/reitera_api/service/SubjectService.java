@@ -3,6 +3,7 @@ package com.reitera_api.service;
 import com.reitera_api.dto.SubjectRequestDTO;
 import com.reitera_api.entity.Subject;
 import com.reitera_api.entity.User;
+import com.reitera_api.exception.LimitReachedException;
 import com.reitera_api.exception.ResourceNotFoundException;
 import com.reitera_api.repository.SubjectRepository;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,11 @@ public class SubjectService {
         this.repository = repository;
     }
 
-    public Subject addSubject(Subject subject) {
+    public Subject addSubject(Subject subject, User user) {
+        List<Subject> foundSubjects = repository.findByUser(user);
+        if(foundSubjects.size() >= 15) {
+            throw new LimitReachedException("Subject limit reached.");
+        }
         return repository.save(subject);
     }
 

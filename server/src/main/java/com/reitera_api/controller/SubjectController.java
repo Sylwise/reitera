@@ -26,7 +26,7 @@ public class SubjectController {
     public ResponseEntity<SubjectResponseDTO> addSubject(@Valid @RequestBody SubjectRequestDTO dto, @AuthenticationPrincipal User currentUser) {
         Subject subject = Subject.create(dto);
         subject.setUser(currentUser);
-        Subject saved = service.addSubject(subject);
+        Subject saved = service.addSubject(subject, currentUser);
         SubjectResponseDTO response = SubjectResponseDTO.fromEntity(saved);
         return ResponseEntity.status(201).body(response);
     }
