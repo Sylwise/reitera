@@ -26,21 +26,21 @@ public class TopicController {
     @PostMapping()
     public ResponseEntity<TopicResponseDTO> addTopic(@Valid @RequestBody TopicRequestDTO dto,
             @AuthenticationPrincipal User user) {
-        Topic saved = service.addTopic(dto.getSubjectId(), dto, user);
+        Topic saved = service.addTopic(dto.getSubjectId(), dto, user.getId());
         TopicResponseDTO response = TopicResponseDTO.fromEntity(saved);
         return ResponseEntity.status(201).body(response);
     }
 
     @PostMapping("/{id}/reset")
     public ResponseEntity<TopicResponseDTO> resetTopic (@PathVariable Long id, @AuthenticationPrincipal User user) {
-        Topic reset = service.resetTopic(id, user);
+        Topic reset = service.resetTopic(id, user.getId());
         return ResponseEntity.ok(TopicResponseDTO.fromEntity(reset));
     }
 
     @GetMapping()
     public ResponseEntity<List<TopicResponseDTO>> findTopics(@RequestParam(required = false) Long subjectId,
             @AuthenticationPrincipal User user) {
-        List<Topic> existing = subjectId != null ? service.getTopicsBySubject(subjectId, user) : service.getAllTopics(user);
+        List<Topic> existing = subjectId != null ? service.getTopicsBySubject(subjectId, user.getId()) : service.getAllTopics(user.getId());
         List<TopicResponseDTO> responseDTOList = new ArrayList<>();
 
         for (Topic topic : existing) {
@@ -53,18 +53,18 @@ public class TopicController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TopicResponseDTO> findTopicById(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(TopicResponseDTO.fromEntity(service.getById(id, user)));
+        return ResponseEntity.ok(TopicResponseDTO.fromEntity(service.getById(id, user.getId())));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TopicResponseDTO> updateTopicById(@PathVariable Long id,
             @Valid @RequestBody TopicRequestDTO dto, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(TopicResponseDTO.fromEntity(service.updateTopic(id, dto, user)));
+        return ResponseEntity.ok(TopicResponseDTO.fromEntity(service.updateTopic(id, dto, user.getId())));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTopicById(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        service.deleteTopic(id, user);
+        service.deleteTopic(id, user.getId());
         return ResponseEntity.noContent().build();
     }
 

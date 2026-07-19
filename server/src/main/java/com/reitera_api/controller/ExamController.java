@@ -27,13 +27,13 @@ public class ExamController {
     public ResponseEntity<ExamResponseDTO> addExam(@Valid @RequestBody ExamRequestDTO dto,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.status(201)
-                .body(ExamResponseDTO.fromEntity(service.addExam(dto.getSubjectId(), dto, user)));
+                .body(ExamResponseDTO.fromEntity(service.addExam(dto.getSubjectId(), dto, user.getId())));
     }
 
     @GetMapping
     public ResponseEntity<List<ExamResponseDTO>> findExams(@RequestParam(required = false) Long subjectId,
             @AuthenticationPrincipal User user) {
-        List<Exam> existing = subjectId != null ? service.getExams(subjectId, user) : service.getAllExams(user);
+        List<Exam> existing = subjectId != null ? service.getExams(subjectId, user.getId()) : service.getAllExams(user.getId());
         List<ExamResponseDTO> responseDTOList = new ArrayList<>();
 
         for (Exam exam : existing) {
@@ -45,18 +45,18 @@ public class ExamController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ExamResponseDTO> findExamById(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(ExamResponseDTO.fromEntity(service.getById(id, user)));
+        return ResponseEntity.ok(ExamResponseDTO.fromEntity(service.getById(id, user.getId())));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ExamResponseDTO> updateExamById(@PathVariable Long id,
             @Valid @RequestBody ExamRequestDTO dto, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(ExamResponseDTO.fromEntity(service.updateById(id, dto, user)));
+        return ResponseEntity.ok(ExamResponseDTO.fromEntity(service.updateById(id, dto, user.getId())));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExamById(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        service.deleteExam(id, user);
+        service.deleteExam(id, user.getId());
         return ResponseEntity.noContent().build();
     }
 }

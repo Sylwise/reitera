@@ -3,7 +3,6 @@ package com.reitera_api.service;
 import com.reitera_api.dto.TopicRequestDTO;
 import com.reitera_api.entity.Subject;
 import com.reitera_api.entity.Topic;
-import com.reitera_api.entity.User;
 import com.reitera_api.exception.ResourceNotFoundException;
 import com.reitera_api.exception.LimitReachedException;
 import com.reitera_api.repository.SubjectRepository;
@@ -24,47 +23,47 @@ public class TopicService {
         this.subjectRepository = subjectRepository;
     }
 
-    public Topic addTopic(Long subjectId, TopicRequestDTO topic, User user) {
-        Subject subject = subjectRepository.findByIdAndUser(subjectId, user)
+    public Topic addTopic(Long subjectId, TopicRequestDTO topic, Long userId) {
+        Subject subject = subjectRepository.findByIdAndUserId(subjectId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Subject not found."));
-        List<Topic> topicList = topicRepository.findBySubjectIdAndSubjectUserId(subjectId, user.getId());
-        if(topicList.size() >= subject.getTotalTopics()) {
+        Long topicNumber = topicRepository.countTopicsBySubjectId(subjectId);
+        if(topicNumber >= subject.getTotalTopics()) {
             throw new LimitReachedException("Topic limit already reached.");
         }
         return topicRepository.save(Topic.create(topic, subject));
     }
 
-    public List<Topic> getTopicsBySubject(Long subjectId, User user) {
-        return topicRepository.findBySubjectIdAndSubjectUserId(subjectId, user.getId());
+    public List<Topic> getTopicsBySubject(Long subjectId, Long userId) {
+        return topicRepository.findBySubjectIdAndSubjectUserId(subjectId, userId);
     }
 
-    public List<Topic> getAllTopics(User user) {
-        return topicRepository.findBySubjectUserId(user.getId());
+    public List<Topic> getAllTopics(Long userId) {
+        return topicRepository.findBySubjectUserId(userId);
     }
 
-    public Topic getById(Long id, User user) {
-        return topicRepository.findByIdAndSubjectUserId(id, user.getId())
+    public Topic getById(Long id, Long userId) {
+        return topicRepository.findByIdAndSubjectUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found."));
     }
 
-    public Topic updateTopic(Long id, TopicRequestDTO dto, User user) {
-        Topic existing = topicRepository.findByIdAndSubjectUserId(id, user.getId())
+    public Topic updateTopic(Long id, TopicRequestDTO dto, Long userId) {
+        Topic existing = topicRepository.findByIdAndSubjectUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found."));
         existing.setName(dto.getName());
         existing.setReviewsNeeded(dto.getReviewsNeeded());
         return topicRepository.save(existing);
     }
 
-    public Topic resetTopic(Long id, User user) {
-        Topic topic = topicRepository.findByIdAndSubjectUserId(id, user.getId())
+    public Topic resetTopic(Long id, Long userId) {
+        Topic topic = topicRepository.findByIdAndSubjectUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found."));
         topic.setReviewCount(0);
         topic.setNextReviewDate(LocalDate.now());
         return topicRepository.save(topic);
     }
 
-    public void deleteTopic(Long id, User user) {
-        Topic existing = topicRepository.findByIdAndSubjectUserId(id, user.getId())
+    public void deleteTopic(Long id, Long userId) {
+        Topic existing = topicRepository.findByIdAndSubjectUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found."));
         topicRepository.delete(existing);
     }

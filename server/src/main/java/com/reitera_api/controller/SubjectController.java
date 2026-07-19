@@ -26,7 +26,7 @@ public class SubjectController {
     public ResponseEntity<SubjectResponseDTO> addSubject(@Valid @RequestBody SubjectRequestDTO dto, @AuthenticationPrincipal User currentUser) {
         Subject subject = Subject.create(dto);
         subject.setUser(currentUser);
-        Subject saved = service.addSubject(subject, currentUser);
+        Subject saved = service.addSubject(subject);
         SubjectResponseDTO response = SubjectResponseDTO.fromEntity(saved);
         return ResponseEntity.status(201).body(response);
     }
@@ -34,7 +34,7 @@ public class SubjectController {
     @GetMapping
     public ResponseEntity<List<SubjectResponseDTO>> getSubjects(@AuthenticationPrincipal User currentUser) {
         List<SubjectResponseDTO> listaDto = new ArrayList<>();
-        List<Subject> listaSubject = service.getSubjects(currentUser);
+        List<Subject> listaSubject = service.getSubjects(currentUser.getId());
         for (Subject subject : listaSubject) {
             listaDto.add(SubjectResponseDTO.fromEntity(subject));
         }
@@ -43,21 +43,21 @@ public class SubjectController {
 
     @GetMapping("/{id}")
     public ResponseEntity<SubjectResponseDTO> getById (@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
-        Subject subject = service.getById(id, currentUser);
+        Subject subject = service.getById(id, currentUser.getId());
         SubjectResponseDTO response = SubjectResponseDTO.fromEntity(subject);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<SubjectResponseDTO> updateSubject(@PathVariable Long id, @Valid @RequestBody SubjectRequestDTO dto, @AuthenticationPrincipal User currentUser) {
-        Subject updated = service.updateSubject(id, dto, currentUser);
+        Subject updated = service.updateSubject(id, dto, currentUser.getId());
         SubjectResponseDTO response = SubjectResponseDTO.fromEntity(updated);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById (@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
-        service.deleteSubject(id, currentUser);
+        service.deleteSubject(id, currentUser.getId());
         return ResponseEntity.noContent().build();
     }
 }
