@@ -83,7 +83,7 @@ public class Topic {
     }
 
     public int getDisplayedProgressDays() {
-        return displayedProgressDays;
+        return displayedProgressDays == null ? 0 : displayedProgressDays;
     }
 
     public void setEaseFactor(double easeFactor) {
