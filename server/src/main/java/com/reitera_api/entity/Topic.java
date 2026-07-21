@@ -20,8 +20,6 @@ public class Topic {
     private String name;
     @Column(name = "review_count")
     private Integer reviewCount;
-    @Column (name = "reviews_needed")
-    private Integer reviewsNeeded;
     @Column (name = "next_review_date")
     private LocalDate nextReviewDate;
     @ManyToOne
@@ -32,18 +30,26 @@ public class Topic {
     private Double easeFactor;
     @Column(name = "current_interval_days")
     private Integer currentIntervalDays;
+    @Column(name = "displayed_progress_days")
+    private Integer displayedProgressDays;
+
+    public static final int MASTERY_THRESHOLD_DAYS = 30;
 
    public static Topic create(TopicRequestDTO dto, Subject subject) {
         Topic topic = new Topic();
         topic.setName(dto.getName());
-        topic.setReviewsNeeded(dto.getReviewsNeeded());
         topic.setSubject(subject);
         topic.setReviewCount(0);
         topic.setNextReviewDate(LocalDate.now());
         topic.setEaseFactor(2.5);
         topic.setCurrentIntervalDays(0);
+        topic.setDisplayedProgressDays(0);
         return topic;
    }
+
+    public boolean isMastered() {
+        return currentIntervalDays >= MASTERY_THRESHOLD_DAYS;
+    }
 
     public Topic() {
     }
@@ -58,10 +64,6 @@ public class Topic {
 
     public int getReviewCount() {
         return reviewCount;
-    }
-
-    public int getReviewsNeeded() {
-        return reviewsNeeded;
     }
 
     public LocalDate getNextReviewDate() {
@@ -80,6 +82,10 @@ public class Topic {
         return currentIntervalDays;
     }
 
+    public int getDisplayedProgressDays() {
+        return displayedProgressDays;
+    }
+
     public void setEaseFactor(double easeFactor) {
         this.easeFactor = easeFactor;
     }
@@ -88,16 +94,16 @@ public class Topic {
         this.currentIntervalDays = currentIntervalDays;
     }
 
+    public void setDisplayedProgressDays(int displayedProgressDays) {
+        this.displayedProgressDays = displayedProgressDays;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
 
     public void setReviewCount(int reviewCount) {
         this.reviewCount = reviewCount;
-    }
-
-    public void setReviewsNeeded(int reviewsNeeded) {
-        this.reviewsNeeded = reviewsNeeded;
     }
 
     public void setNextReviewDate(LocalDate nextReviewDate) {
@@ -126,7 +132,6 @@ public class Topic {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", reviewCount=" + reviewCount +
-                ", reviewsNeeded=" + reviewsNeeded +
                 ", nextReviewDate=" + nextReviewDate +
                 ", subject=" + subject +
                 '}';

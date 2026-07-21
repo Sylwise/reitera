@@ -8,10 +8,6 @@ public class TopicRequestDTO {
     @Size (min = 3, max = 100)
     private String name;
     @NotNull
-    @Min(2)
-    @Max(6)
-    private Integer reviewsNeeded;
-    @NotNull
     private Long subjectId;
 
     public TopicRequestDTO() {
@@ -21,20 +17,12 @@ public class TopicRequestDTO {
         this.name = name;
     }
 
-    public void setReviewsNeeded(int reviewsNeeded) {
-        this.reviewsNeeded = reviewsNeeded;
-    }
-
     public void setSubjectId(Long subjectId) {
         this.subjectId = subjectId;
     }
 
     public String getName() {
         return name;
-    }
-
-    public int getReviewsNeeded() {
-        return reviewsNeeded;
     }
 
     public Long getSubjectId() {

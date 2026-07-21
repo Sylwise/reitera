@@ -50,7 +50,6 @@ public class TopicService {
         Topic existing = topicRepository.findByIdAndSubjectUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found."));
         existing.setName(dto.getName());
-        existing.setReviewsNeeded(dto.getReviewsNeeded());
         return topicRepository.save(existing);
     }
 
@@ -60,6 +59,7 @@ public class TopicService {
         topic.setReviewCount(0);
         topic.setNextReviewDate(LocalDate.now());
         topic.setCurrentIntervalDays(0);
+        topic.setDisplayedProgressDays(0);
         return topicRepository.save(topic);
     }
 

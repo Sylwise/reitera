@@ -4,13 +4,13 @@ import com.reitera_api.entity.Topic;
 
 import java.time.LocalDate;
 
-public record TopicResponseDTO(Long id, String name, Integer reviewCount, Integer reviewsNeeded, LocalDate nextReviewDate, Long subjectId) {
+public record TopicResponseDTO(Long id, String name, Integer reviewCount, Integer displayedProgressDays, LocalDate nextReviewDate, Long subjectId) {
     public static TopicResponseDTO fromEntity (Topic topic) {
         return new TopicResponseDTO(
                 topic.getId(),
                 topic.getName(),
                 topic.getReviewCount(),
-                topic.getReviewsNeeded(),
+                topic.getDisplayedProgressDays(),
                 topic.getNextReviewDate(),
                 topic.getSubject().getId()
         );

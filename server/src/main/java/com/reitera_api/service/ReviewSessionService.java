@@ -27,20 +27,19 @@ public class ReviewSessionService {
         this.userRepository = userRepository;
     }
 
+    private static final int PROGRESS_STEP_CAP_DAYS = 5;
+
     @Transactional
     public void addReviewSession(Long topicId, ReviewSessionRequestDTO dto, User user) {
         Topic topic = topicRepository.findByIdAndSubjectUserId(topicId, user.getId()).orElseThrow(() -> new ResourceNotFoundException("No topic found."));
-        if (topic.getReviewCount() >= topic.getReviewsNeeded()) {
+        if (topic.isMastered()) {
             throw new TopicAlreadyMasteredException("Topic is already mastered.");
         }
         if (dto.getDifficulty() != Difficulty.AGAIN) {
             topic.setReviewCount(topic.getReviewCount() + 1);
         }
-        if (topic.getReviewCount() < topic.getReviewsNeeded()) {
-            topic.setNextReviewDate(calculateNextReviewDate(topic, dto.getDifficulty()));
-        } else {
-            topic.setNextReviewDate(null);
-        }
+        LocalDate candidateNextDate = calculateNextReviewDate(topic, dto.getDifficulty());
+        topic.setNextReviewDate(topic.isMastered() ? null : candidateNextDate);
         streakCounter(user);
         userRepository.save(user);
         reviewSessionRepository.save(ReviewSession.create(dto, topic));
@@ -66,6 +65,15 @@ public class ReviewSessionService {
 
         topic.setEaseFactor(Math.max(1.3, easeFactor + easeDelta));
         topic.setCurrentIntervalDays(nextInterval);
+
+        if (nextInterval >= Topic.MASTERY_THRESHOLD_DAYS) {
+            topic.setDisplayedProgressDays(Topic.MASTERY_THRESHOLD_DAYS);
+        } else {
+            int displayed = topic.getDisplayedProgressDays();
+            int step = Math.max(-PROGRESS_STEP_CAP_DAYS, Math.min(PROGRESS_STEP_CAP_DAYS, nextInterval - displayed));
+            topic.setDisplayedProgressDays(displayed + step);
+        }
+
         return LocalDate.now().plusDays(nextInterval);
     }
 
