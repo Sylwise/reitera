@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import ModalShell from "../ui/ModalShell";
 
-const TOTAL_OPTS = [2, 3, 4, 5, 6];
-
 export default function ConfigTopicModal({
   isOpen,
   onClose,
@@ -37,11 +35,10 @@ function ConfigTopicForm({ keyHandlerRef, onClose, onConfirm, subjects, initialA
     initialAsig ?? subjects[0]?.id ?? null
   );
   const [name, setName] = useState("");
-  const [reviewsNeeded, setReviewsNeeded] = useState(4);
 
   function handleConfirm() {
     if (!name.trim() || !selectedSubjectId) return;
-    onConfirm({ subjectId: selectedSubjectId, name: name.trim(), reviewsNeeded });
+    onConfirm({ subjectId: selectedSubjectId, name: name.trim() });
     onClose();
   }
 
@@ -116,28 +113,6 @@ function ConfigTopicForm({ keyHandlerRef, onClose, onConfirm, subjects, initialA
         minLength={3}
         maxLength={100}
       />
-      <div className="modal-section-label" style={{ marginTop: '1.5rem' }}>Repasos necesarios</div>
-      <div style={{ display: "flex", gap: ".4rem", marginBottom: "1.5rem" }}>
-        {TOTAL_OPTS.map((n) => (
-          <button
-            key={n}
-            className={`diff-btn normal${reviewsNeeded === n ? " selected" : ""}`}
-            style={{
-              flex: 1,
-              ...(reviewsNeeded === n
-                ? {
-                    background: "rgba(200,251,78,.1)",
-                    borderColor: "var(--accent)",
-                    color: "var(--accent)",
-                  }
-                : {}),
-            }}
-            onClick={() => setReviewsNeeded(n)}
-          >
-            {n}
-          </button>
-        ))}
-      </div>
 
       <button
         className="btn-confirm"

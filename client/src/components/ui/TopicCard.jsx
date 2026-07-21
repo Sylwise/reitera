@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import StatusTag from './StatusTag';
-import { getTopicStatus, formatDaysLabel, getAsigColor } from '../../utils/topicHelpers';
+import { getTopicStatus, formatDaysLabel, getAsigColor, MASTERY_THRESHOLD_DAYS } from '../../utils/topicHelpers';
 import { useLongPress } from '../../hooks/useLongPress';
 
 export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, hideAsig = false, highlighted = false }) {
@@ -13,7 +13,7 @@ export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, h
     onEditTopic(topic);
   }
 
-  const fillPct   = Math.round(topic.reviewCount / topic.reviewsNeeded * 100);
+  const fillPct   = status === 'mastered' ? 100 : Math.round(topic.displayedProgressDays / MASTERY_THRESHOLD_DAYS * 100);
   const canMark      = status === 'today' || status === 'overdue';
   const dotColor     = getAsigColor(topic.subjectId, subjects);
   const subjectName  = subjects.find(s => s.id === topic.subjectId)?.name ?? '';
@@ -49,7 +49,7 @@ export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, h
 
       <div className="card-progress">
         <div className="progress-label">
-          <span>Repaso {topic.reviewCount}/{topic.reviewsNeeded}</span>
+          <span>Repaso {topic.reviewCount}</span>
         </div>
         <div className="progress-track">
           <div className="progress-fill" style={{ width: `${fillPct}%` }} />

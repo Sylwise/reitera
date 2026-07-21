@@ -37,9 +37,9 @@ export function useTopics(showToast) {
     }
   }
 
-  async function handleConfigTopic({ subjectId, name, reviewsNeeded }) {
+  async function handleConfigTopic({ subjectId, name }) {
     try {
-      const saved = await createTopic({ name, reviewsNeeded, subjectId });
+      const saved = await createTopic({ name, subjectId });
       setTopics(prev => [...prev, saved]);
       showToast(`✓ "${name}" añadido`);
     } catch (err) {
@@ -47,11 +47,11 @@ export function useTopics(showToast) {
     }
   }
 
-  async function handleEditTopic({ topicId, name, reviewsNeeded }) {
+  async function handleEditTopic({ topicId, name }) {
     const existing = topics.find(t => t.id === topicId);
     if (!existing) return;
     try {
-      const saved = await updateTopic(topicId, { name, reviewsNeeded, subjectId: existing.subjectId });
+      const saved = await updateTopic(topicId, { name, subjectId: existing.subjectId });
       setTopics(prev => prev.map(t => t.id === topicId ? saved : t));
       showToast(`✓ Tema guardado`);
     } catch (err) {

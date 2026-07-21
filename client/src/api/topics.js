@@ -4,12 +4,12 @@ export function fetchTopics() {
   return apiFetch('/topics');
 }
 
-export function createTopic({ name, reviewsNeeded, subjectId }) {
-  return apiFetch('/topics', { method: 'POST', body: { name, reviewsNeeded, subjectId } });
+export function createTopic({ name, subjectId }) {
+  return apiFetch('/topics', { method: 'POST', body: { name, subjectId } });
 }
 
-export function updateTopic(id, { name, reviewsNeeded, subjectId }) {
-  return apiFetch(`/topics/${id}`, { method: 'PUT', body: { name, reviewsNeeded, subjectId } });
+export function updateTopic(id, { name, subjectId }) {
+  return apiFetch(`/topics/${id}`, { method: 'PUT', body: { name, subjectId } });
 }
 
 export function deleteTopic(id) {

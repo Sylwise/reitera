@@ -19,6 +19,8 @@ function toDateStr(date) {
 const EXAM_MARGIN_MIN_DAYS = 1;
 const EXAM_MARGIN_RATIO    = 0.15;
 
+export const MASTERY_THRESHOLD_DAYS = 30;
+
 // Adelanta (nunca retrasa) el nextReviewDate de los temas que caerían después del
 // margen de seguridad del próximo examen de su asignatura, repartiéndolos de forma
 // uniforme en el hueco libre en vez de amontonarlos justo antes del examen. No se
@@ -58,7 +60,7 @@ export function applyExamCaps(topics, exams) {
     const windowDays = Math.round((deadline - today) / 86400000);
 
     const needsCompression = subjTopics
-      .filter(t => t.nextReviewDate !== null && t.reviewCount < t.reviewsNeeded)
+      .filter(t => t.nextReviewDate !== null)
       .filter(t => parseLocalDate(t.nextReviewDate) > deadline)
       .sort((a, b) => parseLocalDate(a.nextReviewDate) - parseLocalDate(b.nextReviewDate));
 
@@ -81,7 +83,7 @@ export function daysUntil(nextReviewDate) {
 }
 
 export function getTopicStatus(topic) {
-  if (topic.nextReviewDate === null || topic.reviewCount >= topic.reviewsNeeded) return 'mastered';
+  if (topic.nextReviewDate === null) return 'mastered';
   const diff = daysUntil(topic.nextReviewDate);
   if (diff < 0)  return 'overdue';
   if (diff === 0) return 'today';

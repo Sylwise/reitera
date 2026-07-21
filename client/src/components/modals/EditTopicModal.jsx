@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import ModalShell from '../ui/ModalShell';
 import { isTouchDevice } from '../../utils/device';
 
-const TOTAL_OPTS = [2, 3, 4, 5, 6];
-
 export default function EditTopicModal({ isOpen, onClose, onEdit, onDelete, onReset, topic }) {
   const keyHandlerRef = useRef(null);
   useEffect(() => {
@@ -31,9 +29,8 @@ export default function EditTopicModal({ isOpen, onClose, onEdit, onDelete, onRe
 }
 
 function EditTopicForm({ keyHandlerRef, onClose, onEdit, onDelete, onReset, topic }) {
-  const [name,          setName]          = useState(topic.name || '');
-  const [reviewsNeeded, setReviewsNeeded] = useState(topic.reviewsNeeded || 4);
-  const [showConfirm,   setShowConfirm]   = useState(false);
+  const [name,        setName]        = useState(topic.name || '');
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     keyHandlerRef.current = (e) => {
@@ -44,7 +41,7 @@ function EditTopicForm({ keyHandlerRef, onClose, onEdit, onDelete, onReset, topi
 
   function handleEdit() {
     if (!name.trim() || !topic) return;
-    onEdit({ topicId: topic.id, name: name.trim(), reviewsNeeded });
+    onEdit({ topicId: topic.id, name: name.trim() });
     onClose();
   }
 
@@ -95,20 +92,6 @@ function EditTopicForm({ keyHandlerRef, onClose, onEdit, onDelete, onReset, topi
             onChange={e => setName(e.target.value)}
             autoFocus={!isTouchDevice}
           />
-
-          <div className="modal-section-label">Repasos necesarios</div>
-          <div style={{ display: 'flex', gap: '.4rem', marginBottom: '1.5rem' }}>
-            {TOTAL_OPTS.map(n => (
-              <button
-                key={n}
-                className={`diff-btn normal${reviewsNeeded === n ? ' selected' : ''}`}
-                style={{ flex: 1, ...(reviewsNeeded === n ? { background: 'rgba(200,251,78,.1)', borderColor: 'var(--accent)', color: 'var(--accent)' } : {}) }}
-                onClick={() => setReviewsNeeded(n)}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
 
           <div style={{ display: 'flex', gap: '.5rem', marginBottom: '1rem' }}>
             <button
