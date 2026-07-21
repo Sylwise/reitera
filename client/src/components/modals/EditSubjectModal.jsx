@@ -92,16 +92,16 @@ function EditSubjectForm({ keyHandlerRef, onClose, onEdit, onDelete, subject }) 
 
           <div className="modal-section-label">Temas totales del curso</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', marginBottom: '1.5rem' }}>
-            <button className="stepper-btn" onClick={() => setTotalTopics(t => Math.max(1, t - 1))}>−</button>
+            <button className="stepper-btn" disabled={totalTopics <= 1} onClick={() => setTotalTopics(t => Math.max(1, t - 1))}>−</button>
             <input
               className="stepper-input"
               type="number"
               min={1}
-              max={50}
+              max={15}
               value={totalTopics}
               onChange={e => setTotalTopics(Math.max(1, parseInt(e.target.value) || 1))}
             />
-            <button className="stepper-btn" onClick={() => setTotalTopics(t => Math.min(50, t + 1))}>+</button>
+            <button className="stepper-btn" disabled={totalTopics >= 15} onClick={() => setTotalTopics(t => Math.min(15, t + 1))}>+</button>
           </div>
 
           <div className="modal-section-label">Color</div>

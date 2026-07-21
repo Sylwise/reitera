@@ -84,6 +84,7 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
       >
         <button
           className="stepper-btn"
+          disabled={totalTopics <= 1}
           onClick={() => setTotalTopics((t) => Math.max(1, t - 1))}
         >
           −
@@ -100,6 +101,7 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
         />
         <button
           className="stepper-btn"
+          disabled={totalTopics >= 15}
           onClick={() => setTotalTopics((t) => Math.min(15, t + 1))}
         >
           +
