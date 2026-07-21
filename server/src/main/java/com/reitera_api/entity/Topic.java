@@ -4,6 +4,7 @@ import com.reitera_api.dto.TopicRequestDTO;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 
 import java.time.LocalDate;
@@ -27,6 +28,10 @@ public class Topic {
     @JoinColumn (name = "subject_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Subject subject;
+    @Column(name = "ease_factor")
+    private Double easeFactor;
+    @Column(name = "current_interval_days")
+    private Integer currentIntervalDays;
 
    public static Topic create(TopicRequestDTO dto, Subject subject) {
         Topic topic = new Topic();
@@ -35,6 +40,8 @@ public class Topic {
         topic.setSubject(subject);
         topic.setReviewCount(0);
         topic.setNextReviewDate(LocalDate.now());
+        topic.setEaseFactor(2.5);
+        topic.setCurrentIntervalDays(0);
         return topic;
    }
 
@@ -63,6 +70,22 @@ public class Topic {
 
     public Subject getSubject() {
         return subject;
+    }
+
+    public double getEaseFactor() {
+        return easeFactor;
+    }
+
+    public int getCurrentIntervalDays() {
+        return currentIntervalDays;
+    }
+
+    public void setEaseFactor(double easeFactor) {
+        this.easeFactor = easeFactor;
+    }
+
+    public void setCurrentIntervalDays(int currentIntervalDays) {
+        this.currentIntervalDays = currentIntervalDays;
     }
 
     public void setName(String name) {

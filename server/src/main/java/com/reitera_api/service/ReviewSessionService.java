@@ -33,9 +33,11 @@ public class ReviewSessionService {
         if (topic.getReviewCount() >= topic.getReviewsNeeded()) {
             throw new TopicAlreadyMasteredException("Topic is already mastered.");
         }
-        topic.setReviewCount(topic.getReviewCount() + 1);
+        if (dto.getDifficulty() != Difficulty.AGAIN) {
+            topic.setReviewCount(topic.getReviewCount() + 1);
+        }
         if (topic.getReviewCount() < topic.getReviewsNeeded()) {
-            topic.setNextReviewDate(calculateNextReviewDate(dto.getDifficulty()));
+            topic.setNextReviewDate(calculateNextReviewDate(topic, dto.getDifficulty()));
         } else {
             topic.setNextReviewDate(null);
         }
@@ -44,12 +46,27 @@ public class ReviewSessionService {
         reviewSessionRepository.save(ReviewSession.create(dto, topic));
     }
 
-    private static LocalDate calculateNextReviewDate(Difficulty difficulty) {
-        return switch (difficulty) {
-            case EASY -> LocalDate.now().plusDays(21);
-            case NORMAL -> LocalDate.now().plusDays(14);
-            case HARD -> LocalDate.now().plusDays(7);
+    private static LocalDate calculateNextReviewDate(Topic topic, Difficulty difficulty) {
+        double easeFactor = topic.getEaseFactor();
+        int currentInterval = topic.getCurrentIntervalDays();
+
+        int nextInterval = switch (difficulty) {
+            case AGAIN -> 1;
+            case HARD -> currentInterval == 0 ? 2 : (int) Math.ceil(currentInterval * easeFactor * 0.8);
+            case NORMAL -> currentInterval == 0 ? 4 : (int) Math.ceil(currentInterval * easeFactor);
+            case EASY -> currentInterval == 0 ? 6 : (int) Math.ceil(currentInterval * easeFactor * 1.3);
         };
+
+        double easeDelta = switch (difficulty) {
+            case AGAIN -> -0.2;
+            case HARD -> -0.15;
+            case NORMAL -> 0;
+            case EASY -> 0.15;
+        };
+
+        topic.setEaseFactor(Math.max(1.3, easeFactor + easeDelta));
+        topic.setCurrentIntervalDays(nextInterval);
+        return LocalDate.now().plusDays(nextInterval);
     }
 
     private static void streakCounter(User user) {
