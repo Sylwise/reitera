@@ -212,7 +212,7 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
                     collapsed: { opacity: 0, height: 0 }
                   }}
                   transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-                  style={{ overflow: "hidden" }}
+                  style={{ overflow: "hidden", paddingTop: "3px" }}
                 >
                   <AnimatePresence mode="sync">
                     {g.topics.map((t) => (
