@@ -41,11 +41,11 @@ public interface ReviewSessionRepository extends JpaRepository<ReviewSession, Lo
     "ORDER BY AVG(rs.score) ASC")
     List<AtRiskDTO> findAtRisk (@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT new com.reitera_api.dto.WeeklyInsightDTO(rs.topic.subject.id, rs.topic.subject.name, COUNT(rs), AVG(rs.score)) " +
+    @Query("SELECT new com.reitera_api.dto.WeeklyInsightDTO(rs.topic.subject.id, rs.topic.subject.name, AVG(rs.score)) " +
     "FROM ReviewSession rs " +
     "WHERE rs.topic.subject.user.id = :userId AND rs.reviewedAt >= :startDate " +
     "GROUP BY rs.topic.subject.id " +
-    "HAVING COUNT(rs) >= 2 " +
+    "HAVING COUNT(rs.score) >= 2 " +
     "ORDER BY AVG(rs.score) DESC"
     )
     List<WeeklyInsightDTO> findAverageScoresBySubject(@Param("userId") Long userId, @Param("startDate") LocalDate startDate);

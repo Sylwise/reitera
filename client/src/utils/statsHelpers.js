@@ -51,7 +51,35 @@ export const EMPTY_STATS = {
   activity: new Array(35).fill(0),
   weakSpots: [],
   atRisk: [],
+  weeklyInsight: 'Aún no hay suficiente actividad esta semana para comparar asignaturas.',
 };
+
+const INSIGHT_TIERS = [
+  { min: 9,          text: s => `¡Vas genial en ${s}!` },
+  { min: 7.5,        text: s => `Vas bien en ${s}.` },
+  { min: 6,          text: s => `Vas decente en ${s}.` },
+  { min: 4.5,        text: s => `${s} tiene margen de mejora.` },
+  { min: 3,          text: s => `La cosa está preocupante en ${s}.` },
+  { min: -Infinity,  text: s => `Deberías echarle un vistazo a ${s} cuanto antes.` },
+];
+
+function insightTier(score) {
+  return INSIGHT_TIERS.find(t => score >= t.min);
+}
+
+function buildWeeklyInsightMessage(weeklyComparison) {
+  if (!weeklyComparison) return EMPTY_STATS.weeklyInsight;
+
+  const { best, worst } = weeklyComparison;
+  const bestTier = insightTier(best.avgScore);
+  const worstTier = insightTier(worst.avgScore);
+
+  if (bestTier === worstTier) {
+    return bestTier.text(`${best.subjectName} y ${worst.subjectName}`);
+  }
+
+  return `${bestTier.text(best.subjectName)} ${worstTier.text(worst.subjectName)}`;
+}
 
 export function mapStatsResponse(raw) {
   if (!raw) return EMPTY_STATS;
@@ -78,6 +106,7 @@ export function mapStatsResponse(raw) {
       subjectName: a.subjectName,
       tag: `Score ${Math.round(a.avgScore * 10)}%`,
     })),
+    weeklyInsight: buildWeeklyInsightMessage(raw.weeklyComparison),
   };
 }
 

@@ -41,7 +41,7 @@ function buildHeatmapDates(activity) {
 export default function Stats({ stats, onAddSubject, onGoToTemas }) {
   if (!stats) return <Spinner />;
 
-  const { streak, totalRepasos, overdue, diffDistribution, chart30, asigProgress, activity } = stats;
+  const { streak, totalRepasos, overdue, diffDistribution, chart30, asigProgress, activity, weeklyInsight } = stats;
 
   if (totalRepasos === 0) {
     return (
@@ -120,12 +120,11 @@ export default function Stats({ stats, onAddSubject, onGoToTemas }) {
           </Panel>
 
           <div className="panel fade-in" style={{ height: 'fit-content', background: `linear-gradient(135deg, rgba(var(--accent-rgb),.06) 0%, rgba(var(--accent-rgb),.02) 100%)`, border: `1px solid rgba(var(--accent-rgb),.15)` }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.6rem' }}>
+            <div style={{ marginBottom: '.6rem' }}>
               <span style={{ fontFamily: 'var(--mono)', fontSize: '.7rem', color: 'var(--muted)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Insight Semanal</span>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: '.66rem', color: 'var(--muted)', letterSpacing: '.04em', textTransform: 'uppercase', background: 'var(--surface2)', border: '1px solid var(--border2)', borderRadius: '999px', padding: '.2rem .55rem', flexShrink: 0 }}>En desarrollo</span>
             </div>
-            <p style={{ fontFamily: 'var(--sans)', fontSize: '.85rem', lineHeight: 1.6, color: 'var(--muted)', margin: 0 }}>
-              Estamos preparando recomendaciones personalizadas basadas en tu actividad de repaso. Disponible próximamente.
+            <p style={{ fontFamily: 'var(--sans)', fontSize: '.85rem', lineHeight: 1.6, color: 'var(--muted)', margin: 0, overflowWrap: 'break-word' }}>
+              {weeklyInsight}
             </p>
           </div>
         </div>
