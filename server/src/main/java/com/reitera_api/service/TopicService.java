@@ -59,6 +59,7 @@ public class TopicService {
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found."));
         topic.setReviewCount(0);
         topic.setNextReviewDate(LocalDate.now());
+        topic.setCurrentIntervalDays(0);
         return topicRepository.save(topic);
     }
 
