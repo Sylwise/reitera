@@ -51,6 +51,7 @@ function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
       if (e.key === "1") setDiff("easy");
       if (e.key === "2") setDiff("normal");
       if (e.key === "3") setDiff("hard");
+      if (e.key === "4") setDiff("again");
       if (e.key === "Escape") onClose();
     };
   });
@@ -82,7 +83,7 @@ function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
             letterSpacing: ".04em",
           }}
         >
-          teclas 1 · 2 · 3
+          teclas 1 · 2 · 3 · 4
         </span>
       </div>
       <div className="diff-btns">
@@ -90,6 +91,7 @@ function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
           { key: "easy", label: "Fácil" },
           { key: "normal", label: "Normal" },
           { key: "hard", label: "Difícil" },
+          { key: "again", label: "Otra vez" },
         ].map((b, i) => (
           <button
             key={b.key}
