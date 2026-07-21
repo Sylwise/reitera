@@ -25,11 +25,11 @@ public class StatsService {
         Long totalReviews = reviewSessionRepository.countByUserId(user.getId());
         List<DifficultyCountDTO> diffDistribution = reviewSessionRepository.countGroupedByDifficulty(user.getId());
         LocalDate currentDay = LocalDate.now();
-        Integer currentStreak = currentDay.minusDays(1).equals(user.getLastReviewDate()) || currentDay.equals(user.getLastReviewDate()) ?  user.getReviewStreak() :  0;
+        Integer currentStreak = currentDay.minusDays(1).equals(user.getLastReviewDate()) || currentDay.equals(user.getLastReviewDate()) ? user.getReviewStreak() : 0;
         List<WeakSpotDTO> weakSpots = reviewSessionRepository.findWeakSpots(user.getId(), PageRequest.of(0, 5));
         List<AtRiskDTO> atRisk = reviewSessionRepository.findAtRisk(user.getId(), PageRequest.of(0, 5));
 
-        return new StatsResponseDTO(totalReviews, diffDistribution, currentStreak, buildActivity(user.getId()), weakSpots, atRisk);
+        return new StatsResponseDTO(totalReviews, diffDistribution, currentStreak, buildActivity(user.getId()), weakSpots, atRisk, buildSubjectHighlight(user.getId()));
     }
 
     private List<Long> buildActivity(Long userId) {
@@ -45,6 +45,20 @@ public class StatsService {
         }
 
         return activity;
+
+    }
+
+    private WeeklyComparisonDTO buildSubjectHighlight(Long userId) {
+        List<WeeklyInsightDTO> findWeeklyInsight = reviewSessionRepository.findAverageScoresBySubject(userId, LocalDate.now().minusDays(6));
+
+        if (findWeeklyInsight.size() < 2) {
+            return null;
+        }
+
+        SubjectHighlightDTO best = new SubjectHighlightDTO(findWeeklyInsight.getFirst().subjectName(), findWeeklyInsight.getFirst().avgScore());
+        SubjectHighlightDTO worst = new SubjectHighlightDTO(findWeeklyInsight.getLast().subjectName(), findWeeklyInsight.getLast().avgScore());
+
+        return new WeeklyComparisonDTO(best, worst);
 
     }
 

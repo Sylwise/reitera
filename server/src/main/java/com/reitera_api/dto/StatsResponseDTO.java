@@ -8,5 +8,6 @@ public record StatsResponseDTO(
         Integer streak,
         List<Long> activity,
         List<WeakSpotDTO> weakSpots,
-        List<AtRiskDTO> atRisk
+        List<AtRiskDTO> atRisk,
+        WeeklyComparisonDTO weeklyComparison
 ) {}

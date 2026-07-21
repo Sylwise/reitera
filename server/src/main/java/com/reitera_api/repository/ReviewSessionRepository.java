@@ -1,9 +1,6 @@
 package com.reitera_api.repository;
 
-import com.reitera_api.dto.AtRiskDTO;
-import com.reitera_api.dto.DailyCountDTO;
-import com.reitera_api.dto.DifficultyCountDTO;
-import com.reitera_api.dto.WeakSpotDTO;
+import com.reitera_api.dto.*;
 import com.reitera_api.entity.ReviewSession;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,4 +40,13 @@ public interface ReviewSessionRepository extends JpaRepository<ReviewSession, Lo
     "HAVING AVG(rs.score) < 6 AND COUNT(rs) >= 2 " +
     "ORDER BY AVG(rs.score) ASC")
     List<AtRiskDTO> findAtRisk (@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT new com.reitera_api.dto.WeeklyInsightDTO(rs.topic.subject.id, rs.topic.subject.name, COUNT(rs), AVG(rs.score)) " +
+    "FROM ReviewSession rs " +
+    "WHERE rs.topic.subject.user.id = :userId AND rs.reviewedAt >= :startDate " +
+    "GROUP BY rs.topic.subject.id " +
+    "HAVING COUNT(rs) >= 2 " +
+    "ORDER BY AVG(rs.score) DESC"
+    )
+    List<WeeklyInsightDTO> findAverageScoresBySubject(@Param("userId") Long userId, @Param("startDate") LocalDate startDate);
 }
