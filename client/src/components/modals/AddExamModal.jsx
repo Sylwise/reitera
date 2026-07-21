@@ -120,7 +120,7 @@ function AddExamForm({ keyHandlerRef, onClose, onAdd, subjects, initialDate }) {
   const [subjectId, setSubjectId] = useState(subjects[0]?.id ?? null);
   const [date,      setDate]      = useState(() => startOfDay(initialDate instanceof Date ? initialDate : new Date()));
 
-  const canSubmit = name.trim() && subjectId != null;
+  const canSubmit = name.trim().length >= 3 && subjectId != null;
 
   useEffect(() => {
     keyHandlerRef.current = (e) => {
@@ -140,8 +140,8 @@ function AddExamForm({ keyHandlerRef, onClose, onAdd, subjects, initialDate }) {
     <>
       <button className="btn-cancel" onClick={onClose}>✕</button>
 
-      <div className="modal-asig" style={{ color: 'var(--muted)' }}>NUEVO EVENTO</div>
-      <div className="modal-title">Añadir evento</div>
+      <div className="modal-asig" style={{ color: 'var(--muted)' }}>NUEVO EXAMEN</div>
+      <div className="modal-title">Añadir examen</div>
       <div className="modal-divider" />
 
       <div className="modal-section-label">Nombre</div>
@@ -181,7 +181,7 @@ function AddExamForm({ keyHandlerRef, onClose, onAdd, subjects, initialDate }) {
         disabled={!canSubmit}
         onClick={handleAdd}
       >
-        Añadir evento
+        Añadir examen
         <span className="key-hint" style={{ opacity: .5, fontSize: '.7rem', marginLeft: '.5rem' }}>Enter ↵</span>
       </button>
     </>

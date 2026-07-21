@@ -3,6 +3,76 @@ function parseLocalDate(dateStr) {
   return new Date(y, m - 1, d);
 }
 
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function toDateStr(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+const EXAM_MARGIN_MIN_DAYS = 1;
+const EXAM_MARGIN_RATIO    = 0.15;
+
+// Adelanta (nunca retrasa) el nextReviewDate de los temas que caerían después del
+// margen de seguridad del próximo examen de su asignatura, repartiéndolos de forma
+// uniforme en el hueco libre en vez de amontonarlos justo antes del examen. No se
+// persiste — es puro derivado de (topics, exams, hoy), así que se autocorrige solo
+// si el examen cambia o se borra.
+export function applyExamCaps(topics, exams) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const nextExamBySubject = new Map();
+  for (const exam of exams) {
+    const examDay = new Date(exam.date);
+    examDay.setHours(0, 0, 0, 0);
+    if (examDay < today) continue;
+    const current = nextExamBySubject.get(exam.subjectId);
+    if (!current || examDay < current) nextExamBySubject.set(exam.subjectId, examDay);
+  }
+  if (nextExamBySubject.size === 0) return topics;
+
+  const bySubject = new Map();
+  for (const topic of topics) {
+    if (!bySubject.has(topic.subjectId)) bySubject.set(topic.subjectId, []);
+    bySubject.get(topic.subjectId).push(topic);
+  }
+
+  const overrides = new Map();
+
+  for (const [subjectId, examDay] of nextExamBySubject) {
+    const subjTopics = bySubject.get(subjectId);
+    if (!subjTopics) continue;
+
+    const daysToExam = Math.round((examDay - today) / 86400000);
+    const margin      = Math.max(EXAM_MARGIN_MIN_DAYS, Math.round(daysToExam * EXAM_MARGIN_RATIO));
+    const deadline     = addDays(examDay, -margin);
+    if (deadline < today) continue; // sin margen que repartir, se deja tal cual
+
+    const windowDays = Math.round((deadline - today) / 86400000);
+
+    const needsCompression = subjTopics
+      .filter(t => t.nextReviewDate !== null && t.reviewCount < t.reviewsNeeded)
+      .filter(t => parseLocalDate(t.nextReviewDate) > deadline)
+      .sort((a, b) => parseLocalDate(a.nextReviewDate) - parseLocalDate(b.nextReviewDate));
+
+    const n = needsCompression.length;
+    needsCompression.forEach((t, i) => {
+      const slot = Math.round((i + 1) * windowDays / n);
+      overrides.set(t.id, toDateStr(addDays(today, slot)));
+    });
+  }
+
+  if (overrides.size === 0) return topics;
+  return topics.map(t => overrides.has(t.id) ? { ...t, nextReviewDate: overrides.get(t.id) } : t);
+}
+
 export function daysUntil(nextReviewDate) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);

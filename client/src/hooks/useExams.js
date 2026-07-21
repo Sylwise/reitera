@@ -26,7 +26,7 @@ export function useExams(showToast) {
     try {
       const saved = await createExam({ name, subjectId, date });
       setExams(prev => [...prev, saved]);
-      showToast(`📅 Evento "${name}" añadido`);
+      showToast(`📅 Examen "${name}" añadido`);
     } catch (err) {
       showToast(`✗ ${err.message}`);
     }
@@ -36,7 +36,7 @@ export function useExams(showToast) {
     try {
       await deleteExam(id);
       setExams(prev => prev.filter(e => e.id !== id));
-      showToast('✓ Evento borrado');
+      showToast('✓ Examen borrado');
     } catch (err) {
       showToast(`✗ ${err.message}`);
     }

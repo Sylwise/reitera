@@ -15,6 +15,7 @@ import { useSubjects } from './hooks/useSubjects';
 import { useExams }    from './hooks/useExams';
 import { useStats }    from './hooks/useStats';
 import { buildRealStats } from './utils/statsHelpers';
+import { applyExamCaps } from './utils/topicHelpers';
 import Spinner from './components/ui/Spinner';
 import { getToken, getUser, setUnauthorizedHandler } from './api/client';
 import { deleteAccount, logout } from './api/auth';
@@ -127,7 +128,8 @@ export default function App() {
     );
   }
 
-  const stats = { ...backendStats, ...buildRealStats(topics, subjects) };
+  const adjustedTopics = applyExamCaps(topics, exams);
+  const stats = { ...backendStats, ...buildRealStats(adjustedTopics, subjects) };
   const dataLoading = subjectsLoading || topicsLoading;
   const dataError   = subjectsError || topicsError;
 
@@ -140,7 +142,7 @@ export default function App() {
           onSelectSubject={(asig) => { setFocusAsig(prev => prev === asig ? null : asig); setFocusTopicId(null); setView('temas'); }}
           onEditSubject={setEditSubject}
           subjects={subjects}
-          topics={topics}
+          topics={adjustedTopics}
           userName={currentUser?.name}
           onAddSubject={() => setAddSubjectOpen(true)}
           onLogout={handleLogout}
@@ -149,7 +151,7 @@ export default function App() {
 
         <div className="main-area">
           <Topbar
-            topics={topics}
+            topics={adjustedTopics}
             subjects={subjects}
             streak={stats.streak}
             userName={currentUser?.name}
@@ -187,11 +189,11 @@ export default function App() {
                 transition={{ duration: 0.2 }}
                 style={{ height: '100%', width: '100%', overflow: 'auto' }}
               >
-                {view === 'dashboard'  && <Dashboard  topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={stats} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} showToast={showToast} />}
-                {view === 'temas'       && <Temas       topics={topics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} onAddTopic={() => openConfigModal(null)} focusAsig={focusAsig} focusTopicId={focusTopicId} />}
-                {view === 'asignaturas' && <Asignaturas subjects={subjects} topics={topics} onEditSubject={setEditSubject} onAddSubject={() => setAddSubjectOpen(true)} />}
+                {view === 'dashboard'  && <Dashboard  topics={adjustedTopics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={stats} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} showToast={showToast} />}
+                {view === 'temas'       && <Temas       topics={adjustedTopics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} onAddTopic={() => openConfigModal(null)} focusAsig={focusAsig} focusTopicId={focusTopicId} />}
+                {view === 'asignaturas' && <Asignaturas subjects={subjects} topics={adjustedTopics} onEditSubject={setEditSubject} onAddSubject={() => setAddSubjectOpen(true)} />}
                 {view === 'stats'       && <Stats       stats={stats} onAddSubject={() => setAddSubjectOpen(true)} onGoToTemas={() => setView('temas')} />}
-                {view === 'calendario' && <Calendario topics={topics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} />}
+                {view === 'calendario' && <Calendario topics={adjustedTopics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} />}
               </motion.div>
             </AnimatePresence>
             )}

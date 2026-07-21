@@ -246,7 +246,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
             titleAction={onAddExam && (
               <button
                 onClick={() => onAddExam(sel)}
-                title="Añadir evento"
+                title="Añadir examen"
                 type="button"
                 style={{
                   background: 'none', border: '1px solid var(--border2)', borderRadius: 6,
@@ -263,7 +263,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
             )}
           >
             {selExams.length === 0 && selTopics.length === 0 && (
-              <div className="cal-side-empty">Sin eventos este día</div>
+              <div className="cal-side-empty">Sin repasos ni exámenes este día</div>
             )}
             {selExams.map(exam => {
               const diff = Math.round((new Date(exam.date) - today) / 86400000);
@@ -278,7 +278,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                     <button
                       className="cal-event-del-btn"
                       onClick={() => onDeleteExam(exam.id)}
-                      title="Borrar evento"
+                      title="Borrar examen"
                     >
                       ✕
                     </button>
