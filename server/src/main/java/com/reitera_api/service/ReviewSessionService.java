@@ -27,7 +27,7 @@ public class ReviewSessionService {
         this.userRepository = userRepository;
     }
 
-    private static final int PROGRESS_STEP_CAP_DAYS = 5;
+    private static final int PROGRESS_STEP_CAP_DAYS = 3;
 
     @Transactional
     public void addReviewSession(Long topicId, ReviewSessionRequestDTO dto, User user) {
