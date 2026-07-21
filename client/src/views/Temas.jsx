@@ -123,6 +123,11 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
+          {search && (
+            <button className="search-clear" onClick={() => setSearch('')} aria-label="Limpiar búsqueda" type="button">
+              ✕
+            </button>
+          )}
         </div>
       </div>
 

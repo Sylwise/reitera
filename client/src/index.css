@@ -411,7 +411,7 @@ body::before {
   background: var(--surface);
   border: 1px solid var(--border2);
   border-radius: 8px;
-  padding: .5rem .85rem .5rem 2.2rem;
+  padding: .5rem 2rem .5rem 2.2rem;
   font-family: var(--mono);
   font-size: .78rem;
   color: var(--text);
@@ -421,6 +421,13 @@ body::before {
 .search-input::placeholder { color: var(--muted2) }
 .search-input:focus { border-color: var(--accent) }
 .search-icon { position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .85rem; pointer-events: none }
+.search-clear {
+  position: absolute; right: .5rem; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--muted);
+  font-size: .9rem; line-height: 1; padding: .2rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.search-clear:hover { color: var(--text) }
 
 .filter-bar { display: flex; gap: .5rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center }
 .link-btn {
