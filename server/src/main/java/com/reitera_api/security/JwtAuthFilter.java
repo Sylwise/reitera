@@ -2,6 +2,7 @@ package com.reitera_api.security;
 
 import com.reitera_api.entity.User;
 import com.reitera_api.repository.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +37,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.equals("/api/auth/login") || path.equals("/api/auth/register");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain)
@@ -50,12 +57,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = extractJwtFromHeader(authHeader);
 
-        if (!jwtUtil.validateToken(token)) {
+        Long userId;
+        try {
+            userId = jwtUtil.extractUserId(token);
+        } catch (JwtException e) {
             writeUnauthorized(response, "Invalid token.");
             return;
         }
-
-        Long userId = jwtUtil.extractUserId(token);
 
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
