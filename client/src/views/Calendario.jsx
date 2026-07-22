@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useRef } from 'react';
 import Panel from '../components/ui/Panel';
 import StatusTag from '../components/ui/StatusTag';
 import { getTopicStatus, getAsigColor, compareByUrgency } from '../utils/topicHelpers';
@@ -42,12 +42,16 @@ function weekRangeLabel(weekDaysArr) {
 }
 
 export default function Calendario({ topics, subjects, exams, onAddExam, onDeleteExam, onNavigateTopic }) {
-  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
+  // Recalculado en cada render: memoizarlo dejaba "hoy" anclado si la vista cruzaba la medianoche.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const [year,  setYear]  = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
   const [sel,   setSel]   = useState(today);
   const [viewMode, setViewMode] = useState('month'); // 'month' | 'week'
   const [showOverdue, setShowOverdue] = useState(false);
+  // Borrado en dos pasos: el primer clic arma el botón, el segundo confirma.
+  const [pendingDeleteExam, setPendingDeleteExam] = useState(null);
 
   // ── long-press / right-click para añadir examen ──────────
   const pressTimer        = useRef(null);
@@ -276,11 +280,19 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                   <span className={`exam-countdown ${diff <= 7 ? 'urgent' : diff <= 14 ? 'soon' : 'ok'}`}>{examCountdownLabel(diff)}</span>
                   {onDeleteExam && (
                     <button
-                      className="cal-event-del-btn"
-                      onClick={() => onDeleteExam(exam.id)}
-                      title="Borrar examen"
+                      className={`cal-event-del-btn${pendingDeleteExam === exam.id ? ' armed' : ''}`}
+                      onClick={() => {
+                        if (pendingDeleteExam === exam.id) {
+                          setPendingDeleteExam(null);
+                          onDeleteExam(exam.id);
+                        } else {
+                          setPendingDeleteExam(exam.id);
+                        }
+                      }}
+                      onBlur={() => setPendingDeleteExam(p => p === exam.id ? null : p)}
+                      title={pendingDeleteExam === exam.id ? 'Confirmar borrado' : 'Borrar examen'}
                     >
-                      ✕
+                      {pendingDeleteExam === exam.id ? '¿Borrar?' : '✕'}
                     </button>
                   )}
                 </div>
