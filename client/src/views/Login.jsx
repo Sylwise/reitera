@@ -119,8 +119,9 @@ export default function Login({ onLogin, notice }) {
           <form onSubmit={handleSubmit}>
             {mode === "register" && (
               <div className="lg-field">
-                <label>NOMBRE</label>
+                <label htmlFor="lg-name">NOMBRE</label>
                 <input
+                  id="lg-name"
                   type="text"
                   placeholder="Tu nombre"
                   autoComplete="name"
@@ -132,8 +133,9 @@ export default function Login({ onLogin, notice }) {
             )}
 
             <div className="lg-field">
-              <label>EMAIL</label>
+              <label htmlFor="lg-email">EMAIL</label>
               <input
+                id="lg-email"
                 type="email"
                 placeholder="tu@universidad.edu"
                 autoComplete="email"
@@ -145,7 +147,7 @@ export default function Login({ onLogin, notice }) {
 
             <div className="lg-field">
               <div className="lg-field-row">
-                <label>CONTRASEÑA</label>
+                <label htmlFor="lg-password">CONTRASEÑA</label>
                 {mode === "login" && (
                   <span className="lg-forgot lg-forgot-disabled" title="Próximamente disponible">
                     He olvidado mi contraseña
@@ -153,6 +155,7 @@ export default function Login({ onLogin, notice }) {
                 )}
               </div>
               <input
+                id="lg-password"
                 type="password"
                 placeholder="••••••••••"
                 autoComplete={mode === "login" ? "current-password" : "new-password"}

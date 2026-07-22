@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function useIsMobile() {
@@ -10,6 +10,45 @@ function useIsMobile() {
     return () => mq.removeEventListener('change', handler);
   }, []);
   return isMobile;
+}
+
+const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
+
+// Atrapa el Tab dentro del modal y devuelve el foco a quien lo abrió al cerrar.
+function FocusTrap({ children }) {
+  const ref = useRef(null);
+  // Capturado en render, antes de que el autoFocus de los inputs mueva el foco.
+  const [opener] = useState(() => document.activeElement);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node.contains(document.activeElement)) {
+      node.querySelector(FOCUSABLE)?.focus({ preventScroll: true });
+    }
+
+    function handleKeyDown(e) {
+      if (e.key !== 'Tab') return;
+      const focusables = [...node.querySelectorAll(FOCUSABLE)];
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last  = focusables[focusables.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !node.contains(document.activeElement))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !node.contains(document.activeElement))) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      opener?.focus?.({ preventScroll: true });
+    };
+  }, [opener]);
+
+  return <div ref={ref} style={{ display: 'contents' }}>{children}</div>;
 }
 
 export default function ModalShell({ isOpen, onClose, children }) {
@@ -39,6 +78,8 @@ export default function ModalShell({ isOpen, onClose, children }) {
         >
           <motion.div
             className="modal"
+            role="dialog"
+            aria-modal="true"
             style={isMobile
               ? { width: '100%', borderRadius: '1rem 1rem 0 0', maxHeight: '85vh', overflowY: 'auto', paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }
               : { maxHeight: '90vh', overflowY: 'auto' }
@@ -54,7 +95,7 @@ export default function ModalShell({ isOpen, onClose, children }) {
               : { type: 'spring', damping: 25, stiffness: 300 }
             }
           >
-            {children}
+            <FocusTrap>{children}</FocusTrap>
           </motion.div>
         </motion.div>
       )}

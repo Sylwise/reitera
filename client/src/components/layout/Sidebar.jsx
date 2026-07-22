@@ -175,10 +175,16 @@ export default function Sidebar({ view, onViewChange, onSelectSubject, onEditSub
             </button>
           </div>
         )}
-        <div className="sidebar-user" onClick={() => menuOpen ? closeMenu() : openMenu()}>
+        <button
+          className="sidebar-user"
+          onClick={() => menuOpen ? closeMenu() : openMenu()}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          aria-label="Menú de usuario"
+        >
           <div className="sidebar-avatar">{getInitials(userName)}</div>
           <span className="sidebar-username">{userName}</span>
-        </div>
+        </button>
       </div>
     </aside>
   );
