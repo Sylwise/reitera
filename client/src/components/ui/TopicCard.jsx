@@ -49,7 +49,7 @@ export default function TopicCard({ topic, subjects = [], onMark, onEditTopic, h
 
       <div className="card-progress">
         <div className="progress-label">
-          <span>Repaso {topic.reviewCount}</span>
+          <span>{topic.reviewCount === 0 ? 'Sin repasos' : `Repaso ${topic.reviewCount}`}</span>
         </div>
         <div className="progress-track">
           <div className="progress-fill" style={{ width: `${fillPct}%` }} />

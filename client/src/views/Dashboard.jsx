@@ -8,7 +8,7 @@ import EmptyDashboard from './EmptyDashboard';
 import { getTopicStatus, getAsigColor, formatDaysLabel, compareByUrgency } from '../utils/topicHelpers';
 import { buildFocusItems } from '../utils/statsHelpers';
 
-export default function Dashboard({ topics, subjects, onMark, onAddSubject, isModalOpen, stats, onNavigateTopic, showToast }) {
+export default function Dashboard({ topics, subjects, onMark, onEditTopic, onAddSubject, isModalOpen, stats, onNavigateTopic, showToast }) {
   // En móvil no hay botón "Marcar": pista de una sola vez para que el tap sea descubrible.
   useEffect(() => {
     if (!showToast || window.innerWidth > 768) return;
@@ -43,7 +43,9 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
               <span className="hero-num">{due.length}</span> <span className="hero-title-label">tema{due.length !== 1 ? 's' : ''} pendiente{due.length !== 1 ? 's' : ''}</span>
             </div>
             {due.length > 0 && (
-              <div className="hero-sub">Tienes la racha — no la rompas ahora.</div>
+              <div className="hero-sub">
+                {stats.streak >= 2 ? 'Tienes la racha — no la rompas ahora.' : 'Un repaso hoy y te lo quitas de encima.'}
+              </div>
             )}
           </div>
           <div className="hero-meta">
@@ -63,8 +65,8 @@ export default function Dashboard({ topics, subjects, onMark, onAddSubject, isMo
             )}
             <div className="due-list">
               <AnimatePresence mode="popLayout">
-                {due.map((t, i) => (
-                  <TopicCard key={t.id} topic={t} subjects={subjects} onMark={onMark} delay={0.05 + i * 0.05} />
+                {due.map(t => (
+                  <TopicCard key={t.id} topic={t} subjects={subjects} onMark={onMark} onEditTopic={onEditTopic} />
                 ))}
               </AnimatePresence>
             </div>
