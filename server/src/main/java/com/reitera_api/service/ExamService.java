@@ -3,6 +3,7 @@ package com.reitera_api.service;
 import com.reitera_api.dto.ExamRequestDTO;
 import com.reitera_api.entity.Exam;
 import com.reitera_api.entity.Subject;
+import com.reitera_api.exception.LimitReachedException;
 import com.reitera_api.exception.ResourceNotFoundException;
 import com.reitera_api.repository.ExamRepository;
 import com.reitera_api.repository.SubjectRepository;
@@ -24,6 +25,10 @@ public class ExamService {
     public Exam addExam(Long subjectId, ExamRequestDTO dto, Long userId) {
         Subject subject = subjectRepository.findByIdAndUserId(subjectId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No subject found."));
+        Long examNumber = examRepository.countExamsBySubjectId(subjectId);
+        if(examNumber >= 10) {
+            throw new LimitReachedException("Exam limit reached.");
+        }
         return examRepository.save(Exam.create(dto, subject));
     }
 
