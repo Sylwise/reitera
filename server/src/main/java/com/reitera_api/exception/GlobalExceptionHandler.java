@@ -1,5 +1,6 @@
 package com.reitera_api.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
@@ -51,6 +52,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LimitReachedException.class)
     public ResponseEntity<String> handleTopicLimitReached(LimitReachedException exception) {
         return ResponseEntity.status(409).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+        return ResponseEntity.status(409).body(Map.of("error", "Los datos enviados entran en conflicto con los ya existentes."));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleUnexpected(Exception exception) {
+        return ResponseEntity.status(500).body(Map.of("error", "Ha ocurrido un error inesperado. Inténtalo de nuevo más tarde."));
     }
 
 }
