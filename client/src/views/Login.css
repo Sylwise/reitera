@@ -49,7 +49,6 @@
 .lg-heading {
   font-family: var(--display);
   font-weight: 700;
-  font-weight: 700;
   font-size: 2rem;
   color: var(--text);
   margin-bottom: 0.4rem;
@@ -194,6 +193,7 @@
   font-family: var(--mono);
   margin-bottom: 1rem;
 }
+[data-theme="light"] .lg-notice { color: #b45309; }
 
 .lg-error {
   font-size: 0.82rem;
@@ -202,6 +202,7 @@
   margin-top: -0.5rem;
   margin-bottom: 0.75rem;
 }
+[data-theme="light"] .lg-error { color: var(--danger); }
 
 .lg-btn-primary {
   width: 100%;
