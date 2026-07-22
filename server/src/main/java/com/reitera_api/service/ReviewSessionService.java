@@ -71,7 +71,7 @@ public class ReviewSessionService {
             topic.setDisplayedProgressDays(Topic.MASTERY_THRESHOLD_DAYS);
         } else {
             int displayed = topic.getDisplayedProgressDays();
-            int step = Math.max(-PROGRESS_STEP_CAP_DAYS, Math.min(PROGRESS_STEP_CAP_DAYS, nextInterval - displayed));
+            int step = Math.clamp(nextInterval - displayed, -PROGRESS_STEP_CAP_DAYS, PROGRESS_STEP_CAP_DAYS);
             topic.setDisplayedProgressDays(displayed + step);
         }
 
