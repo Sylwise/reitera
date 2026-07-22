@@ -1,5 +1,6 @@
 package com.reitera_api.entity;
 
+import com.reitera_api.config.AppClock;
 import com.reitera_api.dto.ReviewSessionRequestDTO;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
@@ -29,7 +30,7 @@ public class ReviewSession {
         ReviewSession reviewSession = new ReviewSession();
         reviewSession.setDifficulty(dto.getDifficulty());
         reviewSession.setScore(dto.getScore());
-        reviewSession.setReviewedAt(LocalDate.now());
+        reviewSession.setReviewedAt(AppClock.today());
         reviewSession.setTopic(topic);
         return reviewSession;
     }

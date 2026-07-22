@@ -17,3 +17,6 @@ server.port=8081
 # JWT
 jwt.secret=your_base64_encoded_secret_key
 jwt.expiration=86400000
+
+# Timezone
+app.timezone=Europe/Madrid

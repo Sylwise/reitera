@@ -1,5 +1,6 @@
 package com.reitera_api.service;
 
+import com.reitera_api.config.AppClock;
 import com.reitera_api.dto.ReviewSessionRequestDTO;
 import com.reitera_api.entity.Difficulty;
 import com.reitera_api.entity.ReviewSession;
@@ -74,20 +75,20 @@ public class ReviewSessionService {
             topic.setDisplayedProgressDays(displayed + step);
         }
 
-        return LocalDate.now().plusDays(nextInterval);
+        return AppClock.today().plusDays(nextInterval);
     }
 
     private static void streakCounter(User user) {
 
-        if (LocalDate.now().equals(user.getLastReviewDate())) {
+        if (AppClock.today().equals(user.getLastReviewDate())) {
             return;
         }
 
-        if (user.getLastReviewDate() == null || !user.getLastReviewDate().equals(LocalDate.now().minusDays(1))) {
-            user.setLastReviewDate(LocalDate.now());
+        if (user.getLastReviewDate() == null || !user.getLastReviewDate().equals(AppClock.today().minusDays(1))) {
+            user.setLastReviewDate(AppClock.today());
             user.setReviewStreak(1);
         } else {
-            user.setLastReviewDate(LocalDate.now());
+            user.setLastReviewDate(AppClock.today());
             user.setReviewStreak(user.getReviewStreak() + 1);
         }
 

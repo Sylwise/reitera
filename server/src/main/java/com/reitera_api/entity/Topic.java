@@ -1,5 +1,6 @@
 package com.reitera_api.entity;
 
+import com.reitera_api.config.AppClock;
 import com.reitera_api.dto.TopicRequestDTO;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
@@ -40,7 +41,7 @@ public class Topic {
         topic.setName(dto.getName());
         topic.setSubject(subject);
         topic.setReviewCount(0);
-        topic.setNextReviewDate(LocalDate.now());
+        topic.setNextReviewDate(AppClock.today());
         topic.setEaseFactor(2.5);
         topic.setCurrentIntervalDays(0);
         topic.setDisplayedProgressDays(0);

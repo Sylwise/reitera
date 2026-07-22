@@ -1,5 +1,6 @@
 package com.reitera_api.service;
 
+import com.reitera_api.config.AppClock;
 import com.reitera_api.dto.TopicRequestDTO;
 import com.reitera_api.entity.Subject;
 import com.reitera_api.entity.Topic;
@@ -9,7 +10,6 @@ import com.reitera_api.repository.SubjectRepository;
 import com.reitera_api.repository.TopicRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -57,7 +57,7 @@ public class TopicService {
         Topic topic = topicRepository.findByIdAndSubjectUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found."));
         topic.setReviewCount(0);
-        topic.setNextReviewDate(LocalDate.now());
+        topic.setNextReviewDate(AppClock.today());
         topic.setCurrentIntervalDays(0);
         topic.setDisplayedProgressDays(0);
         return topicRepository.save(topic);
