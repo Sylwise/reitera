@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import ModalShell from "../ui/ModalShell";
 
-export default function DoneModal({ topic, isOpen, onClose, onConfirm }) {
+export default function DoneModal({ topic, subjects = [], isOpen, onClose, onConfirm }) {
   const keyHandlerRef = useRef(null);
   useEffect(() => {
     if (!isOpen) return;
@@ -16,6 +16,7 @@ export default function DoneModal({ topic, isOpen, onClose, onConfirm }) {
         key={topic?.id}
         keyHandlerRef={keyHandlerRef}
         topic={topic}
+        subjectName={subjects.find(s => s.id === topic?.subjectId)?.name ?? ''}
         onClose={onClose}
         onConfirm={onConfirm}
       />
@@ -23,7 +24,7 @@ export default function DoneModal({ topic, isOpen, onClose, onConfirm }) {
   );
 }
 
-function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
+function DoneForm({ keyHandlerRef, topic, subjectName, onClose, onConfirm }) {
   const [diff, setDiff] = useState("normal");
   const [score, setScore] = useState("");
   const [showScore, setShowScore] = useState(false);
@@ -44,6 +45,7 @@ function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
   useEffect(() => {
     keyHandlerRef.current = (e) => {
       if (e.target.tagName === "INPUT") return;
+      if (e.key === "Enter" && (e.repeat || e.target.tagName === "BUTTON")) return;
       if (e.key === "Enter" && canConfirm) {
         onConfirm({ dificultad: diff, score: score.trim() });
         onClose();
@@ -61,7 +63,7 @@ function DoneForm({ keyHandlerRef, topic, onClose, onConfirm }) {
       <button className="btn-cancel" onClick={onClose}>
         ✕
       </button>
-      <div className="modal-asig">{topic?.asig}</div>
+      <div className="modal-asig">{subjectName}</div>
       <div className="modal-title">{topic?.name}</div>
       <div className="modal-sub">¿Cómo fue este repaso?</div>
       <div className="modal-divider" />

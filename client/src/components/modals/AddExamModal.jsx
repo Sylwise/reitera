@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import ModalShell from '../ui/ModalShell';
+import { isTouchDevice } from '../../utils/device';
 
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAYS   = ['L','M','X','J','V','S','D'];
@@ -125,6 +126,7 @@ function AddExamForm({ keyHandlerRef, onClose, onAdd, subjects, initialDate }) {
   useEffect(() => {
     keyHandlerRef.current = (e) => {
       if (e.key === 'Escape') onClose();
+      if (e.key === 'Enter' && (e.repeat || e.target.tagName === 'BUTTON')) return;
       if (e.key === 'Enter' && canSubmit) handleAdd();
     };
   });
@@ -152,7 +154,7 @@ function AddExamForm({ keyHandlerRef, onClose, onAdd, subjects, initialDate }) {
         placeholder="ej. Examen Bases de datos"
         value={name}
         onChange={e => setName(e.target.value)}
-        autoFocus
+        autoFocus={!isTouchDevice}
       />
 
       <div className="modal-section-label">Asignatura</div>

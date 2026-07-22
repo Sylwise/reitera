@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import ModalShell from "../ui/ModalShell";
 import { PALETTE, SUBJECT_LIMIT } from "../../data/subjects";
+import { isTouchDevice } from "../../utils/device";
 
 export default function AddSubjectModal({ isOpen, onClose, onAdd, subjectCount = 0 }) {
   const keyHandlerRef = useRef(null);
@@ -27,6 +28,7 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
   useEffect(() => {
     keyHandlerRef.current = (e) => {
       if (e.key === "Escape") onClose();
+      if (e.key === "Enter" && (e.repeat || e.target.tagName === "BUTTON")) return;
       if (e.key === "Enter" && name.trim() && !atLimit) handleAdd();
     };
   });
@@ -70,7 +72,7 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         disabled={atLimit}
-        autoFocus
+        autoFocus={!isTouchDevice}
       />
 
       <div className="modal-section-label">Temas totales del curso</div>
@@ -96,7 +98,7 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
           max={15}
           value={totalTopics}
           onChange={(e) =>
-            setTotalTopics(Math.max(1, parseInt(e.target.value) || 1))
+            setTotalTopics(Math.min(15, Math.max(1, parseInt(e.target.value) || 1)))
           }
         />
         <button
@@ -120,7 +122,7 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
             style={{
               "--swatch-color": c,
               background: c,
-              borderColor: color === c ? "#fff" : "transparent",
+              borderColor: color === c ? "var(--surface)" : "transparent",
               boxShadow: color === c ? `0 0 0 2px ${c}` : "none",
             }}
             onClick={() => setColor(c)}

@@ -29,6 +29,7 @@ export default function AppModals({
     <>
       <DoneModal
         topic={modalTopic}
+        subjects={subjects}
         isOpen={!!modalTopic}
         onClose={onCloseDoneModal}
         onConfirm={onConfirmDone}
@@ -76,7 +77,7 @@ export default function AppModals({
 
       <AnimatePresence>
         {toast && (
-          <div className="toast-container">
+          <div className="toast-container" role="status" aria-live="polite">
             <motion.div
               className="toast-notification"
               initial={{ opacity: 0, y: 16 }}

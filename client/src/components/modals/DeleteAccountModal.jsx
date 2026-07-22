@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import ModalShell from '../ui/ModalShell';
+import { isTouchDevice } from '../../utils/device';
 
 const CONFIRM_WORD = 'ELIMINAR';
 
@@ -27,6 +28,7 @@ function DeleteAccountForm({ keyHandlerRef, onClose, onConfirm }) {
   useEffect(() => {
     keyHandlerRef.current = (e) => {
       if (e.key === 'Escape') onClose();
+      if (e.key === 'Enter' && (e.repeat || e.target.tagName === 'BUTTON')) return;
       if (e.key === 'Enter' && canConfirm) handleConfirm();
     };
   });
@@ -61,7 +63,7 @@ function DeleteAccountForm({ keyHandlerRef, onClose, onConfirm }) {
           placeholder={CONFIRM_WORD}
           value={confirmText}
           onChange={e => setConfirmText(e.target.value)}
-          autoFocus
+          autoFocus={!isTouchDevice}
           style={{ marginBottom: '1.5rem' }}
         />
 

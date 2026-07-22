@@ -34,15 +34,18 @@ function EditSubjectForm({ keyHandlerRef, onClose, onEdit, onDelete, subject }) 
   const [color,       setColor]       = useState(subject.color);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const canEdit = name.trim().length >= 3;
+
   useEffect(() => {
     keyHandlerRef.current = (e) => {
       if (e.key === 'Escape') onClose();
-      if (e.key === 'Enter' && name.trim() && !showConfirm) handleEdit();
+      if (e.key === 'Enter' && (e.repeat || e.target.tagName === 'BUTTON')) return;
+      if (e.key === 'Enter' && canEdit && !showConfirm) handleEdit();
     };
   });
 
   function handleEdit() {
-    if (!name.trim() || !subject) return;
+    if (!canEdit || !subject) return;
     onEdit({ id: subject.id, newName: name.trim(), totalTopics: Math.max(1, totalTopics), color });
     onClose();
   }
@@ -83,6 +86,7 @@ function EditSubjectForm({ keyHandlerRef, onClose, onEdit, onDelete, subject }) 
           <input
             className="modal-input"
             type="text"
+            minLength={3}
             maxLength={40}
             placeholder="ej. Programación"
             value={name}
@@ -99,7 +103,7 @@ function EditSubjectForm({ keyHandlerRef, onClose, onEdit, onDelete, subject }) 
               min={1}
               max={15}
               value={totalTopics}
-              onChange={e => setTotalTopics(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={e => setTotalTopics(Math.min(15, Math.max(1, parseInt(e.target.value) || 1)))}
             />
             <button className="stepper-btn" disabled={totalTopics >= 15} onClick={() => setTotalTopics(t => Math.min(15, t + 1))}>+</button>
           </div>
@@ -113,7 +117,7 @@ function EditSubjectForm({ keyHandlerRef, onClose, onEdit, onDelete, subject }) 
                 aria-label={`Color ${c}`}
                 aria-pressed={color === c}
                 className={`color-swatch${color === c ? ' selected' : ''}`}
-                style={{ '--swatch-color': c, background: c, borderColor: color === c ? '#fff' : 'transparent', boxShadow: color === c ? `0 0 0 2px ${c}` : 'none' }}
+                style={{ '--swatch-color': c, background: c, borderColor: color === c ? 'var(--surface)' : 'transparent', boxShadow: color === c ? `0 0 0 2px ${c}` : 'none' }}
                 onClick={() => setColor(c)}
               />
             ))}
@@ -121,7 +125,7 @@ function EditSubjectForm({ keyHandlerRef, onClose, onEdit, onDelete, subject }) 
 
           <button
             className="btn-confirm"
-            disabled={!name.trim()}
+            disabled={!canEdit}
             onClick={handleEdit}
             style={{ marginBottom: '1rem' }}
           >

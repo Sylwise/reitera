@@ -36,8 +36,10 @@ function ConfigTopicForm({ keyHandlerRef, onClose, onConfirm, subjects, initialA
   );
   const [name, setName] = useState("");
 
+  const canConfirm = name.trim().length >= 3 && selectedSubjectId;
+
   function handleConfirm() {
-    if (!name.trim() || !selectedSubjectId) return;
+    if (!canConfirm) return;
     onConfirm({ subjectId: selectedSubjectId, name: name.trim() });
     onClose();
   }
@@ -45,11 +47,10 @@ function ConfigTopicForm({ keyHandlerRef, onClose, onConfirm, subjects, initialA
   useEffect(() => {
     keyHandlerRef.current = (e) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "Enter" && name.trim() && selectedSubjectId) handleConfirm();
+      if (e.key === "Enter" && (e.repeat || e.target.tagName === "BUTTON")) return;
+      if (e.key === "Enter" && canConfirm) handleConfirm();
     };
   });
-
-  const canConfirm = name.trim().length >= 3 && selectedSubjectId;
 
   return (
     <>
