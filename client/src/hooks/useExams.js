@@ -17,6 +17,7 @@ export function useExams(showToast) {
 
   function refetch() {
     setError(null);
+    setIsLoading(true);
     return load();
   }
 

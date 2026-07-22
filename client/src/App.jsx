@@ -58,6 +58,7 @@ export default function App() {
     addExamOpen, setAddExamOpen,
     addExamDate,
     handleAddExam, handleDeleteExam, openAddExam,
+    isLoading: examsLoading, error: examsError,
     refetch: refetchExams,
   } = useExams(showToast);
   const { stats: backendStats, refetch: refetchStats } = useStats();
@@ -130,8 +131,8 @@ export default function App() {
 
   const adjustedTopics = applyExamCaps(topics, exams);
   const stats = { ...backendStats, ...buildRealStats(adjustedTopics, subjects) };
-  const dataLoading = subjectsLoading || topicsLoading;
-  const dataError   = subjectsError || topicsError;
+  const dataLoading = subjectsLoading || topicsLoading || examsLoading;
+  const dataError   = subjectsError || topicsError || examsError;
 
   return (
     <>
