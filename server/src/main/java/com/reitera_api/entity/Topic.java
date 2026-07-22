@@ -48,7 +48,7 @@ public class Topic {
    }
 
     public boolean isMastered() {
-        return currentIntervalDays >= MASTERY_THRESHOLD_DAYS;
+        return nextReviewDate == null || getCurrentIntervalDays() >= MASTERY_THRESHOLD_DAYS;
     }
 
     public Topic() {
@@ -63,7 +63,7 @@ public class Topic {
     }
 
     public int getReviewCount() {
-        return reviewCount;
+        return reviewCount == null ? 0 : reviewCount;
     }
 
     public LocalDate getNextReviewDate() {
@@ -75,11 +75,11 @@ public class Topic {
     }
 
     public double getEaseFactor() {
-        return easeFactor;
+        return easeFactor == null ? 2.5 : easeFactor;
     }
 
     public int getCurrentIntervalDays() {
-        return currentIntervalDays;
+        return currentIntervalDays == null ? 0 : currentIntervalDays;
     }
 
     public int getDisplayedProgressDays() {

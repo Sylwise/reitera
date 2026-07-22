@@ -53,8 +53,8 @@ public class User implements UserDetails {
         this.lastReviewDate = lastReviewDate;
     }
 
-    public Integer getReviewStreak() {
-        return reviewStreak;
+    public int getReviewStreak() {
+        return reviewStreak == null ? 0 : reviewStreak;
     }
 
     public void setReviewStreak(Integer reviewStreak) {
