@@ -42,12 +42,12 @@ export function buildRealStats(topics, subjects) {
   };
 }
 
-const DIFF_KEYS = { EASY: 'easy', NORMAL: 'normal', HARD: 'hard' };
+const DIFF_KEYS = { EASY: 'easy', NORMAL: 'normal', HARD: 'hard', AGAIN: 'again' };
 
 export const EMPTY_STATS = {
   streak: 0,
   totalRepasos: 0,
-  diffDistribution: { easy: 0, normal: 0, hard: 0 },
+  diffDistribution: { easy: 0, normal: 0, hard: 0, again: 0 },
   activity: new Array(35).fill(0),
   weakSpots: [],
   atRisk: [],
@@ -84,9 +84,9 @@ function buildWeeklyInsightMessage(weeklyComparison) {
 export function mapStatsResponse(raw) {
   if (!raw) return EMPTY_STATS;
 
-  const diffDistribution = { easy: 0, normal: 0, hard: 0 };
+  const diffDistribution = { easy: 0, normal: 0, hard: 0, again: 0 };
   (raw.diffDistribution || []).forEach(({ difficulty, count }) => {
-    diffDistribution[DIFF_KEYS[difficulty]] = count;
+    if (DIFF_KEYS[difficulty]) diffDistribution[DIFF_KEYS[difficulty]] = count;
   });
 
   return {

@@ -93,6 +93,7 @@ export default function Stats({ stats, onAddSubject, onGoToTemas }) {
             easy={diffDistribution.easy}
             normal={diffDistribution.normal}
             hard={diffDistribution.hard}
+            again={diffDistribution.again}
           />
         </Panel>
       </div>

@@ -29,7 +29,7 @@ export function useTopics(showToast) {
       await addReviewSession(topic.id, { dificultad, score });
       const updated = await fetchTopic(topic.id);
       setTopics(prev => prev.map(t => t.id === topic.id ? updated : t));
-      const label = dificultad === 'easy' ? 'Fácil' : dificultad === 'hard' ? 'Difícil' : 'Normal';
+      const label = { easy: 'Fácil', normal: 'Normal', hard: 'Difícil', again: 'Otra vez' }[dificultad] ?? 'Normal';
       showToast(`✓ ${topic.name} — ${label}${score ? ` · ${score}` : ''}`);
       setModalTopic(null);
     } catch (err) {
