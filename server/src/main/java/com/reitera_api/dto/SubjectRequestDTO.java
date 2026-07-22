@@ -8,6 +8,7 @@ public class SubjectRequestDTO {
     @Size (min = 3, max = 40)
     private String name;
     @NotBlank
+    @Pattern(regexp = "^#[0-9a-fA-F]{6}$", message = "El color debe ser un código hexadecimal de 6 dígitos.")
     private String color;
     @NotNull
     @Min(1)

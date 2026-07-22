@@ -1,5 +1,6 @@
 package com.reitera_api.dto;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -12,6 +13,7 @@ public class ExamRequestDTO {
     @Size (min = 3, max = 50)
     private String name;
     @NotNull
+    @FutureOrPresent(message = "La fecha del examen no puede estar en el pasado.")
     private LocalDate examDate;
     @NotNull
     private Long subjectId;
