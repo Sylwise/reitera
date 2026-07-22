@@ -5,8 +5,6 @@ import com.reitera_api.dto.TopicRequestDTO;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-
 
 import java.time.LocalDate;
 import java.util.Objects;
