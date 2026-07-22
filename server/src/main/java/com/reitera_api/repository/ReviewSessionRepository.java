@@ -28,7 +28,7 @@ public interface ReviewSessionRepository extends JpaRepository<ReviewSession, Lo
 
     @Query("SELECT new com.reitera_api.dto.WeakSpotDTO(rs.topic.id, rs.topic.name, rs.topic.subject.name, COUNT(rs)) " +
     "FROM ReviewSession rs " +
-    "WHERE rs.topic.subject.user.id = :userId AND rs.difficulty = 'HARD' " +
+    "WHERE rs.topic.subject.user.id = :userId AND rs.difficulty IN ('HARD', 'AGAIN') " +
     "GROUP BY rs.topic.id, rs.topic.subject.id "+
     "ORDER BY COUNT(rs) DESC")
     List<WeakSpotDTO> findWeakSpots(@Param("userId") Long userId, Pageable pageable);
