@@ -16,7 +16,6 @@ import { useExams }    from './hooks/useExams';
 import { useStats }    from './hooks/useStats';
 import { buildRealStats } from './utils/statsHelpers';
 import { applyExamCaps } from './utils/topicHelpers';
-import Spinner from './components/ui/Spinner';
 import { getToken, getUser, setUnauthorizedHandler } from './api/client';
 import { deleteAccount, logout } from './api/auth';
 
@@ -44,13 +43,13 @@ export default function App() {
     topics, setTopics,
     modalTopic, setModalTopic,
     handleConfirm, handleConfigTopic, handleEditTopic, handleDeleteTopic, handleResetTopic,
-    isLoading: topicsLoading, error: topicsError,
+    error: topicsError,
     refetch: refetchTopics,
   } = useTopics(showToast);
   const {
     subjects,
     handleAddSubject, handleEditSubject, handleDeleteSubject,
-    isLoading: subjectsLoading, error: subjectsError,
+    error: subjectsError,
     refetch: refetchSubjects,
   } = useSubjects(setTopics, setFocusAsig, showToast);
   const {
@@ -58,7 +57,7 @@ export default function App() {
     addExamOpen, setAddExamOpen,
     addExamDate,
     handleAddExam, handleDeleteExam, openAddExam,
-    isLoading: examsLoading, error: examsError,
+    error: examsError,
     refetch: refetchExams,
   } = useExams(showToast);
   const { stats: backendStats, refetch: refetchStats } = useStats();
@@ -131,8 +130,7 @@ export default function App() {
 
   const adjustedTopics = applyExamCaps(topics, exams);
   const stats = { ...backendStats, ...buildRealStats(adjustedTopics, subjects) };
-  const dataLoading = subjectsLoading || topicsLoading || examsLoading;
-  const dataError   = subjectsError || topicsError || examsError;
+  const dataError = subjectsError || topicsError || examsError;
 
   return (
     <>
@@ -163,8 +161,7 @@ export default function App() {
           />
 
           <div id="app">
-            {dataLoading && <Spinner />}
-            {!dataLoading && dataError && (
+            {dataError ? (
               <div className="load-error">
                 <h1 className="empty-title">Sin conexión con el servidor</h1>
                 <p className="empty-subtitle">
@@ -179,8 +176,7 @@ export default function App() {
                   Reintentar
                 </button>
               </div>
-            )}
-            {!dataLoading && !dataError && (
+            ) : (
             <AnimatePresence mode="wait">
               <motion.div
                 key={view}
