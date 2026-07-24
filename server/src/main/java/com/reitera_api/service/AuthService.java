@@ -1,6 +1,7 @@
 package com.reitera_api.service;
 
 import com.reitera_api.dto.AuthResponseDTO;
+import com.reitera_api.dto.ChangePasswordDTO;
 import com.reitera_api.dto.LoginRequestDTO;
 import com.reitera_api.dto.RegisterRequestDTO;
 import com.reitera_api.entity.User;
@@ -43,6 +44,16 @@ public class AuthService {
         } else {
             throw new BadCredentialsException("Invalid credentials.");
         }
+    }
+
+    public void changePassword (User user, ChangePasswordDTO dto) {
+        if (passwordEncoder.matches(dto.getOldPassword(), user.getPasswordHash())) {
+            user.setPasswordHash(passwordEncoder.encode(dto.getNewPassword()));
+        } else {
+            throw new BadCredentialsException("Password doesn't match.");
+        }
+
+        userRepository.save(user);
     }
 
     public void delete(User user) {

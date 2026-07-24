@@ -1,6 +1,7 @@
 package com.reitera_api.controller;
 
 import com.reitera_api.dto.AuthResponseDTO;
+import com.reitera_api.dto.ChangePasswordDTO;
 import com.reitera_api.dto.LoginRequestDTO;
 import com.reitera_api.dto.RegisterRequestDTO;
 import com.reitera_api.entity.User;
@@ -33,6 +34,12 @@ public class AuthController {
     @DeleteMapping("/me")
     public ResponseEntity<Void> delete(@AuthenticationPrincipal User user) {
         authService.delete(user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal User user, @RequestBody @Valid ChangePasswordDTO dto){
+        authService.changePassword(user, dto);
         return ResponseEntity.noContent().build();
     }
 
