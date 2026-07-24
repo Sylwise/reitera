@@ -62,7 +62,7 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
                 </motion.button>
               </div>
 
-              {/* ── Bloque 3: Ajustes ── */}
+              {/* ── Bloque 3: Preferencias ── */}
               <div className="mobile-menu-section">
                 <motion.button whileTap={{ scale: 0.95 }} className="dd-item" onClick={() => { toggleTheme(); setMenuOpen(false); }}>
                   {theme === 'dark' ? (
@@ -81,6 +81,10 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
                     </>
                   )}
                 </motion.button>
+              </div>
+
+              {/* ── Bloque 4: Cuenta ── */}
+              <div className="mobile-menu-section">
                 <motion.button whileTap={{ scale: 0.95 }} className="dd-item" onClick={() => { onChangePassword(); setMenuOpen(false); }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -88,11 +92,7 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
                   </svg>
                   Cambiar contraseña
                 </motion.button>
-              </div>
-
-              {/* ── Bloque 4: Peligro ── */}
-              <div className="mobile-menu-section">
-                <motion.button whileTap={{ scale: 0.95 }} className="dd-item danger" onClick={() => { onLogout(); setMenuOpen(false); }}>
+                <motion.button whileTap={{ scale: 0.95 }} className="dd-item" onClick={() => { onLogout(); setMenuOpen(false); }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
                   </svg>

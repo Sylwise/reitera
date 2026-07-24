@@ -901,6 +901,7 @@ body::before {
   text-align: left;
 }
 .sidebar-user-menu-item:hover       { background: var(--surface2); color: var(--text) }
+.sidebar-user-menu-item.danger       { color: var(--danger) }
 .sidebar-user-menu-item.danger:hover { color: var(--danger) }
 
 /* ── SCROLLBAR ──────────────────────────────────────────── */
