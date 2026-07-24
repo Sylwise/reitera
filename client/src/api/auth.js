@@ -23,6 +23,10 @@ export function deleteAccount() {
   return apiFetch('/auth/me', { method: 'DELETE' });
 }
 
+export function changePassword({ oldPassword, newPassword }) {
+  return apiFetch('/auth/me', { method: 'PUT', body: { oldPassword, newPassword } });
+}
+
 export function logout() {
   clearToken();
   clearUser();

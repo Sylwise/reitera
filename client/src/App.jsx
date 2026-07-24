@@ -17,7 +17,7 @@ import { useStats }    from './hooks/useStats';
 import { buildRealStats } from './utils/statsHelpers';
 import { applyExamCaps } from './utils/topicHelpers';
 import { getToken, getUser, setUnauthorizedHandler } from './api/client';
-import { deleteAccount, logout } from './api/auth';
+import { deleteAccount, changePassword, logout } from './api/auth';
 
 export default function App() {
   const [loggedIn, setLoggedIn]             = useState(() => !!getToken());
@@ -36,6 +36,7 @@ export default function App() {
   const [editSubject, setEditSubject]       = useState(null);
   const [editTopic, setEditTopic]           = useState(null);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [sessionExpired, setSessionExpired]       = useState(false);
 
   const { toast, showToast, dismissToast } = useToast();
@@ -108,6 +109,11 @@ export default function App() {
     }
   }
 
+  async function handleChangePassword(payload) {
+    await changePassword(payload);
+    showToast('✓ Contraseña actualizada');
+  }
+
   function handleLoginSuccess() {
     setCurrentUser(getUser());
     setLoggedIn(true);
@@ -145,6 +151,7 @@ export default function App() {
           userName={currentUser?.name}
           onAddSubject={() => setAddSubjectOpen(true)}
           onLogout={handleLogout}
+          onChangePassword={() => setChangePasswordOpen(true)}
           onDeleteAccount={() => setDeleteAccountOpen(true)}
         />
 
@@ -157,6 +164,7 @@ export default function App() {
             onAddTopic={() => openConfigModal(null)}
             onOpenAsignaturas={() => setView('asignaturas')}
             onLogout={handleLogout}
+            onChangePassword={() => setChangePasswordOpen(true)}
             onDeleteAccount={() => setDeleteAccountOpen(true)}
           />
 
@@ -227,6 +235,9 @@ export default function App() {
         deleteAccountOpen={deleteAccountOpen}
         onCloseDeleteAccount={() => setDeleteAccountOpen(false)}
         onConfirmDeleteAccount={handleDeleteAccount}
+        changePasswordOpen={changePasswordOpen}
+        onCloseChangePassword={() => setChangePasswordOpen(false)}
+        onConfirmChangePassword={handleChangePassword}
         toast={toast}
         onDismissToast={dismissToast}
       />

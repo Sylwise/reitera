@@ -44,6 +44,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(exception.getMessage());
     }
 
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<String> handleInvalidPassword(InvalidPasswordException exception) {
+        return ResponseEntity.status(400).body(exception.getMessage());
+    }
+
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<String> handleDuplicateEmail (EmailAlreadyExistsException exception) {
         return ResponseEntity.status(409).body(exception.getMessage());

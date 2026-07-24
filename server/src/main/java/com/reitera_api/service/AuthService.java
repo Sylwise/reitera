@@ -6,6 +6,7 @@ import com.reitera_api.dto.LoginRequestDTO;
 import com.reitera_api.dto.RegisterRequestDTO;
 import com.reitera_api.entity.User;
 import com.reitera_api.exception.EmailAlreadyExistsException;
+import com.reitera_api.exception.InvalidPasswordException;
 import com.reitera_api.repository.UserRepository;
 import com.reitera_api.security.JwtUtil;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -50,7 +51,7 @@ public class AuthService {
         if (passwordEncoder.matches(dto.getOldPassword(), user.getPasswordHash())) {
             user.setPasswordHash(passwordEncoder.encode(dto.getNewPassword()));
         } else {
-            throw new BadCredentialsException("Password doesn't match.");
+            throw new InvalidPasswordException("Password doesn't match.");
         }
 
         userRepository.save(user);

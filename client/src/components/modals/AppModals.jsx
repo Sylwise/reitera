@@ -6,6 +6,7 @@ import ConfigTopicModal from './ConfigTopicModal';
 import EditSubjectModal   from './EditSubjectModal';
 import EditTopicModal     from './EditTopicModal';
 import DeleteAccountModal from './DeleteAccountModal';
+import ChangePasswordModal from './ChangePasswordModal';
 
 export default function AppModals({
   // DoneModal
@@ -22,6 +23,8 @@ export default function AppModals({
   editTopic, onCloseEditTopic, onEditTopic, onDeleteTopic, onResetTopic,
   // DeleteAccountModal
   deleteAccountOpen, onCloseDeleteAccount, onConfirmDeleteAccount,
+  // ChangePasswordModal
+  changePasswordOpen, onCloseChangePassword, onConfirmChangePassword,
   // Toast
   toast, onDismissToast,
 }) {
@@ -73,6 +76,11 @@ export default function AppModals({
         isOpen={deleteAccountOpen}
         onClose={onCloseDeleteAccount}
         onConfirm={onConfirmDeleteAccount}
+      />
+      <ChangePasswordModal
+        isOpen={changePasswordOpen}
+        onClose={onCloseChangePassword}
+        onConfirm={onConfirmChangePassword}
       />
 
       <AnimatePresence>
