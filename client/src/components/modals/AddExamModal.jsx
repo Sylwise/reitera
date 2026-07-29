@@ -121,21 +121,34 @@ function AddExamForm({ keyHandlerRef, onClose, onAdd, subjects, initialDate }) {
   const [subjectId, setSubjectId] = useState(subjects[0]?.id ?? null);
   const [date,      setDate]      = useState(() => startOfDay(initialDate instanceof Date ? initialDate : new Date()));
 
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
   const canSubmit = name.trim().length >= 3 && subjectId != null;
 
   useEffect(() => {
     keyHandlerRef.current = (e) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'Enter' && (e.repeat || e.target.tagName === 'BUTTON')) return;
-      if (e.key === 'Enter' && canSubmit) handleAdd();
+      if (e.key === 'Enter') handleAdd();
     };
   });
 
-  function handleAdd() {
-    if (!canSubmit) return;
+  // El modal se queda abierto con el botón bloqueado hasta que el POST resuelve,
+  // para que un doble clic no cree el examen dos veces.
+  async function handleAdd() {
+    if (!canSubmit || submitting) return;
     const d = new Date(date); d.setHours(12, 0, 0, 0);
-    onAdd({ name: name.trim(), subjectId, date: d });
-    onClose();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await onAdd({ name: name.trim(), subjectId, date: d });
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -178,13 +191,21 @@ function AddExamForm({ keyHandlerRef, onClose, onAdd, subjects, initialDate }) {
       <div className="modal-section-label">Fecha</div>
       <DatePicker value={date} onChange={setDate} />
 
+      {error && (
+        <div className="modal-section-label" style={{ color: 'var(--danger)', marginBottom: '1rem' }}>
+          {error}
+        </div>
+      )}
+
       <button
         className="btn-confirm"
-        disabled={!canSubmit}
+        disabled={!canSubmit || submitting}
         onClick={handleAdd}
       >
-        Añadir examen
-        <span className="key-hint" style={{ opacity: .5, fontSize: '.7rem', marginLeft: '.5rem' }}>Enter ↵</span>
+        {submitting ? 'Añadiendo…' : 'Añadir examen'}
+        {!submitting && (
+          <span className="key-hint" style={{ opacity: .5, fontSize: '.7rem', marginLeft: '.5rem' }}>Enter ↵</span>
+        )}
       </button>
     </>
   );

@@ -1,5 +1,6 @@
 import Panel from '../components/ui/Panel';
-import Spinner from '../components/ui/Spinner';
+import Skeleton from '../components/ui/Skeleton';
+import AsyncSection from '../components/ui/AsyncSection';
 import DonutChart from '../components/charts/DonutChart';
 import BarChart from '../components/ui/BarChart';
 import EmptyStats from './EmptyStats';
@@ -38,20 +39,71 @@ function buildHeatmapDates(activity) {
   return { cells, numCols, weekHeaders };
 }
 
-export default function Stats({ stats, onAddSubject, onGoToTemas }) {
-  if (!stats) return <Spinner />;
+function StatsSkeleton() {
+  return (
+    <>
+      <div className="stats-grid">
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} className="kpi-card">
+            <Skeleton w="55%" h={10} />
+            <Skeleton w={64} h={30} style={{ margin: '.7rem 0 .55rem' }} />
+            <Skeleton w="75%" h={10} />
+          </div>
+        ))}
+      </div>
 
-  const { streak, totalRepasos, overdue, diffDistribution, chart30, asigProgress, activity, weeklyInsight } = stats;
+      <div className="stats-row">
+        <Panel title="Carga — próximos 30 días"><Skeleton h={120} /></Panel>
+        <Panel title="Distribución de dificultad"><Skeleton h={120} /></Panel>
+      </div>
 
-  if (totalRepasos === 0) {
+      <div className="stats-row" style={{ alignItems: 'start' }}>
+        <Panel title="Progreso por asignatura">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.9rem' }}>
+            {[0, 1, 2].map(i => (
+              <div key={i}>
+                <Skeleton w="60%" h={11} style={{ marginBottom: '.45rem' }} />
+                <Skeleton h={6} r={3} />
+              </div>
+            ))}
+          </div>
+        </Panel>
+        <Panel title="Actividad — últimas 5 semanas"><Skeleton h={220} /></Panel>
+      </div>
+    </>
+  );
+}
+
+export default function Stats({ stats, onAddSubject, onGoToTemas, statsState }) {
+  const ready = !statsState.isLoading && !statsState.error && stats;
+
+  // El "aún no hay nada que enseñar" sólo tras confirmar que la carga fue bien.
+  if (ready && stats.totalRepasos === 0) {
     return (
       <EmptyStats
-        hasSubjects={asigProgress.length > 0}
+        hasSubjects={stats.asigProgress.length > 0}
         onAddSubject={onAddSubject}
         onGoToTemas={onGoToTemas}
       />
     );
   }
+
+  return (
+    <div className="page-wrap">
+      <AsyncSection
+        isLoading={statsState.isLoading || !stats}
+        error={statsState.error}
+        onRetry={statsState.retry}
+        skeleton={<StatsSkeleton />}
+      >
+        <StatsContent stats={stats} />
+      </AsyncSection>
+    </div>
+  );
+}
+
+function StatsContent({ stats }) {
+  const { streak, totalRepasos, overdue, diffDistribution, chart30, asigProgress, activity, weeklyInsight } = stats;
 
   const masteredTotal = asigProgress.reduce((s, a) => s + a.done, 0);
   const { cells: heatmapData, numCols, weekHeaders } = buildHeatmapDates(activity);
@@ -61,7 +113,7 @@ export default function Stats({ stats, onAddSubject, onGoToTemas }) {
   }));
 
   return (
-    <div className="page-wrap">
+    <>
       <div className="stats-grid fade-in">
         {[
           { label: 'Afianzados',      value: masteredTotal,   cls: 'accent', sub: `de ${asigProgress.reduce((s, a) => s + a.total, 0)} temas totales` },
@@ -161,6 +213,6 @@ export default function Stats({ stats, onAddSubject, onGoToTemas }) {
           </div>
         </Panel>
       </div>
-    </div>
+    </>
   );
 }

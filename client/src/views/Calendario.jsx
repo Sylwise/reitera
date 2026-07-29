@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import Panel from '../components/ui/Panel';
 import StatusTag from '../components/ui/StatusTag';
+import Skeleton from '../components/ui/Skeleton';
+import AsyncSection from '../components/ui/AsyncSection';
 import { getTopicStatus, getAsigColor, compareByUrgency } from '../utils/topicHelpers';
 
 function examCountdownLabel(diff) {
@@ -41,7 +43,12 @@ function weekRangeLabel(weekDaysArr) {
   return `${firstLabel} – ${fmt(last, true)} ${last.getFullYear()}`;
 }
 
-export default function Calendario({ topics, subjects, exams, onAddExam, onDeleteExam, onNavigateTopic }) {
+export default function Calendario({ topics, subjects, exams, onAddExam, onDeleteExam, onNavigateTopic, calendarState }) {
+  const ready = !calendarState.isLoading && !calendarState.error && topics && subjects && exams;
+  const safeTopics   = topics ?? [];
+  const safeSubjects = subjects ?? [];
+  const safeExams    = exams ?? [];
+
   // Recalculado en cada render: memoizarlo dejaba "hoy" anclado si la vista cruzaba la medianoche.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -101,10 +108,10 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
   }
 
   function getDayTopics(date) {
-    return topics.filter(t => { const td = getTopicDate(t); return td && sameDay(td, date); });
+    return safeTopics.filter(t => { const td = getTopicDate(t); return td && sameDay(td, date); });
   }
   function getDayExams(date) {
-    return exams.filter(e => sameDay(new Date(e.date), date));
+    return safeExams.filter(e => sameDay(new Date(e.date), date));
   }
 
   const days      = buildDays();
@@ -154,7 +161,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                 const dayExams  = getDayExams(day.date);
                 const isToday   = sameDay(day.date, today);
                 const isSel     = sameDay(day.date, sel);
-                const dotColors = [...new Set(dayTopics.map(t => getAsigColor(t.subjectId, subjects)).filter(Boolean))];
+                const dotColors = [...new Set(dayTopics.map(t => getAsigColor(t.subjectId, safeSubjects)).filter(Boolean))];
                 return (
                   <div
                     key={i}
@@ -204,7 +211,8 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                       <span className="cal-week-row-num">{d.getDate()}</span>
                     </div>
                     <div className="cal-week-row-content">
-                      {dTopics.length === 0 && dExams.length === 0 && (
+                      {!ready && <Skeleton w={110} h={16} r={9} />}
+                      {ready && dTopics.length === 0 && dExams.length === 0 && (
                         <span className="cal-week-row-empty">Sin repasos</span>
                       )}
                       {dExams.map(e => (
@@ -218,7 +226,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                           onClick={(e) => { e.stopPropagation(); onNavigateTopic && onNavigateTopic(t); }}
                           style={onNavigateTopic ? { cursor: 'pointer' } : undefined}
                         >
-                          <span className="cal-week-chip-dot" style={{ background: getAsigColor(t.subjectId, subjects) }} />
+                          <span className="cal-week-chip-dot" style={{ background: getAsigColor(t.subjectId, safeSubjects) }} />
                           {t.name}
                         </span>
                       ))}
@@ -235,7 +243,13 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
               <div className="cal-dot-sm" style={{ background: 'var(--warn)' }} />
               Exámenes
             </div>
-            {subjects.map(s => (
+            {!ready && [0, 1, 2].map(i => (
+              <div key={`sk-${i}`} className="cal-legend-item">
+                <Skeleton w={7} h={7} r="50%" />
+                <Skeleton w={68 + i * 14} h={10} />
+              </div>
+            ))}
+            {safeSubjects.map(s => (
               <div key={s.id} className="cal-legend-item">
                 <div className="cal-dot-sm" style={{ background: s.color }} />
                 {s.name}
@@ -250,22 +264,34 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
             titleAction={onAddExam && (
               <button
                 onClick={() => onAddExam(sel)}
-                title="Añadir examen"
+                title={ready ? 'Añadir examen' : 'Cargando…'}
                 type="button"
+                disabled={!ready}
                 style={{
                   background: 'none', border: '1px solid var(--border2)', borderRadius: 6,
                   color: 'var(--muted)', width: 22, height: 22, display: 'flex',
                   alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
                   fontSize: '1rem', lineHeight: 1, flexShrink: 0,
                   transition: 'color .15s, border-color .15s, background .15s',
+                  ...(ready ? null : { opacity: .4, cursor: 'not-allowed' }),
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color='var(--accent)'; e.currentTarget.style.borderColor='var(--accent)'; e.currentTarget.style.background='rgba(var(--accent-rgb),.08)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color='var(--muted)'; e.currentTarget.style.borderColor='var(--border2)'; e.currentTarget.style.background='none'; }}
+                onMouseEnter={e => { if (!ready) return; e.currentTarget.style.color='var(--accent)'; e.currentTarget.style.borderColor='var(--accent)'; e.currentTarget.style.background='rgba(var(--accent-rgb),.08)'; }}
+                onMouseLeave={e => { if (!ready) return; e.currentTarget.style.color='var(--muted)'; e.currentTarget.style.borderColor='var(--border2)'; e.currentTarget.style.background='none'; }}
               >
                 +
               </button>
             )}
           >
+            <AsyncSection
+              isLoading={calendarState.isLoading}
+              error={calendarState.error}
+              onRetry={calendarState.retry}
+              skeleton={
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '.7rem', padding: '.4rem 0' }}>
+                  {[0, 1, 2].map(i => <Skeleton key={i} h={16} w={`${88 - i * 14}%`} />)}
+                </div>
+              }
+            >
             {selExams.length === 0 && selTopics.length === 0 && (
               <div className="cal-side-empty">Sin repasos ni exámenes este día</div>
             )}
@@ -275,7 +301,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                 <div key={exam.id} className="risk-row">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '.15rem', flex: 1, minWidth: 0 }}>
                     <div className="risk-name">📅 {exam.name}</div>
-                    <div style={{ fontFamily: 'var(--mono)', fontSize: '.7rem', color: 'var(--muted)' }}>{subjects.find(s => s.id === exam.subjectId)?.name ?? ''}</div>
+                    <div style={{ fontFamily: 'var(--mono)', fontSize: '.7rem', color: 'var(--muted)' }}>{safeSubjects.find(s => s.id === exam.subjectId)?.name ?? ''}</div>
                   </div>
                   <span className={`exam-countdown ${diff <= 7 ? 'urgent' : diff <= 14 ? 'soon' : 'ok'}`}>{examCountdownLabel(diff)}</span>
                   {onDeleteExam && (
@@ -310,7 +336,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                     title={onNavigateTopic ? 'Ir al tema' : undefined}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flex: 1, minWidth: 0 }}>
-                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: getAsigColor(t.subjectId, subjects), flexShrink: 0, display: 'inline-block' }} />
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: getAsigColor(t.subjectId, safeSubjects), flexShrink: 0, display: 'inline-block' }} />
                       <div className="risk-name" style={{ fontSize: '.78rem' }}>{t.name}</div>
                     </div>
                     <StatusTag status={getTopicStatus(t)} />
@@ -339,7 +365,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                     title={onNavigateTopic ? 'Ir al tema' : undefined}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flex: 1, minWidth: 0 }}>
-                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: getAsigColor(t.subjectId, subjects), flexShrink: 0, display: 'inline-block' }} />
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: getAsigColor(t.subjectId, safeSubjects), flexShrink: 0, display: 'inline-block' }} />
                       <div className="risk-name" style={{ fontSize: '.78rem' }}>{t.name}</div>
                     </div>
                     <StatusTag status={getTopicStatus(t)} />
@@ -347,6 +373,7 @@ export default function Calendario({ topics, subjects, exams, onAddExam, onDelet
                 ))}
               </div>
             )}
+            </AsyncSection>
           </Panel>
         </div>
 

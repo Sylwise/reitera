@@ -23,20 +23,33 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
   const [name, setName] = useState("");
   const [totalTopics, setTotalTopics] = useState(6);
   const [color, setColor] = useState(PALETTE[0]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const atLimit = subjectCount >= SUBJECT_LIMIT;
+  const canAdd = name.trim().length >= 3 && !atLimit;
 
   useEffect(() => {
     keyHandlerRef.current = (e) => {
       if (e.key === "Escape") onClose();
       if (e.key === "Enter" && (e.repeat || e.target.tagName === "BUTTON")) return;
-      if (e.key === "Enter" && name.trim() && !atLimit) handleAdd();
+      if (e.key === "Enter") handleAdd();
     };
   });
 
-  function handleAdd() {
-    if (name.trim().length < 3 || atLimit) return;
-    onAdd({ name: name.trim(), totalTopics: Math.max(1, totalTopics), color });
-    onClose();
+  // El modal se queda abierto con el botón bloqueado hasta que el POST resuelve,
+  // para que un doble clic no cree la asignatura dos veces.
+  async function handleAdd() {
+    if (!canAdd || submitting) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      await onAdd({ name: name.trim(), totalTopics: Math.max(1, totalTopics), color });
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -130,15 +143,23 @@ function AddSubjectForm({ keyHandlerRef, onClose, onAdd, subjectCount }) {
         ))}
       </div>
 
+      {error && (
+        <div className="modal-section-label" style={{ color: "var(--danger)", marginBottom: "1rem" }}>
+          {error}
+        </div>
+      )}
+
       <button
         className="btn-confirm"
-        disabled={name.trim().length < 3 || atLimit}
+        disabled={!canAdd || submitting}
         onClick={handleAdd}
       >
-        Crear asignatura
-        <span className="key-hint" style={{ opacity: 0.5, fontSize: ".7rem", marginLeft: ".5rem" }}>
-          Enter ↵
-        </span>
+        {submitting ? 'Creando…' : 'Crear asignatura'}
+        {!submitting && (
+          <span className="key-hint" style={{ opacity: 0.5, fontSize: ".7rem", marginLeft: ".5rem" }}>
+            Enter ↵
+          </span>
+        )}
       </button>
     </>
   );

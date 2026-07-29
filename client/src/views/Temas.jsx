@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TopicCard from '../components/ui/TopicCard';
+import Skeleton from '../components/ui/Skeleton';
+import AsyncSection from '../components/ui/AsyncSection';
 import { getTopicStatus, compareByUrgency } from '../utils/topicHelpers';
 import { useLongPress } from '../hooks/useLongPress';
 
@@ -24,8 +26,42 @@ function computeCollapsed(subjects, topics, effectiveFocusAsig) {
   return s;
 }
 
-export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSubject, onAddTopic, focusAsig, focusTopicId }) {
-  const focusTopic       = focusTopicId != null ? topics.find(t => t.id === focusTopicId) : null;
+function TopicRowSkeleton() {
+  return (
+    <div className="skeleton-card">
+      <div className="skeleton-row">
+        <Skeleton w={8} h={8} r="50%" />
+        <Skeleton w="40%" h={13} />
+        <Skeleton w={54} h={18} r={9} style={{ marginLeft: 'auto' }} />
+      </div>
+      <Skeleton w="25%" h={10} />
+    </div>
+  );
+}
+
+function TemasSkeleton() {
+  return (
+    <>
+      {[0, 1].map(g => (
+        <div key={g} className="asig-group">
+          <div className="asig-group-header skeleton-asig-row">
+            <Skeleton w={10} h={10} r="50%" />
+            <Skeleton w={120} h={14} />
+            <Skeleton w={58} h={11} style={{ marginLeft: 'auto' }} />
+          </div>
+          {[0, 1].map(i => <TopicRowSkeleton key={i} />)}
+        </div>
+      ))}
+    </>
+  );
+}
+
+export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSubject, onAddTopic, focusAsig, focusTopicId, coreState }) {
+  const ready = !coreState.isLoading && !coreState.error && topics && subjects;
+  const safeTopics   = topics ?? [];
+  const safeSubjects = subjects ?? [];
+
+  const focusTopic       = focusTopicId != null ? safeTopics.find(t => t.id === focusTopicId) : null;
   const effectiveFocusAsig = focusAsig ?? focusTopic?.subjectId ?? null;
 
   const [filter, setFilter] = useState(effectiveFocusAsig ? 'all' : 'pending');
@@ -34,14 +70,22 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
 
   const subjectLongPress = useLongPress();
 
-  const [collapsed, setCollapsed] = useState(() => computeCollapsed(subjects, topics, effectiveFocusAsig));
+  const [collapsed, setCollapsed] = useState(() => computeCollapsed(safeSubjects, safeTopics, effectiveFocusAsig));
 
   // Al cambiar el foco de asignatura, se recalcula qué grupos van plegados y el filtro.
   const [prevFocusAsig, setPrevFocusAsig] = useState(focusAsig);
   if (focusAsig !== prevFocusAsig) {
     setPrevFocusAsig(focusAsig);
-    setCollapsed(computeCollapsed(subjects, topics, effectiveFocusAsig));
+    setCollapsed(computeCollapsed(safeSubjects, safeTopics, effectiveFocusAsig));
     setFilter(effectiveFocusAsig ? 'all' : 'pending');
+  }
+
+  // En el primer render los datos aún no han llegado, así que el plegado inicial se
+  // calcula cuando de verdad hay temas con los que decidir.
+  const [wasReady, setWasReady] = useState(ready);
+  if (ready && !wasReady) {
+    setWasReady(true);
+    setCollapsed(computeCollapsed(safeSubjects, safeTopics, effectiveFocusAsig));
   }
 
   // Scroll + flash-highlight al tema que nos trajo aquí desde el calendario.
@@ -82,23 +126,23 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
   function matchesSearch(t) {
     if (!search) return true;
     const q           = search.toLowerCase();
-    const subjectName = subjects.find(s => s.id === t.subjectId)?.name ?? '';
+    const subjectName = safeSubjects.find(s => s.id === t.subjectId)?.name ?? '';
     return t.name?.toLowerCase().includes(q) || subjectName.toLowerCase().includes(q);
   }
 
-  const groups = subjects.map(subj => {
+  const groups = safeSubjects.map(subj => {
     const { id, name, color, totalTopics } = subj;
-    const subjTopics = topics.filter(t => t.subjectId === id);
+    const subjTopics = safeTopics.filter(t => t.subjectId === id);
     const filtered   = subjTopics.filter(t => matchesFilter(t) && matchesSearch(t)).sort(compareByUrgency);
     const mastered   = subjTopics.filter(t => getTopicStatus(t) === 'mastered').length;
     const pct        = totalTopics > 0 ? Math.round(mastered / totalTopics * 100) : 0;
     return { id, name, color, topics: filtered, mastered, total: subjTopics.length, totalTopics, pct };
   }).filter(g => g.topics.length > 0);
 
-  const total = topics.filter(t => matchesFilter(t) && matchesSearch(t)).length;
+  const total = safeTopics.filter(t => matchesFilter(t) && matchesSearch(t)).length;
   // Coincidencias de la búsqueda que el filtro activo está ocultando.
   const hiddenByFilter = search && filter !== 'all'
-    ? topics.filter(t => matchesSearch(t)).length - total
+    ? safeTopics.filter(t => matchesSearch(t)).length - total
     : 0;
 
   return (
@@ -106,8 +150,16 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
       <div className="temas-header fade-in">
         <div className="temas-title-row">
           <div className="temas-title">Todos los temas</div>
-          {onAddTopic && subjects.length > 0 && (
-            <button className="temas-add-btn" onClick={onAddTopic} aria-label="Añadir tema" type="button">
+          {onAddTopic && (!ready || safeSubjects.length > 0) && (
+            <button
+              className="temas-add-btn"
+              onClick={onAddTopic}
+              aria-label="Añadir tema"
+              type="button"
+              disabled={!ready}
+              title={ready ? undefined : (coreState.error ? 'No se han podido cargar los datos' : 'Cargando…')}
+              style={!ready ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -142,15 +194,27 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
           </button>
         ))}
         <span style={{ marginLeft: 'auto', fontFamily: 'var(--mono)', fontSize: '.7rem', color: 'var(--muted)', alignSelf: 'center' }}>
-          {total} resultado{total !== 1 ? 's' : ''}
-          {hiddenByFilter > 0 && (
-            <button className="link-btn" onClick={() => setFilter('all')}>
-              +{hiddenByFilter} en “Todos”
-            </button>
+          {ready ? (
+            <>
+              {total} resultado{total !== 1 ? 's' : ''}
+              {hiddenByFilter > 0 && (
+                <button className="link-btn" onClick={() => setFilter('all')}>
+                  +{hiddenByFilter} en “Todos”
+                </button>
+              )}
+            </>
+          ) : (
+            <Skeleton w={72} h={11} />
           )}
         </span>
       </div>
 
+      <AsyncSection
+        isLoading={coreState.isLoading}
+        error={coreState.error}
+        onRetry={coreState.retry}
+        skeleton={<TemasSkeleton />}
+      >
       {groups.length === 0 ? (
         <div className="fade-in" style={{ fontFamily: 'var(--mono)', fontSize: '.8rem', color: 'var(--muted)', padding: '3rem 0', textAlign: 'center' }}>
           <div>Sin resultados{search ? <> para <span style={{ color: 'var(--text)' }}>“{search}”</span></> : ''}</div>
@@ -224,7 +288,7 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
                       <TopicCard
                         key={t.id}
                         topic={t}
-                        subjects={subjects}
+                        subjects={safeSubjects}
                         onMark={onMark}
                         onEditTopic={onEditTopic}
                         hideAsig
@@ -238,6 +302,7 @@ export default function Temas({ topics, subjects, onMark, onEditTopic, onEditSub
           </div>
         );
       })}
+      </AsyncSection>
     </div>
   );
 }

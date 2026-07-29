@@ -5,6 +5,7 @@ import { useOutsideClick } from '../../hooks/useOutsideClick';
 import { useLongPress } from '../../hooks/useLongPress';
 import { useTheme } from '../../context/theme';
 import { getInitials } from '../../utils/userHelpers';
+import Skeleton from '../ui/Skeleton';
 import { SUBJECT_LIMIT } from '../../data/subjects';
 
 function IconDots() {
@@ -49,14 +50,17 @@ const ICONS = {
   ),
 };
 
-export default function Sidebar({ view, onViewChange, onSelectSubject, onEditSubject, subjects, topics, userName, onAddSubject, onLogout, onChangePassword, onDeleteAccount }) {
+export default function Sidebar({ view, onViewChange, onSelectSubject, onEditSubject, subjects, topics, subjectsState, userName, onAddSubject, onLogout, onChangePassword, onDeleteAccount }) {
   const { theme, toggleTheme } = useTheme();
-  const dueCount = topics.filter(t => ['today', 'overdue'].includes(getTopicStatus(t))).length;
+  const safeTopics = topics ?? [];
+  const dueCount = safeTopics.filter(t => ['today', 'overdue'].includes(getTopicStatus(t))).length;
   const [menuOpen,    setMenuOpen]    = useState(false);
   const [menuClosing, setMenuClosing] = useState(false);
   const menuRef = useRef(null);
   const subjectLongPress = useLongPress();
-  const atSubjectLimit = subjects.length >= SUBJECT_LIMIT;
+  const subjectsReady = !subjectsState.isLoading && !subjectsState.error && subjects;
+  const canAddSubject = subjectsReady && subjects.length < SUBJECT_LIMIT;
+  const atSubjectLimit = subjectsReady && subjects.length >= SUBJECT_LIMIT;
 
   function openMenu()  { setMenuOpen(true); setMenuClosing(false); }
   function closeMenu() {
@@ -90,8 +94,14 @@ export default function Sidebar({ view, onViewChange, onSelectSubject, onEditSub
       ))}
 
       <span className="sidebar-nav-label">Asignaturas</span>
-      {subjects.map(s => {
-        const pending = topics.filter(t => t.subjectId === s.id && ['today', 'overdue'].includes(getTopicStatus(t))).length;
+      {!subjectsReady && !subjectsState.error && [0, 1, 2].map(i => (
+        <div key={`sk-${i}`} className="sidebar-item subject-item" style={{ pointerEvents: 'none' }}>
+          <Skeleton w={9} h={9} r="50%" />
+          <Skeleton w={`${58 + i * 12}%`} h={11} />
+        </div>
+      ))}
+      {(subjects ?? []).map(s => {
+        const pending = safeTopics.filter(t => t.subjectId === s.id && ['today', 'overdue'].includes(getTopicStatus(t))).length;
         return (
           <motion.div
             key={s.id}
@@ -126,12 +136,17 @@ export default function Sidebar({ view, onViewChange, onSelectSubject, onEditSub
         );
       })}
       <motion.button
-        whileTap={atSubjectLimit ? undefined : { scale: 0.96 }}
+        whileTap={canAddSubject ? { scale: 0.96 } : undefined}
         className="sidebar-item subject-action"
         onClick={onAddSubject}
-        disabled={atSubjectLimit}
-        title={atSubjectLimit ? `Máximo de ${SUBJECT_LIMIT} asignaturas alcanzado` : undefined}
-        style={atSubjectLimit ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+        disabled={!canAddSubject}
+        title={
+          atSubjectLimit ? `Máximo de ${SUBJECT_LIMIT} asignaturas alcanzado`
+            : subjectsState.error ? 'No se han podido cargar las asignaturas'
+            : !subjectsReady ? 'Cargando asignaturas…'
+            : undefined
+        }
+        style={canAddSubject ? undefined : { opacity: 0.4, cursor: 'not-allowed' }}
       >
         <span>+</span> Nueva asignatura
       </motion.button>

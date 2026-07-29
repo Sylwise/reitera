@@ -1,4 +1,6 @@
 import { useLongPress } from '../hooks/useLongPress';
+import Skeleton from '../components/ui/Skeleton';
+import AsyncSection from '../components/ui/AsyncSection';
 import { getTopicStatus } from '../utils/topicHelpers';
 import { SUBJECT_LIMIT } from '../data/subjects';
 
@@ -20,9 +22,23 @@ function IconPlus() {
   );
 }
 
-export default function Asignaturas({ subjects, topics, onEditSubject, onAddSubject }) {
+function SubjectRowSkeleton() {
+  return (
+    <div className="asig-group-header skeleton-asig-row">
+      <Skeleton w={10} h={10} r="50%" />
+      <Skeleton w={130} h={14} />
+      <Skeleton w={58} h={11} style={{ marginLeft: 'auto' }} />
+    </div>
+  );
+}
+
+export default function Asignaturas({ subjects, topics, onEditSubject, onAddSubject, subjectsState }) {
   const longPress = useLongPress();
-  const atSubjectLimit = subjects.length >= SUBJECT_LIMIT;
+  const ready = !subjectsState.isLoading && !subjectsState.error && subjects;
+  const safeSubjects = subjects ?? [];
+  // Mientras no sepamos cuántas asignaturas hay, no se puede afirmar que quepan más.
+  const canAddSubject = ready && subjects.length < SUBJECT_LIMIT;
+  const atSubjectLimit = ready && subjects.length >= SUBJECT_LIMIT;
 
   return (
     <div className="page-wrap" style={{ maxWidth: 640 }}>
@@ -30,12 +46,18 @@ export default function Asignaturas({ subjects, topics, onEditSubject, onAddSubj
         <div className="temas-title">Asignaturas</div>
       </div>
 
-      {subjects.length === 0 ? (
+      <AsyncSection
+        isLoading={subjectsState.isLoading}
+        error={subjectsState.error}
+        onRetry={subjectsState.retry}
+        skeleton={<>{[0, 1, 2].map(i => <SubjectRowSkeleton key={i} />)}</>}
+      >
+      {safeSubjects.length === 0 ? (
         <div style={{ fontFamily: 'var(--mono)', fontSize: '.8rem', color: 'var(--muted)', padding: '3rem 0', textAlign: 'center' }}>
           Sin asignaturas todavía
         </div>
-      ) : subjects.map((s, i) => {
-        const subjTopics = topics.filter(t => t.subjectId === s.id);
+      ) : safeSubjects.map((s, i) => {
+        const subjTopics = (topics ?? []).filter(t => t.subjectId === s.id);
         const mastered   = subjTopics.filter(t => getTopicStatus(t) === 'mastered').length;
         const pct        = s.totalTopics > 0 ? Math.round(mastered / s.totalTopics * 100) : 0;
         return (
@@ -68,13 +90,19 @@ export default function Asignaturas({ subjects, topics, onEditSubject, onAddSubj
           </div>
         );
       })}
+      </AsyncSection>
 
       <button
         className="btn-add-topic btn-add-subject-full"
         onClick={onAddSubject}
-        disabled={atSubjectLimit}
-        title={atSubjectLimit ? `Máximo de ${SUBJECT_LIMIT} asignaturas alcanzado` : undefined}
-        style={atSubjectLimit ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+        disabled={!canAddSubject}
+        title={
+          atSubjectLimit ? `Máximo de ${SUBJECT_LIMIT} asignaturas alcanzado`
+            : subjectsState.error ? 'No se han podido cargar las asignaturas'
+            : !ready ? 'Cargando asignaturas…'
+            : undefined
+        }
+        style={!canAddSubject ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
       >
         <IconPlus />
         {atSubjectLimit ? `Máximo de ${SUBJECT_LIMIT} asignaturas` : 'Añadir asignatura'}

@@ -7,21 +7,28 @@ import { getInitials, getFirstName } from '../../utils/userHelpers';
 
 export default function Topbar({ topics, subjects, streak, userName, onAddTopic, onOpenAsignaturas, onLogout, onChangePassword, onDeleteAccount }) {
   const { theme, toggleTheme } = useTheme();
-  const hasSubjects = subjects.length > 0;
+  // Con las asignaturas aún sin cargar no sabemos si hay o no: el botón se muestra
+  // pero deshabilitado, en vez de aparecer de golpe cuando llega la respuesta.
+  const subjectsLoaded = subjects != null;
+  const hasSubjects    = subjectsLoaded && subjects.length > 0;
+  const showAddTopic   = !subjectsLoaded || hasSubjects;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
   useOutsideClick(menuRef, () => setMenuOpen(false), menuOpen);
 
-  const dueCount = topics.filter(t => ['today', 'overdue'].includes(getTopicStatus(t))).length;
+  const dueCount = (topics ?? []).filter(t => ['today', 'overdue'].includes(getTopicStatus(t))).length;
 
   const hour     = new Date().getHours();
   const greet    = hour < 6 ? 'Buenas noches' : hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
   const dateStr  = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
   const dateCap  = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-  const dueLabel = dueCount > 0
-    ? `${dueCount} tema${dueCount !== 1 ? 's' : ''} pendiente${dueCount !== 1 ? 's' : ''}`
-    : 'Todo al día';
+  // Sin los temas cargados no se puede afirmar ni que hay pendientes ni que no los hay.
+  const dueLabel = topics == null
+    ? null
+    : dueCount > 0
+      ? `${dueCount} tema${dueCount !== 1 ? 's' : ''} pendiente${dueCount !== 1 ? 's' : ''}`
+      : 'Todo al día';
 
   return (
     <div className="inner-topbar">
@@ -46,8 +53,14 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
 
               {/* ── Bloque 2: Acciones ── */}
               <div className="mobile-menu-section">
-                {hasSubjects && (
-                  <motion.button whileTap={{ scale: 0.95 }} className="dd-item" onClick={() => { onAddTopic(); setMenuOpen(false); }}>
+                {showAddTopic && (
+                  <motion.button
+                    whileTap={hasSubjects ? { scale: 0.95 } : undefined}
+                    className="dd-item"
+                    disabled={!hasSubjects}
+                    style={hasSubjects ? undefined : { opacity: 0.4, cursor: 'not-allowed' }}
+                    onClick={() => { onAddTopic(); setMenuOpen(false); }}
+                  >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
@@ -115,14 +128,21 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
 
       <div className="inner-topbar-left">
         <h2>{greet}, {getFirstName(userName)}</h2>
-        <p>// {dateCap} · {dueLabel}</p>
+        <p>// {dateCap}{dueLabel ? ` · ${dueLabel}` : ''}</p>
       </div>
       <div className="inner-topbar-right">
         {streak >= 2 && (
           <div className="streak-badge">{streak >= 3 && '🔥 '}<span>{streak} días</span></div>
         )}
-        {hasSubjects && (
-          <motion.button whileTap={{ scale: 0.95 }} className="btn-add-topic hide-on-mobile" onClick={onAddTopic}>
+        {showAddTopic && (
+          <motion.button
+            whileTap={hasSubjects ? { scale: 0.95 } : undefined}
+            className="btn-add-topic hide-on-mobile"
+            disabled={!hasSubjects}
+            title={hasSubjects ? undefined : (subjectsLoaded ? undefined : 'Cargando asignaturas…')}
+            style={hasSubjects ? undefined : { opacity: 0.4, cursor: 'not-allowed' }}
+            onClick={onAddTopic}
+          >
             <span style={{ fontSize: '1rem', lineHeight: 1 }}>+</span> Añadir tema
           </motion.button>
         )}

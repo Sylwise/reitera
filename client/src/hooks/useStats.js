@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { fetchStats } from '../api/stats';
-import { mapStatsResponse, EMPTY_STATS } from '../utils/statsHelpers';
+import { mapStatsResponse } from '../utils/statsHelpers';
 
 export function useStats() {
-  const [stats, setStats] = useState(EMPTY_STATS);
+  const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,6 +16,7 @@ export function useStats() {
 
   function refetch() {
     setError(null);
+    setIsLoading(true);
     return load();
   }
 

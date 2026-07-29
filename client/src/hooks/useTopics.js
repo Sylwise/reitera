@@ -3,7 +3,7 @@ import { fetchTopics, fetchTopic, createTopic, updateTopic, deleteTopic, resetTo
 import { addReviewSession } from '../api/reviewSessions';
 
 export function useTopics(showToast) {
-  const [topics, setTopics]         = useState([]);
+  const [topics, setTopics]         = useState(null);
   const [modalTopic, setModalTopic] = useState(null);
   const [isLoading, setIsLoading]   = useState(true);
   const [error, setError]           = useState(null);
@@ -37,14 +37,11 @@ export function useTopics(showToast) {
     }
   }
 
+  // El fallo se propaga: lo enseña el modal en línea, para no perder lo ya escrito.
   async function handleConfigTopic({ subjectId, name }) {
-    try {
-      const saved = await createTopic({ name, subjectId });
-      setTopics(prev => [...prev, saved]);
-      showToast(`✓ "${name}" añadido`);
-    } catch (err) {
-      showToast(`✗ ${err.message}`);
-    }
+    const saved = await createTopic({ name, subjectId });
+    setTopics(prev => [...(prev ?? []), saved]);
+    showToast(`✓ "${name}" añadido`);
   }
 
   async function handleEditTopic({ topicId, name }) {

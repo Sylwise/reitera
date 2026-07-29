@@ -98,6 +98,51 @@ body::before {
 }
 .fade-in { animation: fadeUp .35s ease both }
 
+@keyframes shimmer {
+  from { background-position: 200% 0 }
+  to   { background-position: -200% 0 }
+}
+/* Base en --surface2 y brillo en --border: así contrasta tanto sobre el fondo de
+   página como sobre las tarjetas, que usan --surface. */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--border2) 37%, var(--surface2) 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--border) }
+}
+.skeleton-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .85rem .9rem;
+  margin-bottom: .5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+/* Alto de la cabecera de asignatura real, igual en escritorio y móvil. */
+.skeleton-asig-row {
+  min-height: 33px;
+  pointer-events: none;
+}
+/* En móvil la tarjeta real pasa a una rejilla de tres filas y crece hasta ~106px:
+   sin esto el contenido daría un salto de 40px por tarjeta al llegar los datos. */
+@media (max-width: 768px) {
+  .skeleton-card {
+    min-height: 104px;
+    justify-content: space-between;
+  }
+}
+
 /* ── LAYOUT ─────────────────────────────────────────────── */
 .page-wrap { padding: 2rem; max-width: 1280px; margin: 0 auto }
 

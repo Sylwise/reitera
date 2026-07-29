@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { fetchExams, createExam, deleteExam } from '../api/exams';
 
 export function useExams(showToast) {
-  const [exams, setExams]             = useState([]);
+  const [exams, setExams]             = useState(null);
   const [addExamOpen, setAddExamOpen] = useState(false);
   const [addExamDate, setAddExamDate] = useState(new Date());
   const [isLoading, setIsLoading]     = useState(true);
@@ -23,14 +23,11 @@ export function useExams(showToast) {
 
   useEffect(() => { load(); }, []);
 
+  // El fallo se propaga: lo enseña el modal en línea, para no perder lo ya escrito.
   async function handleAddExam({ name, subjectId, date }) {
-    try {
-      const saved = await createExam({ name, subjectId, date });
-      setExams(prev => [...prev, saved]);
-      showToast(`📅 Examen "${name}" añadido`);
-    } catch (err) {
-      showToast(`✗ ${err.message}`);
-    }
+    const saved = await createExam({ name, subjectId, date });
+    setExams(prev => [...(prev ?? []), saved]);
+    showToast(`📅 Examen "${name}" añadido`);
   }
 
   async function handleDeleteExam(id) {

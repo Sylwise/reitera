@@ -44,12 +44,14 @@ export default function App() {
     topics, setTopics,
     modalTopic, setModalTopic,
     handleConfirm, handleConfigTopic, handleEditTopic, handleDeleteTopic, handleResetTopic,
+    isLoading: topicsLoading,
     error: topicsError,
     refetch: refetchTopics,
   } = useTopics(showToast);
   const {
     subjects,
     handleAddSubject, handleEditSubject, handleDeleteSubject,
+    isLoading: subjectsLoading,
     error: subjectsError,
     refetch: refetchSubjects,
   } = useSubjects(setTopics, setFocusAsig, showToast);
@@ -58,10 +60,16 @@ export default function App() {
     addExamOpen, setAddExamOpen,
     addExamDate,
     handleAddExam, handleDeleteExam, openAddExam,
+    isLoading: examsLoading,
     error: examsError,
     refetch: refetchExams,
   } = useExams(showToast);
-  const { stats: backendStats, refetch: refetchStats } = useStats();
+  const {
+    stats: backendStats,
+    isLoading: statsLoading,
+    error: statsError,
+    refetch: refetchStats,
+  } = useStats();
 
   useEffect(() => { localStorage.setItem('repaso_view', view); }, [view]);
 
@@ -134,9 +142,36 @@ export default function App() {
     );
   }
 
-  const adjustedTopics = applyExamCaps(topics, exams);
-  const stats = { ...backendStats, ...buildRealStats(adjustedTopics, subjects) };
-  const dataError = subjectsError || topicsError || examsError;
+  // Si los exámenes fallan, los temas siguen siendo utilizables: se pierde el tope
+  // por examen, no la vista entera.
+  const adjustedTopics = topics ? (exams ? applyExamCaps(topics, exams) : topics) : null;
+  const statsReady = backendStats && adjustedTopics && subjects;
+  const stats = statsReady ? { ...backendStats, ...buildRealStats(adjustedTopics, subjects) } : null;
+
+  // Cada bloque de datos expone su propio estado; no hay carga ni error globales.
+  const coreState = {
+    isLoading: topicsLoading || subjectsLoading,
+    error: topicsError || subjectsError,
+    retry: () => { refetchTopics(); refetchSubjects(); },
+  };
+  const subjectsState = {
+    isLoading: subjectsLoading,
+    error: subjectsError,
+    retry: refetchSubjects,
+  };
+  // Los exámenes entran en la carga (las gráficas se calculan con el tope aplicado, y sin
+  // esperarlos las cifras bailarían al llegar) pero no en el error: si fallan, se pierde el
+  // tope y nada más.
+  const statsState = {
+    isLoading: statsLoading || topicsLoading || subjectsLoading || examsLoading,
+    error: statsError || topicsError || subjectsError,
+    retry: () => { refetchStats(); refetchTopics(); refetchSubjects(); },
+  };
+  const calendarState = {
+    isLoading: topicsLoading || subjectsLoading || examsLoading,
+    error: topicsError || subjectsError || examsError,
+    retry: () => { refetchTopics(); refetchSubjects(); refetchExams(); },
+  };
 
   return (
     <>
@@ -148,6 +183,7 @@ export default function App() {
           onEditSubject={setEditSubject}
           subjects={subjects}
           topics={adjustedTopics}
+          subjectsState={subjectsState}
           userName={currentUser?.name}
           onAddSubject={() => setAddSubjectOpen(true)}
           onLogout={handleLogout}
@@ -159,7 +195,7 @@ export default function App() {
           <Topbar
             topics={adjustedTopics}
             subjects={subjects}
-            streak={stats.streak}
+            streak={stats?.streak}
             userName={currentUser?.name}
             onAddTopic={() => openConfigModal(null)}
             onOpenAsignaturas={() => setView('asignaturas')}
@@ -169,22 +205,6 @@ export default function App() {
           />
 
           <div id="app">
-            {dataError ? (
-              <div className="load-error">
-                <h1 className="empty-title">Sin conexión con el servidor</h1>
-                <p className="empty-subtitle">
-                  Tus datos están a salvo, pero ahora mismo no se han podido cargar.
-                  <br />
-                  ({dataError})
-                </p>
-                <button
-                  className="empty-cta"
-                  onClick={() => { refetchSubjects(); refetchTopics(); refetchExams(); refetchStats(); }}
-                >
-                  Reintentar
-                </button>
-              </div>
-            ) : (
             <AnimatePresence mode="wait">
               <motion.div
                 key={view}
@@ -194,14 +214,13 @@ export default function App() {
                 transition={{ duration: 0.2 }}
                 style={{ height: '100%', width: '100%', overflow: 'auto' }}
               >
-                {view === 'dashboard'  && <Dashboard  topics={adjustedTopics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={stats} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} showToast={showToast} />}
-                {view === 'temas'       && <Temas       topics={adjustedTopics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} onAddTopic={() => openConfigModal(null)} focusAsig={focusAsig} focusTopicId={focusTopicId} />}
-                {view === 'asignaturas' && <Asignaturas subjects={subjects} topics={adjustedTopics} onEditSubject={setEditSubject} onAddSubject={() => setAddSubjectOpen(true)} />}
-                {view === 'stats'       && <Stats       stats={stats} onAddSubject={() => setAddSubjectOpen(true)} onGoToTemas={() => setView('temas')} />}
-                {view === 'calendario' && <Calendario topics={adjustedTopics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} />}
+                {view === 'dashboard'  && <Dashboard  topics={adjustedTopics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onAddSubject={() => setAddSubjectOpen(true)} isModalOpen={addSubjectOpen} stats={stats} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} showToast={showToast} coreState={coreState} statsState={statsState} />}
+                {view === 'temas'       && <Temas       topics={adjustedTopics} subjects={subjects} onMark={setModalTopic} onEditTopic={setEditTopic} onEditSubject={setEditSubject} onAddTopic={() => openConfigModal(null)} focusAsig={focusAsig} focusTopicId={focusTopicId} coreState={coreState} />}
+                {view === 'asignaturas' && <Asignaturas subjects={subjects} topics={adjustedTopics} onEditSubject={setEditSubject} onAddSubject={() => setAddSubjectOpen(true)} subjectsState={subjectsState} />}
+                {view === 'stats'       && <Stats       stats={stats} onAddSubject={() => setAddSubjectOpen(true)} onGoToTemas={() => setView('temas')} statsState={statsState} />}
+                {view === 'calendario' && <Calendario topics={adjustedTopics} subjects={subjects} exams={exams} onAddExam={openAddExam} onDeleteExam={handleDeleteExam} onNavigateTopic={(t) => { setFocusTopicId(t.id); setView('temas'); }} calendarState={calendarState} />}
               </motion.div>
             </AnimatePresence>
-            )}
           </div>
 
         </div>
@@ -217,7 +236,7 @@ export default function App() {
         addExamOpen={addExamOpen}
         onCloseAddExam={() => setAddExamOpen(false)}
         onAddExam={handleAddExam}
-        subjects={subjects}
+        subjects={subjects ?? []}
         addExamDate={addExamDate}
         configOpen={configOpen}
         onCloseConfig={() => setConfigOpen(false)}

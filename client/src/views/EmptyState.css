@@ -168,6 +168,48 @@
   padding: 2rem;
 }
 
+/* Variante compacta: un bloque de datos falla sin tumbar la vista entera. */
+.section-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  text-align: center;
+  padding: 2rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.section-error-msg {
+  font-family: var(--mono);
+  font-size: .78rem;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 320px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.section-error-retry {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: .45rem 1.1rem;
+  font-family: var(--sans);
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+
+.section-error-retry:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+
 /* ── Mobile ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .ghost-layout { display: none; }
