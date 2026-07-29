@@ -29,14 +29,14 @@ public interface ReviewSessionRepository extends JpaRepository<ReviewSession, Lo
     @Query("SELECT new com.reitera_api.dto.WeakSpotDTO(rs.topic.id, rs.topic.name, rs.topic.subject.name, COUNT(rs)) " +
     "FROM ReviewSession rs " +
     "WHERE rs.topic.subject.user.id = :userId AND rs.difficulty IN ('HARD', 'AGAIN') " +
-    "GROUP BY rs.topic.id, rs.topic.subject.id "+
+    "GROUP BY rs.topic.id, rs.topic.name, rs.topic.subject.id, rs.topic.subject.name "+
     "ORDER BY COUNT(rs) DESC")
     List<WeakSpotDTO> findWeakSpots(@Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT new com.reitera_api.dto.AtRiskDTO(rs.topic.id, rs.topic.name, rs.topic.subject.name, AVG(rs.score)) " +
     "FROM ReviewSession  rs " +
     "WHERE rs.topic.subject.user.id = :userId " +
-    "GROUP BY rs.topic.id, rs.topic.subject.id " +
+    "GROUP BY rs.topic.id, rs.topic.name, rs.topic.subject.id, rs.topic.subject.name " +
     "HAVING AVG(rs.score) < 6 AND COUNT(rs) >= 2 " +
     "ORDER BY AVG(rs.score) ASC")
     List<AtRiskDTO> findAtRisk (@Param("userId") Long userId, Pageable pageable);
@@ -44,7 +44,7 @@ public interface ReviewSessionRepository extends JpaRepository<ReviewSession, Lo
     @Query("SELECT new com.reitera_api.dto.WeeklyInsightDTO(rs.topic.subject.id, rs.topic.subject.name, AVG(rs.score)) " +
     "FROM ReviewSession rs " +
     "WHERE rs.topic.subject.user.id = :userId AND rs.reviewedAt >= :startDate " +
-    "GROUP BY rs.topic.subject.id " +
+    "GROUP BY rs.topic.subject.id, rs.topic.subject.name " +
     "HAVING COUNT(rs.score) >= 2 " +
     "ORDER BY AVG(rs.score) DESC"
     )
