@@ -103,7 +103,7 @@ export default function Stats({ stats, onAddSubject, onGoToTemas, statsState }) 
 }
 
 function StatsContent({ stats }) {
-  const { streak, totalRepasos, overdue, diffDistribution, chart30, asigProgress, activity, weeklyInsight } = stats;
+  const { totalRepasos, overdue, diffDistribution, chart30, asigProgress, activity, weeklyInsight } = stats;
 
   const masteredTotal = asigProgress.reduce((s, a) => s + a.done, 0);
   const { cells: heatmapData, numCols, weekHeaders } = buildHeatmapDates(activity);
@@ -117,7 +117,6 @@ function StatsContent({ stats }) {
       <div className="stats-grid fade-in">
         {[
           { label: 'Afianzados',      value: masteredTotal,   cls: 'accent', sub: `de ${asigProgress.reduce((s, a) => s + a.total, 0)} temas totales` },
-          { label: 'Racha actual',    value: <>{streak >= 3 && <span style={{ fontSize: '1.3rem', verticalAlign: 'middle', marginRight: '.3rem' }}>🔥</span>}{streak}</>, cls: 'accent', sub: streak === 1 ? 'día consecutivo' : 'días consecutivos' },
           { label: 'Repasos totales', value: totalRepasos,    cls: 'ok',     sub: totalRepasos === 1 ? 'sesión completada' : 'sesiones completadas' },
           { label: 'Atrasados',       value: overdue,         cls: 'danger', sub: overdue === 1 ? 'tema con retraso' : 'temas con retraso' },
         ].map(k => (

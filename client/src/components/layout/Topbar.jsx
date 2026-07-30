@@ -5,7 +5,7 @@ import { useOutsideClick } from '../../hooks/useOutsideClick';
 import { useTheme } from '../../context/theme';
 import { getInitials, getFirstName } from '../../utils/userHelpers';
 
-export default function Topbar({ topics, subjects, streak, userName, onAddTopic, onOpenAsignaturas, onLogout, onChangePassword, onDeleteAccount }) {
+export default function Topbar({ topics, subjects, userName, onAddTopic, onOpenAsignaturas, onLogout, onChangePassword, onDeleteAccount }) {
   const { theme, toggleTheme } = useTheme();
   // Con las asignaturas aún sin cargar no sabemos si hay o no: el botón se muestra
   // pero deshabilitado, en vez de aparecer de golpe cuando llega la respuesta.
@@ -43,12 +43,7 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
               {/* ── Bloque 1: Perfil ── */}
               <div className="mobile-menu-user">
                 <div className="sidebar-avatar" style={{ width: 36, height: 36, fontSize: '.85rem' }}>{getInitials(userName)}</div>
-                <div>
-                  <div style={{ fontSize: '.83rem', fontWeight: 600, color: 'var(--text)' }}>{userName}</div>
-                  {streak >= 2 && (
-                    <div style={{ fontSize: '.7rem', color: 'var(--accent)', marginTop: '2px' }}>{streak >= 3 && '🔥 '}{streak} días de racha</div>
-                  )}
-                </div>
+                <div style={{ fontSize: '.83rem', fontWeight: 600, color: 'var(--text)' }}>{userName}</div>
               </div>
 
               {/* ── Bloque 2: Acciones ── */}
@@ -131,9 +126,6 @@ export default function Topbar({ topics, subjects, streak, userName, onAddTopic,
         <p>// {dateCap}{dueLabel ? ` · ${dueLabel}` : ''}</p>
       </div>
       <div className="inner-topbar-right">
-        {streak >= 2 && (
-          <div className="streak-badge">{streak >= 3 && '🔥 '}<span>{streak} días</span></div>
-        )}
         {showAddTopic && (
           <motion.button
             whileTap={hasSubjects ? { scale: 0.95 } : undefined}

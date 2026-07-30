@@ -45,7 +45,6 @@ export function buildRealStats(topics, subjects) {
 const DIFF_KEYS = { EASY: 'easy', NORMAL: 'normal', HARD: 'hard', AGAIN: 'again' };
 
 export const EMPTY_STATS = {
-  streak: 0,
   totalRepasos: 0,
   diffDistribution: { easy: 0, normal: 0, hard: 0, again: 0 },
   activity: new Array(35).fill(0),
@@ -90,7 +89,6 @@ export function mapStatsResponse(raw) {
   });
 
   return {
-    streak: raw.streak ?? 0,
     totalRepasos: raw.totalReviews ?? 0,
     diffDistribution,
     activity: raw.activity ?? EMPTY_STATS.activity,

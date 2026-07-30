@@ -195,7 +195,6 @@ export default function App() {
           <Topbar
             topics={adjustedTopics}
             subjects={subjects}
-            streak={stats?.streak}
             userName={currentUser?.name}
             onAddTopic={() => openConfigModal(null)}
             onOpenAsignaturas={() => setView('asignaturas')}

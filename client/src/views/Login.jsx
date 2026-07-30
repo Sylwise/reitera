@@ -230,7 +230,7 @@ export default function Login({ onLogin, notice }) {
           <div className="lg-stats-row">
             <div className="lg-stat-pill">
               <span className="lg-stat-num">47</span>
-              <span className="lg-stat-label">Días de racha</span>
+              <span className="lg-stat-label">Temas afianzados</span>
             </div>
             <div className="lg-stat-pill">
               <span className="lg-stat-num">1.2k</span>

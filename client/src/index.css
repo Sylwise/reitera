@@ -880,9 +880,6 @@ body::before {
 .inner-topbar-left p  { font-family: var(--mono); font-size: .68rem; color: var(--muted); margin-top: .1rem }
 .inner-topbar-right   { display: flex; align-items: center; gap: .75rem }
 
-.streak-badge { display: flex; align-items: center; gap: .35rem; background: rgba(var(--accent-rgb),.08); border: 1px solid rgba(var(--accent-rgb),.2); border-radius: 999px; padding: .25rem .75rem; font-family: var(--mono); font-size: .78rem; color: var(--accent) }
-[data-theme="light"] .streak-badge { color: #4d7c0f; border-color: rgba(var(--accent-rgb), .4) }
-
 .btn-add-topic {
   display: flex;
   align-items: center;
@@ -1201,7 +1198,7 @@ body::before {
   /* Topbar compacto: una sola línea — la fecha la da el sistema y los
      pendientes ya están en el badge del bottom nav */
   /* Todo en una línea y con flujo: avatar y saludo pegados a la izquierda
-     (space-between con 3 hijos centraba el saludo), racha a la derecha.
+     (space-between con 3 hijos centraba el saludo).
      El saludo va en sans — la display es voz de datos y aquí chirría —
      y encoge (y elide en último recurso) antes que partir la fila */
   .inner-topbar { padding: .65rem 1.25rem; gap: .6rem; justify-content: flex-start; position: relative; z-index: 999; }
@@ -1218,7 +1215,6 @@ body::before {
   }
   .inner-topbar-left p { display: none; }
   .inner-topbar-right { gap: .5rem; flex-shrink: 0; margin-left: auto; }
-  .streak-badge { font-size: .68rem; padding: .2rem .55rem; white-space: nowrap; }
   /* El avatar vive a la izquierda: el menú se ancla por ese lado */
   .mobile-dropdown-menu { left: 0; right: auto; max-width: calc(100vw - 24px); }
   

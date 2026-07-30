@@ -88,7 +88,7 @@ export default function Dashboard({ topics, subjects, onMark, onEditTopic, onAdd
                 </div>
                 {due.length > 0 && (
                   <div className="hero-sub">
-                    {stats?.streak >= 2 ? 'Tienes la racha — no la rompas ahora.' : 'Un repaso hoy y te lo quitas de encima.'}
+                    Un repaso hoy y te lo quitas de encima.
                   </div>
                 )}
               </div>
@@ -121,7 +121,7 @@ export default function Dashboard({ topics, subjects, onMark, onEditTopic, onAdd
               {due.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '2.5rem 1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: '.6rem' }}>
                   <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '.35rem', letterSpacing: '-.01em' }}>¡Todo al día!</div>
-                  <div style={{ fontFamily: 'var(--mono)', fontSize: '.78rem', color: 'var(--muted)' }}>Racha activa — vuelve mañana.</div>
+                  <div style={{ fontFamily: 'var(--mono)', fontSize: '.78rem', color: 'var(--muted)' }}>Nada pendiente — vuelve mañana.</div>
                 </div>
               )}
               <div className="due-list">
