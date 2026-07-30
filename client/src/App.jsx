@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Login      from './views/Login';
 import Sidebar    from './components/layout/Sidebar';
@@ -133,6 +133,20 @@ export default function App() {
     refetchStats();
   }
 
+  // Si los exámenes fallan, los temas siguen siendo utilizables: se pierde el tope
+  // por examen, no la vista entera. Van antes del return de Login porque son hooks.
+  const adjustedTopics = useMemo(
+    () => (topics ? (exams ? applyExamCaps(topics, exams) : topics) : null),
+    [topics, exams],
+  );
+  const statsReady = backendStats && adjustedTopics && subjects;
+  // Memoizado porque baja como prop a componentes que a su vez memoizan sobre él:
+  // reconstruir el objeto en cada render invalidaba esos useMemo siempre.
+  const stats = useMemo(
+    () => (statsReady ? { ...backendStats, ...buildRealStats(adjustedTopics, subjects) } : null),
+    [statsReady, backendStats, adjustedTopics, subjects],
+  );
+
   if (!loggedIn) {
     return (
       <Login
@@ -141,12 +155,6 @@ export default function App() {
       />
     );
   }
-
-  // Si los exámenes fallan, los temas siguen siendo utilizables: se pierde el tope
-  // por examen, no la vista entera.
-  const adjustedTopics = topics ? (exams ? applyExamCaps(topics, exams) : topics) : null;
-  const statsReady = backendStats && adjustedTopics && subjects;
-  const stats = statsReady ? { ...backendStats, ...buildRealStats(adjustedTopics, subjects) } : null;
 
   // Cada bloque de datos expone su propio estado; no hay carga ni error globales.
   const coreState = {
