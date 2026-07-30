@@ -1,12 +1,21 @@
+import { useState } from 'react';
 import Panel from '../components/ui/Panel';
 import Skeleton from '../components/ui/Skeleton';
 import AsyncSection from '../components/ui/AsyncSection';
 import DonutChart from '../components/charts/DonutChart';
-import BarChart from '../components/ui/BarChart';
+import UpcomingLoadTimeline from '../components/charts/UpcomingLoadTimeline';
 import EmptyStats from './EmptyStats';
-
 import { shortMonth } from '../utils/dateHelpers';
+
 const WEEK_LABELS  = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
+// La ventana (30 o 15 días) la decide el timeline a partir del ancho que mide de su
+// propio panel, y nos la comunica para que el título diga lo mismo que el eje. Esta
+// estimación por viewport es solo el valor inicial, para que el esqueleto no enseñe
+// un número que cambie en cuanto monta el componente real.
+function guessLoadWindowDays() {
+  return window.innerWidth >= 1080 ? 30 : 15;
+}
 
 function buildHeatmapDates(activity) {
   const today    = new Date();
@@ -40,7 +49,7 @@ function buildHeatmapDates(activity) {
   return { cells, numCols, weekHeaders };
 }
 
-function StatsSkeleton() {
+function StatsSkeleton({ loadDays }) {
   return (
     <>
       <div className="stats-grid">
@@ -55,7 +64,7 @@ function StatsSkeleton() {
       </div>
 
       <div className="stats-row">
-        <Panel title="Carga — próximos 30 días"><Skeleton h={120} /></Panel>
+        <Panel title={`Carga — próximos ${loadDays} días`}><Skeleton h={120} /></Panel>
         <Panel title="Distribución de dificultad"><Skeleton h={120} /></Panel>
       </div>
 
@@ -77,6 +86,7 @@ function StatsSkeleton() {
 }
 
 export default function Stats({ stats, onAddSubject, onGoToTemas, statsState }) {
+  const [loadDays, setLoadDays] = useState(guessLoadWindowDays);
   const ready = !statsState.isLoading && !statsState.error && stats;
 
   // El "aún no hay nada que enseñar" sólo tras confirmar que la carga fue bien.
@@ -96,23 +106,19 @@ export default function Stats({ stats, onAddSubject, onGoToTemas, statsState }) 
         isLoading={statsState.isLoading || !stats}
         error={statsState.error}
         onRetry={statsState.retry}
-        skeleton={<StatsSkeleton />}
+        skeleton={<StatsSkeleton loadDays={loadDays} />}
       >
-        <StatsContent stats={stats} />
+        <StatsContent stats={stats} loadDays={loadDays} onWindowChange={setLoadDays} />
       </AsyncSection>
     </div>
   );
 }
 
-function StatsContent({ stats }) {
-  const { totalRepasos, overdue, diffDistribution, chart30, asigProgress, activity, weeklyInsight } = stats;
+function StatsContent({ stats, loadDays, onWindowChange }) {
+  const { totalRepasos, overdue, diffDistribution, upcomingLoad, asigProgress, activity, weeklyInsight } = stats;
 
   const masteredTotal = asigProgress.reduce((s, a) => s + a.done, 0);
   const { cells: heatmapData, numCols, weekHeaders } = buildHeatmapDates(activity);
-
-  const chart30data = chart30.map((count, i) => ({
-    count, label: i === 0 ? 'Hoy' : i % 5 === 0 ? `${i}d` : '',
-  }));
 
   return (
     <>
@@ -132,15 +138,8 @@ function StatsContent({ stats }) {
       </div>
 
       <div className="stats-row fade-in" style={{ animationDelay: '.1s' }}>
-        <Panel title="Carga — próximos 30 días">
-          <BarChart
-            data={chart30data}
-            todayIdx={0}
-            height={120}
-            className="big-chart"
-            barWrapGap={2}
-            barLabelStyle={{ fontSize: '.66rem' }}
-          />
+        <Panel title={`Carga — próximos ${loadDays} días`}>
+          <UpcomingLoadTimeline milestones={upcomingLoad} onWindowChange={onWindowChange} />
         </Panel>
         <Panel title="Distribución de dificultad">
           <DonutChart

@@ -346,18 +346,6 @@ body::before {
 }
 .chart::after { content: ''; position: absolute; bottom: 1.35rem; left: 0; right: 0; height: 1px; background: var(--border) }
 
-.big-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 120px;
-  padding-top: 16px;
-  padding-bottom: 1.8rem;
-  position: relative;
-  overflow: hidden;
-}
-.big-chart::after { content: ''; position: absolute; bottom: 1.6rem; left: 0; right: 0; height: 1px; background: var(--border) }
-
 .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px }
 .bar {
   width: 100%;
@@ -607,6 +595,59 @@ body::before {
 .metric-value.danger { color: var(--danger) }
 .metric-value.ok     { color: var(--ok) }
 .kpi-sub { font-family: var(--mono); font-size: .7rem; color: var(--muted) }
+
+/* Línea de tiempo de carga — próximos 30 días */
+.timeline-wrap { width: 100% }
+.timeline-sub { font-family: var(--mono); font-size: .7rem; color: var(--muted); margin-bottom: .35rem }
+.timeline-canvas { position: relative; width: 100% }
+.tl-line-active { stroke: var(--ok); stroke-width: 2; stroke-linecap: round }
+.tl-line-rest   { stroke: var(--muted2); stroke-width: 2; stroke-linecap: round }
+.tl-end-dot     { fill: var(--muted2) }
+/* El borde del color del panel separa visualmente los puntos que se tocan cuando
+   hay días consecutivos y la tarjeta es estrecha */
+.tl-dot { fill: var(--ok); stroke: var(--surface); stroke-width: 1.5 }
+.tl-dot.today { fill: var(--accent) }
+/* Anillo exterior: distingue de un vistazo un cluster de varios días de un día suelto */
+.tl-ring { fill: none; stroke: var(--ok); stroke-width: 1.5; opacity: .5 }
+.tl-ring.today { stroke: var(--accent) }
+.tl-count { font-family: var(--mono); font-size: 9px; fill: var(--btn-text) }
+.tl-label { font-family: var(--mono); font-size: 9px; fill: var(--muted) }
+.tl-label.today { fill: var(--accent) }
+.tl-point { cursor: pointer }
+.tl-point:hover .tl-dot { filter: brightness(1.25) }
+/* El marcador es focusable para poder recorrer el gráfico con el tabulador, pero el
+   recuadro del navegador solo debe salir con teclado: al tocar con el dedo aparecía
+   un borde alrededor del círculo. :focus-visible ya distingue teclado de puntero. */
+.tl-point:focus { outline: none }
+.tl-point:focus-visible .tl-dot { stroke: var(--text); stroke-width: 2 }
+.timeline-tip {
+  position: absolute; z-index: 20; transform: translateX(-50%);
+  background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px;
+  padding: .4rem .55rem; font-family: var(--mono); font-size: .68rem; line-height: 1.45;
+  color: var(--text); pointer-events: none;
+  /* Sin nowrap y con tope de ancho: un nombre de tema largo se salía de la tarjeta.
+     El alto se limita recortando la lista de temas en el JSX, no con overflow: el
+     tooltip tiene pointer-events:none, así que una barra de scroll sería inalcanzable. */
+  max-width: 240px; overflow-wrap: anywhere;
+  box-shadow: 0 4px 14px rgba(0,0,0,.45);
+}
+/* .panel y .stats-row arrastran .fade-in, cuya animación con fill-mode "both" deja un
+   transform aplicado y con él un contexto de apilado. Son DOS niveles de encierro: el
+   z-index del tooltip no sale de su tarjeta, y el de la tarjeta no sale de su fila. Hay
+   que elevar los dos o lo tapa la tarjeta de al lado (móvil) o la fila de abajo
+   (escritorio). */
+.panel:has(.timeline-tip),
+.stats-row:has(.timeline-tip) { position: relative; z-index: 5 }
+.timeline-tip-date { color: var(--accent); margin-bottom: .15rem }
+.timeline-tip-item { color: var(--muted) }
+.timeline-tip-more { color: var(--muted2); margin-top: .2rem }
+.timeline-tip-day + .timeline-tip-day { margin-top: .35rem; padding-top: .35rem; border-top: 1px solid var(--border) }
+/* El verde acento claro se queda corto de contraste como texto pequeño, igual que en
+   .status-tag.today; y el número del punto va en blanco sobre verde, que en claro no
+   llega ni a 2.5:1 */
+[data-theme="light"] .tl-label.today,
+[data-theme="light"] .timeline-tip-date { fill: #4d7c0f; color: #4d7c0f }
+[data-theme="light"] .tl-count { fill: #0a0a0b }
 
 .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem }
 
@@ -1268,13 +1309,6 @@ body::before {
   .stats-grid .metric-value { font-size: 1.5rem; }
   .stats-grid .kpi-sub { font-size: .55rem; }
   .stats-row { grid-template-columns: 1fr; gap: 1.25rem; overflow: hidden; }
-  
-  /* Charts overflow */
-  .big-chart {
-    overflow-x: auto;
-    scrollbar-width: none; /* Firefox */
-  }
-  .big-chart::-webkit-scrollbar { display: none; } /* Chrome/Safari */
   
   /* Streak Grid */
   .streak-grid { gap: 3px; grid-template-rows: repeat(7, 26px); }

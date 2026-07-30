@@ -13,6 +13,29 @@ function buildLoadChart(topics, days) {
   return counts;
 }
 
+// Ventana máxima que se construye. El timeline puede pintar menos días si su panel es
+// estrecho, así que aquí se genera siempre el máximo y él recorta.
+export const MAX_LOAD_WINDOW_DAYS = 30;
+
+// Mismo criterio que buildLoadChart: los atrasados se agrupan en el día 0 junto a
+// los de hoy, y la ventana llega hasta el día 29 incluido.
+function buildUpcomingLoad(topics, days) {
+  const byOffset = new Map();
+  topics.forEach(t => {
+    if (t.nextReviewDate === null) return;
+    const diff   = daysUntil(t.nextReviewDate);
+    const offset = diff <= 0 ? 0 : diff;
+    if (offset >= days) return;
+    if (!byOffset.has(offset)) byOffset.set(offset, []);
+    // Se guarda el id además del nombre: dos temas de asignaturas distintas pueden
+    // llamarse igual y caer el mismo día, y el nombre solo no sirve como clave.
+    byOffset.get(offset).push({ id: t.id, name: t.name });
+  });
+  return [...byOffset.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([offset, dayTopics]) => ({ offset, count: dayTopics.length, topics: dayTopics }));
+}
+
 function buildChart7Labels() {
   const today = new Date();
   return Array.from({ length: 7 }, (_, i) => {
@@ -38,7 +61,7 @@ export function buildRealStats(topics, subjects) {
     asigProgress,
     chart7: buildLoadChart(topics, 7),
     chart7Labels: buildChart7Labels(),
-    chart30: buildLoadChart(topics, 30),
+    upcomingLoad: buildUpcomingLoad(topics, MAX_LOAD_WINDOW_DAYS),
   };
 }
 
