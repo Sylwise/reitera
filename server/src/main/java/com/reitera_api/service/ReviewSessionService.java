@@ -10,7 +10,6 @@ import com.reitera_api.exception.ResourceNotFoundException;
 import com.reitera_api.exception.TopicAlreadyMasteredException;
 import com.reitera_api.repository.ReviewSessionRepository;
 import com.reitera_api.repository.TopicRepository;
-import com.reitera_api.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
@@ -20,12 +19,10 @@ public class ReviewSessionService {
 
     private final ReviewSessionRepository reviewSessionRepository;
     private final TopicRepository topicRepository;
-    private final UserRepository userRepository;
 
-    public ReviewSessionService(ReviewSessionRepository reviewSessionRepository, TopicRepository topicRepository, UserRepository userRepository) {
+    public ReviewSessionService(ReviewSessionRepository reviewSessionRepository, TopicRepository topicRepository) {
         this.reviewSessionRepository = reviewSessionRepository;
         this.topicRepository = topicRepository;
-        this.userRepository = userRepository;
     }
 
     private static final int PROGRESS_STEP_CAP_DAYS = 3;
@@ -41,8 +38,6 @@ public class ReviewSessionService {
         }
         LocalDate candidateNextDate = calculateNextReviewDate(topic, dto.getDifficulty());
         topic.setNextReviewDate(topic.isMastered() ? null : candidateNextDate);
-        streakCounter(user);
-        userRepository.save(user);
         reviewSessionRepository.save(ReviewSession.create(dto, topic));
     }
 
@@ -76,22 +71,6 @@ public class ReviewSessionService {
         }
 
         return AppClock.today().plusDays(nextInterval);
-    }
-
-    private static void streakCounter(User user) {
-
-        if (AppClock.today().equals(user.getLastReviewDate())) {
-            return;
-        }
-
-        if (user.getLastReviewDate() == null || !user.getLastReviewDate().equals(AppClock.today().minusDays(1))) {
-            user.setLastReviewDate(AppClock.today());
-            user.setReviewStreak(1);
-        } else {
-            user.setLastReviewDate(AppClock.today());
-            user.setReviewStreak(user.getReviewStreak() + 1);
-        }
-
     }
 
 }
