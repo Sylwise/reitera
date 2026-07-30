@@ -43,7 +43,8 @@ function StatsSkeleton() {
   return (
     <>
       <div className="stats-grid">
-        {[0, 1, 2, 3].map(i => (
+        {/* 3 y no 4: el grid real tiene 3 tarjetas (2 si no hay atrasados) */}
+        {[0, 1, 2].map(i => (
           <div key={i} className="kpi-card">
             <Skeleton w="55%" h={10} />
             <Skeleton w={64} h={30} style={{ margin: '.7rem 0 .55rem' }} />

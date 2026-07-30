@@ -1257,7 +1257,16 @@ body::before {
   .hero-meta { display: flex; align-items: center; gap: .55rem; text-align: left; flex-shrink: 0; grid-row: 1; grid-column: 2; }
   
   /* Stats grid */
-  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+  /* Las tres caben en fila recortando padding y textos: el ancho se lo comían
+     esos, no las cifras, que aguantan a 1.5rem. auto-fit porque la de atrasados
+     desaparece cuando no hay ninguno y entonces son dos. */
+  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: .5rem; }
+  .stats-grid .kpi-card { padding: .7rem .6rem; }
+  /* "Repasos totales" parte en dos líneas y las demás no: si el label no reserva
+     siempre el mismo alto, los números de la fila dejan de estar alineados */
+  .stats-grid .kpi-label { font-size: .55rem; letter-spacing: .03em; line-height: 1.3; min-height: 2.6em; }
+  .stats-grid .metric-value { font-size: 1.5rem; }
+  .stats-grid .kpi-sub { font-size: .55rem; }
   .stats-row { grid-template-columns: 1fr; gap: 1.25rem; overflow: hidden; }
   
   /* Charts overflow */
