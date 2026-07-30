@@ -594,7 +594,9 @@ body::before {
 /* ── STATS ──────────────────────────────────────────────── */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* auto-fit y no repeat(3): la tarjeta de atrasados desaparece cuando no hay
+     ninguno, y las 2 restantes reparten el ancho en vez de dejar un hueco */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
 }

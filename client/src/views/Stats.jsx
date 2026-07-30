@@ -118,7 +118,8 @@ function StatsContent({ stats }) {
         {[
           { label: 'Afianzados',      value: masteredTotal,   cls: 'accent', sub: `de ${asigProgress.reduce((s, a) => s + a.total, 0)} temas totales` },
           { label: 'Repasos totales', value: totalRepasos,    cls: 'ok',     sub: totalRepasos === 1 ? 'sesión completada' : 'sesiones completadas' },
-          { label: 'Atrasados',       value: overdue,         cls: 'danger', sub: overdue === 1 ? 'tema con retraso' : 'temas con retraso' },
+          // Sin atrasados no hay nada que avisar: la tarjeta se cae y el grid se reajusta.
+          ...(overdue > 0 ? [{ label: 'Atrasados', value: overdue, cls: 'danger', sub: overdue === 1 ? 'tema con retraso' : 'temas con retraso' }] : []),
         ].map(k => (
           <div key={k.label} className="kpi-card">
             <div className="kpi-label">{k.label}</div>
