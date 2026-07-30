@@ -5,6 +5,7 @@ import DonutChart from '../components/charts/DonutChart';
 import BarChart from '../components/ui/BarChart';
 import EmptyStats from './EmptyStats';
 
+import { shortMonth } from '../utils/dateHelpers';
 const WEEK_LABELS  = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
 function buildHeatmapDates(activity) {
@@ -20,7 +21,7 @@ function buildHeatmapDates(activity) {
   const days = sliced.map((v, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - (daysNeeded - 1 - i));
-    const mon = d.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
+    const mon = shortMonth(d);
     const tip = `${d.getDate()} ${mon} · ${v} repaso${v !== 1 ? 's' : ''}`;
     return { v, tip, d };
   });
@@ -33,7 +34,7 @@ function buildHeatmapDates(activity) {
   const weekHeaders = Array.from({ length: numCols }, (_, c) => {
     const d = new Date(mondayOfFirstCol);
     d.setDate(d.getDate() + c * 7);
-    return { day: d.getDate(), mon: d.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '').toUpperCase() };
+    return { day: d.getDate(), mon: shortMonth(d).toUpperCase() };
   });
 
   return { cells, numCols, weekHeaders };

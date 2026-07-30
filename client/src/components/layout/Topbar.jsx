@@ -4,6 +4,7 @@ import { getTopicStatus } from '../../utils/topicHelpers';
 import { useOutsideClick } from '../../hooks/useOutsideClick';
 import { useTheme } from '../../context/theme';
 import { getInitials, getFirstName } from '../../utils/userHelpers';
+import { longDate } from '../../utils/dateHelpers';
 
 export default function Topbar({ topics, subjects, userName, onAddTopic, onOpenAsignaturas, onLogout, onChangePassword, onDeleteAccount }) {
   const { theme, toggleTheme } = useTheme();
@@ -21,8 +22,7 @@ export default function Topbar({ topics, subjects, userName, onAddTopic, onOpenA
 
   const hour     = new Date().getHours();
   const greet    = hour < 6 ? 'Buenas noches' : hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
-  const dateStr  = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-  const dateCap  = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  const dateCap  = longDate(new Date());
   // Sin los temas cargados no se puede afirmar ni que hay pendientes ni que no los hay.
   const dueLabel = topics == null
     ? null
