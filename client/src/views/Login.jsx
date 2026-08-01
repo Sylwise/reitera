@@ -149,6 +149,13 @@ export default function Login({ onLogin, notice }) {
               </>
             )}
           </p>
+
+          {mode === "login" && (
+            <p className="lg-help">
+              ¿Olvidaste la contraseña?{" "}
+              <a href="mailto:reitera@duck.com">Escríbeme</a>
+            </p>
+          )}
         </motion.div>
       </div>
 

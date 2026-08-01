@@ -151,6 +151,25 @@
 }
 .lg-signup a:hover { color: var(--accent); }
 
+.lg-help {
+  margin: 0.65rem auto 0;
+  max-width: 42ch;
+  text-align: center;
+  text-wrap: balance;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--muted);
+  font-family: var(--mono);
+  opacity: 0.75;
+}
+.lg-help a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+.lg-help a:hover { color: var(--accent); }
+
 /* ── Right panel ── */
 .lg-right {
   position: relative;
