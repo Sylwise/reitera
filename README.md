@@ -18,7 +18,7 @@ Estudiar sin un sistema lleva a repasar lo mismo sin criterio o a olvidar temas 
 - Java 21 + Spring Boot 4
 - Spring Security + JWT (autenticación stateless)
 - Spring Data JPA + Hibernate
-- MySQL
+- PostgreSQL (alojado en Neon)
 - Maven
 
 **Frontend**
@@ -44,15 +44,33 @@ El backend sigue una arquitectura por capas con patrones consistentes en todas l
 
 ## Algoritmo de repetición espaciada
 
-Cada sesión de repaso (`ReviewSession`) registra la dificultad percibida por el usuario y calcula la próxima fecha de revisión:
+Cada sesión de repaso (`ReviewSession`) registra la dificultad percibida por el usuario (`AGAIN`, `HARD`, `NORMAL`, `EASY`) y una puntuación numérica (`score`), y recalcula el intervalo del tema. Es una variante de SM-2: cada `Topic` mantiene un `easeFactor` (arranca en 2.5) y un `currentIntervalDays`, que se ajustan en cada repaso (`ReviewSessionService.calculateNextReviewDate`):
 
-| Dificultad | Próximo repaso |
-|------------|---------------|
-| `EASY`     | +21 días      |
-| `NORMAL`   | +14 días      |
-| `HARD`     | +7 días       |
+| Dificultad | Próximo intervalo                                              | Cambio en `easeFactor` |
+|------------|------------------------------------------------------------------|-------------------------|
+| `AGAIN`    | 1 día (reinicio)                                                  | −0.2                    |
+| `HARD`     | 2 días si es la primera vez; si no, `intervalo actual × easeFactor × 0.8` | −0.15           |
+| `NORMAL`   | 4 días si es la primera vez; si no, `intervalo actual × easeFactor`       | sin cambio      |
+| `EASY`     | 6 días si es la primera vez; si no, `intervalo actual × easeFactor × 1.3` | +0.15           |
 
-Un tema marcado como dominado (`mastered = true`) no acepta nuevas sesiones — el sistema lo rechaza con una excepción específica en lugar de ignorarlo silenciosamente.
+El `easeFactor` nunca baja de 1.3. La próxima fecha de repaso es `hoy + nuevo intervalo`.
+
+Un tema se considera dominado cuando su `currentIntervalDays` alcanza el umbral `MASTERY_THRESHOLD_DAYS` (30 días) — no es un flag persistido, sino una condición calculada en `Topic.isMastered()`. A partir de ahí, `nextReviewDate` pasa a `null` y el tema deja de aceptar nuevas sesiones: el sistema lo rechaza con `TopicAlreadyMasteredException` en lugar de ignorarlo silenciosamente.
+
+Aparte del intervalo real, cada tema guarda un `displayedProgressDays` pensado para la barra de progreso de la interfaz: en vez de saltar directamente al nuevo intervalo, se desplaza como máximo ±3 días por sesión hacia él, salvo que se alcance el umbral de dominio, en cuyo caso salta directamente a 30.
+
+---
+
+## Estadísticas
+
+El endpoint `GET /api/stats` (`StatsController` → `StatsService`) agrega, todo mediante consultas JPQL sobre `ReviewSession`:
+
+- **Total de repasos** del usuario.
+- **Distribución por dificultad** (recuento agrupado por `EASY`/`NORMAL`/`HARD`/`AGAIN`).
+- **Actividad de los últimos 35 días** (hoy incluido), como una lista de recuentos diarios pensada para pintar un calendario/heatmap.
+- **Puntos débiles**: los 5 temas con más sesiones marcadas `HARD` o `AGAIN`.
+- **Temas en riesgo**: temas con al menos 2 sesiones cuya puntuación media (`score`) es menor a 6, ordenados de peor a mejor.
+- **Comparativa semanal por asignatura**: de las asignaturas con al menos 2 puntuaciones en los últimos 7 días, calcula la puntuación media por asignatura y devuelve la mejor y la peor; si hay menos de dos asignaturas con datos suficientes, no devuelve comparativa (`null`).
 
 ---
 
@@ -60,9 +78,9 @@ Un tema marcado como dominado (`mastered = true`) no acepta nuevas sesiones — 
 
 - `User` — Implementa `UserDetails` de Spring Security
 - `Subject` — Asignatura
-- `Topic` — Tema dentro de una asignatura, con estado `mastered`
+- `Topic` — Tema dentro de una asignatura; su estado de dominio (`isMastered()`) se calcula a partir de `currentIntervalDays` y `nextReviewDate`, no es un campo persistido
 - `Exam` — Examen asociado a una asignatura
-- `ReviewSession` — Sesión de repaso con dificultad y fecha de próxima revisión
+- `ReviewSession` — Sesión de repaso con dificultad, puntuación (`score`) y fecha de revisión
 
 ---
 
@@ -72,14 +90,15 @@ Autenticación stateless con JWT:
 
 - Token generado con `userId` como subject (JJWT 0.12.6)
 - Filtro `JwtAuthFilter` extendiendo `OncePerRequestFilter`
-- Rutas públicas (`/auth/**`) y protegidas configuradas en `SecurityConfig`
+- Rutas públicas: `/api/auth/register` y `/api/auth/login`; el resto requiere autenticación (configurado en `SecurityConfig`)
 
 ---
 
 ## Despliegue
 
-- Backend y frontend desplegados en Railway, con MySQL gestionado
-- Backend construido con Dockerfile multi-stage (Maven → JRE 21)
+- Backend en Railway, construido con Dockerfile multi-stage (Maven → JRE 21)
+- Frontend en Cloudflare Pages
+- Base de datos PostgreSQL gestionada en Neon
 - Dominios propios: [reitera.dev](https://reitera.dev) (frontend) y `api.reitera.dev` (API)
 - Perfil `prod` de Spring configurado por variables de entorno (datasource, JWT, CORS)
 
@@ -88,11 +107,18 @@ Autenticación stateless con JWT:
 ## Estado actual
 
 - [x] CRUD completo: Subject, Topic, Exam, ReviewSession
-- [x] Algoritmo de repetición espaciada
+- [x] Algoritmo de repetición espaciada (variante SM-2)
+- [x] Módulo de estadísticas
 - [x] Manejo global de excepciones (`@ControllerAdvice`)
 - [x] Spring Security + JWT
 - [x] Frontend React
 - [x] Despliegue en producción
+
+---
+
+## Autoría
+
+El backend está escrito íntegramente por mí. El cliente React se generó con asistencia de IA.
 
 ---
 
